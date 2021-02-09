@@ -1,6 +1,7 @@
 """"Send a CPLEX file to WML and solve it.
 
 For now, just accepts a path and sends that, assuming that's a model"""
+import argparse
 
 
 def solve(path):
@@ -15,6 +16,10 @@ def solve(path):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    solve('acc-tight4.mps.gz')
+    parser = argparse.ArgumentParser(description='Create an OPL .dat file from one or more CSV files')
+    # Accept a number of CSV file names to read -> csvfiles
+    parser.add_argument(metavar='model', dest='model',
+                        help='Name of the model to solve')
+    args = parser.parse_args()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    solve(args.model)
