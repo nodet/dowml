@@ -68,7 +68,7 @@ def solve(path, *,
         wml_credentials: credentials to use to connect to WML"""
 
     client = APIClient(wml_credentials)
-    print(print.version)
+    print(client.version)
 
 
 def main():
@@ -82,7 +82,7 @@ credentials are read from an environment variable')
     args = parser.parse_args()
     wml_credentials = read_wml_credentials(args)
 
-    solve(args.model, wml_credentials = wml_credentials)
+    solve(args.model, wml_credentials=wml_credentials)
 
 
 if __name__ == '__main__':
