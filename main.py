@@ -62,32 +62,89 @@ def read_wml_credentials(args):
     return wml_credentials
 
 
-def solve(path, *,
-          wml_credentials):
-    """Solve the model.
+def get_deployment_id(client):
+    """Create deployment if doesn't exist already, return its id"""
+    logging.info(f'Getting deployments...')
+    deployment_details = client.deployments.get_details()
+    logging.info(f'Done.')
+    resources = deployment_details['resources']
+    deployment_name = 'deployment-solve-on-wml'
+    logging.info(f'Got the list. Looking for deployment named \'{deployment_name}\'')
+    deployment_id = None
+    for r in resources:
+        if r['entity']['name'] == deployment_name:
+            deployment_id = r['metadata']['id']
+            logging.info(f'Found it.')
+            break
+    if deployment_id is None:
+        logging.info(f'This deployment doesn\'t exist yet. Creating it...')
 
-    The model is sent as online data to WML.
+        # We need a model to create a deployment
+        model_id = get_model_id(client)
 
-    Args:
-        path: pathname to the file to solve
-        wml_credentials: credentials to use to connect to WML"""
+        # Create the deployment
+        logging.info(f'Creating the deployment itself...')
+        meta_props = {
+            client.deployments.ConfigurationMetaNames.NAME: deployment_name,
+            client.deployments.ConfigurationMetaNames.DESCRIPTION: "Deployment for the Solve on WML Python script",
+            client.deployments.ConfigurationMetaNames.BATCH: {},
+            # FIXME: should be configurable
+            client.deployments.ConfigurationMetaNames.HARDWARE_SPEC: {'name': 'S', 'nodes': 1}
+        }
+        deployment = client.deployments.create(artifact_uid=model_id, meta_props=meta_props)
+        logging.info(f'Deployment created.')
+        deployment_id = client.deployments.get_id(deployment)
+    return deployment_id
 
-    client, metadata, space_name = create_connexion(wml_credentials)
-    space_id = get_space_id(client, metadata, space_name)
-    client.set.default_space(space_id)
+
+def get_model_id(client):
+    # In order to create a deployment, we need first a model, even if empty
+    model_name = 'model-solve-on-wml'
+    model_metadata = {
+        client.repository.ModelMetaNames.NAME: model_name,
+        client.repository.ModelMetaNames.DESCRIPTION:
+            "Model for the solve-on-wml script",
+        # FIXME: Must default to latest version
+        # FIXME: Should be configurable
+        client.repository.ModelMetaNames.TYPE: "do-cplex_12.10",
+        # FIXME: should not be hard-coded
+        client.repository.ModelMetaNames.SOFTWARE_SPEC_UID:
+            client.software_specifications.get_uid_by_name("do_12.10")
+    }
+    logging.info(f'Creating the model...')
+    model_details = client.repository.store_model(model='',
+                                                  meta_props=model_metadata)
+    logging.info(f'Model created.')
+    model_id = client.repository.get_model_id(model_details)
+    logging.info(f'Model id: {model_id}')
+    return model_id
 
 
-
-
-def get_space_id(client, metadata, space_name):
+def get_space_id(client):
     # Get ID of existing space
+    logging.info(f'Fetching existing spaces...')
+    space_name = 'space-sample'
+    cos_resource_crn = 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9157016d38ed1b725fa796f7bc:7df9ff41-d7db-4df7-9efa-b6fadcbb1228::'
+    instance_crn = 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f9157016d38ed1b725fa796f7bc:031c5823-a324-4f66-a585-c41a5734efe1::'
+    metadata = {
+        client.spaces.ConfigurationMetaNames.NAME: space_name,
+        client.spaces.ConfigurationMetaNames.DESCRIPTION: space_name + ' description',
+        client.spaces.ConfigurationMetaNames.STORAGE: {
+            "type": "bmcos_object_storage",
+            "resource_crn": cos_resource_crn
+        },
+        client.spaces.ConfigurationMetaNames.COMPUTE: {
+            "name": "existing_instance_id",
+            "crn": instance_crn
+        }
+    }
+
     space_details = client.spaces.get_details()
     resources = space_details['resources']
     logging.info(f'Got the list. Looking for space named \'{space_name}\'')
     space_id = None
-    for i, r in enumerate(resources):
-        e = r['entity']
-        if e['name'] == space_name:
+    for r in resources:
+        if r['entity']['name'] == space_name:
             space_id = r['metadata']['id']
             logging.info(f'Found it.')
             break
@@ -105,28 +162,32 @@ def create_connexion(wml_credentials):
     logging.info(f'Creating the connexion...')
     client = APIClient(wml_credentials)
     logging.info(f'Creating the connexion succeeded.  Client version is {client.version}')
-    logging.info(f'Fetching existing spaces...')
-    space_name = 'space-sample'
-    cos_resource_crn = 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9157016d38ed1b725fa796f7bc:7df9ff41-d7db-4df7-9efa-b6fadcbb1228::'
-    instance_crn = 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f9157016d38ed1b725fa796f7bc:031c5823-a324-4f66-a585-c41a5734efe1::'
-    metadata = {
-        client.spaces.ConfigurationMetaNames.NAME: space_name,
-        client.spaces.ConfigurationMetaNames.DESCRIPTION: space_name + ' description',
-        client.spaces.ConfigurationMetaNames.STORAGE: {
-            "type": "bmcos_object_storage",
-            "resource_crn": cos_resource_crn
-        },
-        client.spaces.ConfigurationMetaNames.COMPUTE: {
-            "name": "existing_instance_id",
-            "crn": instance_crn
-        }
-    }
-    return client, metadata, space_name
+    return client
+
+
+def solve(path, *,
+          wml_credentials):
+    """Solve the model.
+
+    The model is sent as online data to WML.
+
+    Args:
+        path: pathname to the file to solve
+        wml_credentials: credentials to use to connect to WML"""
+
+    client = create_connexion(wml_credentials)
+    space_id = get_space_id(client)
+
+    logging.info(f'Setting default space...')
+    client.set.default_space(space_id)
+    logging.info(f'Done.')
+
+    deployment_id = get_deployment_id(client)
+    logging.info(f'Deployment id: {deployment_id}')
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Create an OPL .dat file from one or more CSV files')
-    # Accept a number of CSV file names to read -> csvfiles
+    parser = argparse.ArgumentParser(description='Send a CPLEX model for solving on WML')
     parser.add_argument(metavar='model', dest='model',
                         help='Name of the model to solve')
     parser.add_argument('--wml-cred-file',
