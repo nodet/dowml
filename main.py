@@ -117,7 +117,7 @@ def get_model_id(client):
             client.software_specifications.get_uid_by_name("do_12.10")
     }
     logging.info(f'Creating the model...')
-    model_details = client.repository.store_model(model='',
+    model_details = client.repository.store_model(model='empty.zip',
                                                   meta_props=model_metadata)
     logging.info(f'Model created.')
     model_id = client.repository.get_model_id(model_details)
