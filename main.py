@@ -72,9 +72,56 @@ def solve(path, *,
         path: pathname to the file to solve
         wml_credentials: credentials to use to connect to WML"""
 
+    client, metadata, space_name = create_connexion(wml_credentials)
+    space_id = get_space_id(client, metadata, space_name)
+    client.set.default_space(space_id)
+
+
+
+
+def get_space_id(client, metadata, space_name):
+    # Get ID of existing space
+    space_details = client.spaces.get_details()
+    resources = space_details['resources']
+    logging.info(f'Got the list. Looking for space named \'{space_name}\'')
+    space_id = None
+    for i, r in enumerate(resources):
+        e = r['entity']
+        if e['name'] == space_name:
+            space_id = r['metadata']['id']
+            logging.info(f'Found it.')
+            break
+    if space_id is None:
+        logging.info(f'This space doesn\'t exist yet. Creating it...')
+        # Create the space
+        space = client.spaces.store(meta_props=metadata)
+        logging.info(f'Space created')
+        space_id = client.spaces.get_id(space)
+    logging.info(f'Space id: {space_id}')
+    return space_id
+
+
+def create_connexion(wml_credentials):
     logging.info(f'Creating the connexion...')
     client = APIClient(wml_credentials)
     logging.info(f'Creating the connexion succeeded.  Client version is {client.version}')
+    logging.info(f'Fetching existing spaces...')
+    space_name = 'space-sample'
+    cos_resource_crn = 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9157016d38ed1b725fa796f7bc:7df9ff41-d7db-4df7-9efa-b6fadcbb1228::'
+    instance_crn = 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f9157016d38ed1b725fa796f7bc:031c5823-a324-4f66-a585-c41a5734efe1::'
+    metadata = {
+        client.spaces.ConfigurationMetaNames.NAME: space_name,
+        client.spaces.ConfigurationMetaNames.DESCRIPTION: space_name + ' description',
+        client.spaces.ConfigurationMetaNames.STORAGE: {
+            "type": "bmcos_object_storage",
+            "resource_crn": cos_resource_crn
+        },
+        client.spaces.ConfigurationMetaNames.COMPUTE: {
+            "name": "existing_instance_id",
+            "crn": instance_crn
+        }
+    }
+    return client, metadata, space_name
 
 
 def main():
