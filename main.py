@@ -43,9 +43,14 @@ def read_wml_credentials_from_file(file):
     return wml_cred_str
 
 
-def read_wml_credentials(args):
-    if args.wml_cred_file is not None:
-        wml_cred_str = read_wml_credentials_from_file(args.wml_cred_file)
+def read_wml_credentials(wml_cred_file=None):
+    """Read, validate and returns the WML credentials
+
+    Args:
+        wml_cred_file: path to the file that contains the WML credentials.
+        If None, they are read from the environment."""
+    if wml_cred_file is not None:
+        wml_cred_str = read_wml_credentials_from_file(wml_cred_file)
     else:
         wml_cred_str = read_wml_credentials_from_env()
     logging.info(f'Found credential string.')
@@ -98,7 +103,7 @@ def get_deployment_id(client):
 
 
 def get_model_id(client):
-    # In order to create a deployment, we need first a model, even if empty
+    """Find the (empty) model to be deployed, or create it"""
     model_name = 'model-solve-on-wml'
     model_metadata = {
         client.repository.ModelMetaNames.NAME: model_name,
@@ -121,7 +126,7 @@ def get_model_id(client):
 
 
 def get_space_id(client):
-    # Get ID of existing space
+    """Find the Space to use, create it if it doesn't exist"""
     logging.info(f'Fetching existing spaces...')
     space_name = 'space-sample'
     cos_resource_crn = 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9157016d38ed1b725fa796f7bc:7df9ff41-d7db-4df7-9efa-b6fadcbb1228::'
@@ -197,7 +202,7 @@ credentials are read from an environment variable')
 
     logging.basicConfig(force=True, format='%(asctime)s %(message)s', level=logging.INFO)
 
-    wml_credentials = read_wml_credentials(args)
+    wml_credentials = read_wml_credentials(args.wml_cred_file)
     solve(args.model, wml_credentials=wml_credentials)
 
 
