@@ -1,7 +1,8 @@
 """"Send a CPLEX file to WML and solve it.
 
 For now, just accepts a path and sends that, assuming that's a model
-The code is mostly based on https://dataplatform.cloud.ibm.com/exchange/public/entry/view/50fa9246181026cd7ae2a5bc7e4ac7bd?audience=wdp&context=cpdaas"""
+The code is mostly based on
+https://dataplatform.cloud.ibm.com/exchange/public/entry/view/50fa9246181026cd7ae2a5bc7e4ac7bd"""
 import argparse
 import logging
 import os
@@ -18,7 +19,7 @@ class InvalidCredentials(Error):
     pass
 
 
-class DOWMLClient():
+class DOWMLClient:
     """A Python client to run DO models on WML"""
 
     ENVIRONMENT_VARIABLE_NAME = 'WML_CREDENTIALS'
@@ -31,7 +32,7 @@ class DOWMLClient():
         """Read and validate the WML credentials
 
         Args:
-            wml_cred_file: path to the file that contains the WML credentials.
+            wml_credentials_file: path to the file that contains the WML credentials.
             If None, they are read from the environment."""
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -50,6 +51,10 @@ class DOWMLClient():
         self._logger.info(f'Credentials have the expected structure.')
 
         self._wml_credentials = wml_credentials
+
+        # We don't initialize the client at this time, because this is an
+        # expensive operation.
+        self._client = None
 
     @staticmethod
     def _read_wml_credentials_from_env(var_name):
@@ -107,42 +112,46 @@ class DOWMLClient():
                 deployment_id = r['metadata']['id']
                 logging.info(f'Found it.')
                 break
-        if deployment_id is None:
-            logging.info(f'This deployment doesn\'t exist yet. Creating it...')
+        if deployment_id is not None:
+            return deployment_id
 
-            # We need a model to create a deployment
-            model_id = self.get_model_id()
+        logging.info(f'This deployment doesn\'t exist yet. Creating it...')
 
-            # Create the deployment
-            logging.info(f'Creating the deployment itself...')
-            meta_props = {
-                client.deployments.ConfigurationMetaNames.NAME: deployment_name,
-                client.deployments.ConfigurationMetaNames.DESCRIPTION: "Deployment for the Solve on WML Python script",
-                client.deployments.ConfigurationMetaNames.BATCH: {},
-                # FIXME: should be configurable
-                client.deployments.ConfigurationMetaNames.HARDWARE_SPEC: {'name': 'S', 'nodes': 1}
-            }
-            deployment = client.deployments.create(artifact_uid=model_id, meta_props=meta_props)
-            logging.info(f'Deployment created.')
-            deployment_id = client.deployments.get_id(deployment)
+        # We need a model to create a deployment
+        model_id = self.get_model_id()
+
+        # Create the deployment
+        logging.info(f'Creating the deployment itself...')
+        cdc = client.deployments.ConfigurationMetaNames
+        meta_props = {
+            cdc.NAME: deployment_name,
+            cdc.DESCRIPTION: "Deployment for the Solve on WML Python script",
+            cdc.BATCH: {},
+            # FIXME: should be configurable
+            cdc.HARDWARE_SPEC: {'name': 'S', 'nodes': 1}
+        }
+        deployment = client.deployments.create(artifact_uid=model_id, meta_props=meta_props)
+        logging.info(f'Deployment created.')
+        deployment_id = client.deployments.get_id(deployment)
         return deployment_id
 
     def get_model_id(self):
         """Find the (empty) model to be deployed, or create it"""
         client = self._client
         model_name = self.MODEL_NAME
+        crm = client.repository.ModelMetaNames
         model_metadata = {
-            client.repository.ModelMetaNames.NAME: model_name,
-            client.repository.ModelMetaNames.DESCRIPTION:
-                "Model for the solve-on-wml script",
+            crm.NAME: model_name,
+            crm.DESCRIPTION: "Model for the solve-on-wml script",
             # FIXME: Must default to latest version
             # FIXME: Should be configurable
-            client.repository.ModelMetaNames.TYPE: "do-cplex_12.10",
+            crm.TYPE: "do-cplex_12.10",
             # FIXME: should not be hard-coded
-            client.repository.ModelMetaNames.SOFTWARE_SPEC_UID:
+            crm.SOFTWARE_SPEC_UID:
                 client.software_specifications.get_uid_by_name("do_12.10")
         }
         logging.info(f'Creating the model...')
+        # FIXME: look for the model before creating one
         model_details = client.repository.store_model(model='empty.zip',
                                                       meta_props=model_metadata)
         logging.info(f'Model created.')
@@ -155,16 +164,21 @@ class DOWMLClient():
         client = self._client
         logging.info(f'Fetching existing spaces...')
         space_name = self.SPACE_NAME
-        cos_resource_crn = 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9157016d38ed1b725fa796f7bc:7df9ff41-d7db-4df7-9efa-b6fadcbb1228::'
-        instance_crn = 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f9157016d38ed1b725fa796f7bc:031c5823-a324-4f66-a585-c41a5734efe1::'
+        cos_resource_crn = ('crn:v1:bluemix:public:cloud-object-storage:global'
+                            ':a/76260f9157016d38ed1b725fa796f7bc:'
+                            '7df9ff41-d7db-4df7-9efa-b6fadcbb1228::')
+        instance_crn = ('crn:v1:bluemix:public:pm-20:eu-de:a/'
+                        '76260f9157016d38ed1b725fa796f7bc:'
+                        '031c5823-a324-4f66-a585-c41a5734efe1::')
+        csc = client.spaces.ConfigurationMetaNames
         metadata = {
-            client.spaces.ConfigurationMetaNames.NAME: space_name,
-            client.spaces.ConfigurationMetaNames.DESCRIPTION: space_name + ' description',
-            client.spaces.ConfigurationMetaNames.STORAGE: {
+            csc.NAME: space_name,
+            csc.DESCRIPTION: space_name + ' description',
+            csc.STORAGE: {
                 "type": "bmcos_object_storage",
                 "resource_crn": cos_resource_crn
             },
-            client.spaces.ConfigurationMetaNames.COMPUTE: {
+            csc.COMPUTE: {
                 "name": "existing_instance_id",
                 "crn": instance_crn
             }
@@ -189,11 +203,11 @@ class DOWMLClient():
         return space_id
 
     def create_connexion(self):
+        if self._client is not None:
+            return
         logging.info(f'Creating the connexion...')
         self._client = APIClient(self._wml_credentials)
         logging.info(f'Creating the connexion succeeded.  Client version is {self._client.version}')
-
-
 
 
 def main():
