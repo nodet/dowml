@@ -264,7 +264,7 @@ class DOWMLClient:
             crm.TYPE: "do-cplex_12.10",
             # FIXME: should not be hard-coded
             crm.SOFTWARE_SPEC_UID:
-                client.software_specifications.get_uid_by_name("do_12.10")
+                client.software_specifications.get_id_by_name("do_12.10")
         }
         logging.info(f'Creating the model...')
         model_details = client.repository.store_model(model='empty.zip',
