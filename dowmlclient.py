@@ -2,6 +2,7 @@ import base64
 import logging
 import os
 import pprint
+from collections import namedtuple
 from time import sleep
 
 from ibm_watson_machine_learning import APIClient
@@ -239,7 +240,9 @@ class DOWMLClient:
             id = self._get_job_id_from_details(job)
             created = self._get_creation_time_from_details(job)
             names = self._get_input_names_from_details(job)
-            result.append((status, id, created, names))
+            JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names'])
+            j = JobTuple(status=status, id=id, created=created, names=names)
+            result.append(j)
         return result
 
     def create_job(self, path, deployment_id):

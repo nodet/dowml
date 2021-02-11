@@ -56,10 +56,9 @@ of the job, as displayed by the 'jobs' command.
         self.jobs = []
         print('  #   status     id                                    creation date             inputs')
         for i, j in enumerate(jobs, start=1):
-            status, id, created, names = j
-            names = ', '.join(names)
-            self.jobs.append(id)
-            print(f'{i:>3}: {status:>10}  {id}  {created}  {names}')
+            names = ', '.join(j.names)
+            self.jobs.append(j.id)
+            print(f'{i:>3}: {j.status:>10}  {j.id}  {j.created}  {names}')
 
     def do_log(self, job_id):
         '''Print the CPLEX log for the given job'''
