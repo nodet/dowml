@@ -2,13 +2,19 @@ import argparse
 import logging
 import pprint
 from cmd import Cmd
-from dowmlclient import DOWMLClient
+from dowmlclient import DOWMLClient, InvalidCredentials
 
 
 class DOWMLInteractive(Cmd):
     prompt = 'dowml> '
-    intro = ('Decision Optimization in WML Interactive.\n'
-             'Type ? for a list of commands')
+    intro = ('''
+Decision Optimization in WML Interactive.
+Submit and manage CPLEX models interactively.
+
+Type ? for a list of commands.
+Most commands need an argument that can be either a job id, or the number
+of the job, as displayed by the 'jobs' command.
+''')
 
     def __init__(self, wml_cred_file):
         super().__init__()
@@ -85,5 +91,9 @@ if __name__ == '__main__':
                              'If not specified, credentials are read from an environment variable')
     args = parser.parse_args()
 
-    logging.basicConfig(force=True, format='%(asctime)s %(message)s', level=logging.INFO)
-    DOWMLInteractive(args.wml_cred_file).cmdloop()
+    try:
+        logging.basicConfig(force=True, format='%(asctime)s %(message)s', level=logging.INFO)
+        DOWMLInteractive(args.wml_cred_file).cmdloop()
+    except InvalidCredentials:
+        print(f'\nERROR: credentials not found!\n')
+        parser.print_help()
