@@ -1,5 +1,9 @@
+import base64
 import logging
 import os
+import pprint
+from time import sleep
+
 from ibm_watson_machine_learning import APIClient
 
 
@@ -21,6 +25,7 @@ class DOWMLClient:
     SPACE_NAME = 'DOWMLClient-space'
     MODEL_NAME = 'DOWMLClient-model'
     DEPLOYMENT_NAME = 'DOWMLClient-deployment'
+    JOB_END_SLEEP_DELAY = 2
 
     def __init__(self, wml_credentials_file=None):
         """Read and validate the WML credentials
@@ -54,8 +59,9 @@ class DOWMLClient:
     def _get_or_make_client(self):
         if self._client is not None:
             return self._client
-        self.create_connexion()
+        self._create_connexion()
         assert self._client is not None
+        self._get_space_id()
         return self._client
 
     @staticmethod
@@ -94,12 +100,91 @@ class DOWMLClient:
 
         deployment_id = self._get_deployment_id()
         self._logger.info(f'Deployment id: {deployment_id}')
+        job_id = self.create_job(path, deployment_id)
+        self._logger.info(f'Job id: {job_id}')
+        self.wait_for_job_end(job_id)
+        output = self.get_output(job_id)
+        print(output)
+
+    def get_output(self, job_id, job_details=None):
+        if job_details is None:
+            client = self._get_or_make_client()
+            self._logger.info(f'Fetching output...')
+            job_details = client.deployments.get_job_details(job_id)
+            self._logger.info(f'Done.')
+        output = None
+        for output_data in job_details['entity']['decision_optimization']['output_data']:
+            if output_data['id'] == 'log.txt':
+                output = output_data['content']
+                output = output.encode('UTF-8')
+                output = base64.b64decode(output)
+                output = output.decode('UTF-8')
+                # Remove empty lines
+                output = '\n'.join([s for s in output.splitlines() if s])
+            else:
+                print(f'Found this output: {output_data!r}')
+        return output
+
+    def wait_for_job_end(self, job_id):
+        """Wait for the job to finish and return its status"""
+        client = self._get_or_make_client()
+        while True:
+            job_details = client.deployments.get_job_details(job_id)
+            do = job_details['entity']['decision_optimization']
+            status = do['status']['state']
+            self._logger.info(f'Job status: {status}')
+            if status in ['completed', 'failed', 'canceled']:
+                break
+            else:
+                # There may be a bit of log to look at
+                # FIXME: Only print whatever was not printed before
+                activity = do['solve_state']['latest_engine_activity']
+                print(''.join(activity))
+            sleep(self.JOB_END_SLEEP_DELAY)
+        return status
+
+
+    @staticmethod
+    def get_file_as_data(path):
+        with open(path, 'rb') as f:
+            data = f.read()
+        #data = data.encode('UTF-8')
+        data = base64.b64encode(data)
+        data = data.decode('UTF-8')
+        return data
+
+    def create_job(self, path, deployment_id):
+        client = self._get_or_make_client()
+        cdd = client.deployments.DecisionOptimizationMetaNames
+        solve_payload = {
+            cdd.SOLVE_PARAMETERS: {
+                'oaas.logAttachmentName': 'log.txt',
+                'oaas.logTailEnabled': 'true',
+                'oaas.includeInputData': 'false',
+                'oaas.resultFormat': 'JSON'
+            },
+            cdd.INPUT_DATA: [
+                {
+                    'id': path,
+                    'content': self.get_file_as_data(path)
+                }
+            ],
+            cdd.OUTPUT_DATA: [
+                {'id': '.*\.json'},
+                {'id': '.*\.txt'}
+            ]
+        }
+        self._logger.info(f'Creating the job...')
+        job_details = client.deployments.create_job(deployment_id, solve_payload)
+        self._logger.info(f'Done. Getting its id...')
+        job_id = client.deployments.get_job_uid(job_details)
+        return job_id
 
     def _get_deployment_id(self):
         """Create deployment if doesn't exist already, return its id"""
 
         if not self._space_id:
-            self._space_id = self.get_space_id()
+            self._space_id = self._get_space_id()
 
         logging.info(f'Getting deployments...')
         client = self._get_or_make_client()
@@ -120,7 +205,7 @@ class DOWMLClient:
         logging.info(f'This deployment doesn\'t exist yet. Creating it...')
 
         # We need a model to create a deployment
-        model_id = self.get_model_id()
+        model_id = self._get_model_id()
 
         # Create the deployment
         logging.info(f'Creating the deployment itself...')
@@ -216,5 +301,3 @@ class DOWMLClient:
         logging.info(f'Creating the connexion...')
         self._client = APIClient(self._wml_credentials)
         logging.info(f'Creating the connexion succeeded.  Client version is {self._client.version}')
-
-
