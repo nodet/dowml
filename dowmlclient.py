@@ -252,7 +252,7 @@ class DOWMLClient:
         return deployment_id
 
     def _get_model_id(self):
-        """Find the (empty) model to be deployed, or create it"""
+        """Create an empty model"""
         client = self._get_or_make_client()
         model_name = self.MODEL_NAME
         crm = client.repository.ModelMetaNames
@@ -267,7 +267,6 @@ class DOWMLClient:
                 client.software_specifications.get_uid_by_name("do_12.10")
         }
         logging.info(f'Creating the model...')
-        # FIXME: look for the model before creating one
         model_details = client.repository.store_model(model='empty.zip',
                                                       meta_props=model_metadata)
         logging.info(f'Model created.')
