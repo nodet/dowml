@@ -15,6 +15,10 @@ class DOWMLInteractive(Cmd):
         self.client = DOWMLClient(wml_cred_file)
         self.jobs = []
 
+    def emptyline(self) -> bool:
+        # Just hitting enter should _not_ repeat a command
+        return False
+
     def _number_to_id(self, number):
         if number in self.jobs:
             # Easy: we simply have an existing job id
