@@ -103,26 +103,51 @@ class DOWMLClient:
         job_id = self.create_job(path, deployment_id)
         self._logger.info(f'Job id: {job_id}')
         self.wait_for_job_end(job_id)
-        output = self.get_output(job_id)
+        output = self.get_log(job_id)
         print(output)
 
-    def get_output(self, job_id, job_details=None):
+    def get_log(self, job_id, job_details=None):
+        """Extracts the CPLEX log from the job
+
+        :param job_id: The id of the job to get the log from
+        :param job_details: If not None, this should be the job details
+        previously downloaded for that job. If None, the job details will be
+        fetched from WML
+        :return: The decoded log, or None
+        """
         if job_details is None:
             client = self._get_or_make_client()
             self._logger.info(f'Fetching output...')
             job_details = client.deployments.get_job_details(job_id)
             self._logger.info(f'Done.')
-        output = None
         for output_data in job_details['entity']['decision_optimization']['output_data']:
             if output_data['id'] == 'log.txt':
                 output = output_data['content']
-                output = output.encode('UTF-8')
-                output = base64.b64decode(output)
-                output = output.decode('UTF-8')
-                # Remove empty lines
-                output = '\n'.join([s for s in output.splitlines() if s])
-            else:
-                print(f'Found this output: {output_data!r}')
+                output = self.decode_log(output)
+                output = self.remove_empty_lines(output)
+                return output
+        return None
+
+    def decode_log(self, output):
+        """ Decode the log from DO4WML
+
+        :param output: A base-64 encoded text with empty lines
+        :return: The decoded text, without empty lines
+        """
+        output = output.encode('UTF-8')
+        output = base64.b64decode(output)
+        output = output.decode('UTF-8')
+        output = self.remove_empty_lines(output)
+        return output
+
+    @staticmethod
+    def remove_empty_lines(output):
+        """Remove empty lines from the log
+
+        :param output: The text to process
+        :return: The text, with no empty lines
+        """
+        output = '\n'.join([s for s in output.splitlines() if s])
         return output
 
     def wait_for_job_end(self, job_id):
@@ -137,12 +162,15 @@ class DOWMLClient:
                 break
             else:
                 # There may be a bit of log to look at
-                # FIXME: Only print whatever was not printed before
-                activity = do['solve_state']['latest_engine_activity']
-                print(''.join(activity))
+                try:
+                    # FIXME: Only print whatever was not printed before
+                    activity = do['solve_state']['latest_engine_activity']
+                    print(''.join(activity))
+                except KeyError:
+                    # This must mean that no activity is available yet
+                    pass
             sleep(self.JOB_END_SLEEP_DELAY)
         return status
-
 
     @staticmethod
     def get_file_as_data(path):
