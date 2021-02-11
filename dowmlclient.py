@@ -152,7 +152,6 @@ class DOWMLClient:
     def wait_for_job_end(self, job_id, print_activity=False):
         """Wait for the job to finish and return its status"""
         client = self._get_or_make_client()
-        job_details = None
         while True:
             job_details = client.deployments.get_job_details(job_id)
             do = job_details['entity']['decision_optimization']
