@@ -87,13 +87,14 @@ class DOWMLClient:
             wml_cred_str = f.read()
         return wml_cred_str
 
-    def solve(self, path):
-        """Solve the model.
+    def solve(self, path, wait_for_completion=True):
+        """Solve the model, return the job id
 
         The model is sent as online data to WML.
 
-        Args:
-            path: pathname to the file to solve"""
+        :param path: pathname to the file to solve
+        :param wait_for_completion: whether to wait for the job to complete
+        """
         self._create_connexion()
         self._get_space_id()
 
@@ -101,9 +102,11 @@ class DOWMLClient:
         self._logger.info(f'Deployment id: {deployment_id}')
         job_id = self.create_job(path, deployment_id)
         self._logger.info(f'Job id: {job_id}')
-        status, job_details = self.wait_for_job_end(job_id)
-        print(f'Job {status}')
-        print(self.get_log(job_id, job_details))
+        if wait_for_completion:
+            status, job_details = self.wait_for_job_end(job_id)
+            print(f'Job {status}')
+            print(self.get_log(job_id, job_details))
+        return job_id
 
     def get_log(self, job_id, job_details=None):
         """Extracts the CPLEX log from the job
@@ -115,10 +118,7 @@ class DOWMLClient:
         :return: The decoded log, or None
         """
         if job_details is None:
-            client = self._get_or_make_client()
-            self._logger.info(f'Fetching output...')
-            job_details = client.deployments.get_job_details(job_id)
-            self._logger.info(f'Done.')
+            job_details = self.get_job_details(job_id, with_contents=True)
         for output_data in job_details['entity']['decision_optimization']['output_data']:
             if output_data['id'] == 'log.txt':
                 output = output_data['content']
@@ -126,6 +126,37 @@ class DOWMLClient:
                 output = self.remove_empty_lines(output)
                 return output
         return None
+
+    def get_job_details(self, job_id, with_contents=False):
+        ''' Get the job details for the given job
+        :param job_id:
+        :return: The job details
+        '''
+        client = self._get_or_make_client()
+        self._logger.info(f'Fetching output...')
+        job_details = client.deployments.get_job_details(job_id)
+        self._logger.info(f'Done.')
+        if with_contents:
+            return job_details
+        # Let's remove the largest, mostly useless, parts
+        do = job_details['entity']['decision_optimization']
+        for data in do['output_data']:
+            data['content'] = '[not shown]'
+        for data in do['input_data']:
+            data['content'] = '[not shown]'
+        do['solve_state']['latest_engine_activity'] = ['[not shown]']
+        return job_details
+
+    def delete_job(self, job_id, hard=False):
+        ''' Delete the given job
+        :param job_id: the job to be deleted
+        :param hard: if False, cancel the job. If true, delete it completely
+        '''
+        client = self._get_or_make_client()
+        self._logger.info(f'Deleting job...')
+        job_details = client.deployments.delete_job(job_id, hard)
+        self._logger.info(f'Done.')
+
 
     def decode_log(self, output):
         """ Decode the log from DO4WML
@@ -149,13 +180,21 @@ class DOWMLClient:
         output = '\n'.join([s for s in output.splitlines() if s])
         return output
 
+    @staticmethod
+    def _get_job_status_from_details(job_details):
+        return job_details['entity']['decision_optimization']['status']['state']
+
+    @staticmethod
+    def _get_job_id_from_details(job_details):
+        return job_details['metadata']['id']
+
     def wait_for_job_end(self, job_id, print_activity=False):
         """Wait for the job to finish and return its status"""
         client = self._get_or_make_client()
         while True:
             job_details = client.deployments.get_job_details(job_id)
             do = job_details['entity']['decision_optimization']
-            status = do['status']['state']
+            status = self._get_job_status_from_details(job_details)
             self._logger.info(f'Job status: {status}')
             if status in ['completed', 'failed', 'canceled']:
                 break
@@ -179,6 +218,17 @@ class DOWMLClient:
         data = base64.b64encode(data)
         data = data.decode('UTF-8')
         return data
+
+    def get_jobs(self):
+        '''Return the list of tuples (id, status) for all jobs in the deployment'''
+        client = self._get_or_make_client()
+        job_details = client.deployments.get_job_details()
+        result = []
+        for job in job_details['resources']:
+            status = self._get_job_status_from_details(job)
+            id = self._get_job_id_from_details(job)
+            result.append((status, id))
+        return result
 
     def create_job(self, path, deployment_id):
         client = self._get_or_make_client()
@@ -274,6 +324,9 @@ class DOWMLClient:
 
     def _get_space_id(self):
         """Find the Space to use, create it if it doesn't exist"""
+        if self._space_id:
+            return self._space_id
+
         client = self._get_or_make_client()
         logging.info(f'Fetching existing spaces...')
         space_name = self.SPACE_NAME
