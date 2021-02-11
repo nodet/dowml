@@ -21,7 +21,6 @@ class DOWMLClient:
     """A Python client to run DO models on WML"""
 
     ENVIRONMENT_VARIABLE_NAME = 'WML_CREDENTIALS'
-    # FIXME: It must be possible to not repeat the class name here
     SPACE_NAME = 'DOWMLClient-space'
     MODEL_NAME = 'DOWMLClient-model'
     DEPLOYMENT_NAME = 'DOWMLClient-deployment'
