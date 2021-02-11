@@ -102,9 +102,9 @@ class DOWMLClient:
         self._logger.info(f'Deployment id: {deployment_id}')
         job_id = self.create_job(path, deployment_id)
         self._logger.info(f'Job id: {job_id}')
-        self.wait_for_job_end(job_id)
-        output = self.get_log(job_id)
-        print(output)
+        status, job_details = self.wait_for_job_end(job_id)
+        print(f'Job {status}')
+        print(self.get_log(job_id, job_details))
 
     def get_log(self, job_id, job_details=None):
         """Extracts the CPLEX log from the job
@@ -150,9 +150,10 @@ class DOWMLClient:
         output = '\n'.join([s for s in output.splitlines() if s])
         return output
 
-    def wait_for_job_end(self, job_id):
+    def wait_for_job_end(self, job_id, print_activity=False):
         """Wait for the job to finish and return its status"""
         client = self._get_or_make_client()
+        job_details = None
         while True:
             job_details = client.deployments.get_job_details(job_id)
             do = job_details['entity']['decision_optimization']
@@ -161,22 +162,22 @@ class DOWMLClient:
             if status in ['completed', 'failed', 'canceled']:
                 break
             else:
-                # There may be a bit of log to look at
-                try:
-                    # FIXME: Only print whatever was not printed before
-                    activity = do['solve_state']['latest_engine_activity']
-                    print(''.join(activity))
-                except KeyError:
-                    # This must mean that no activity is available yet
-                    pass
+                if print_activity:
+                    # There may be a bit of log to look at
+                    try:
+                        # FIXME: Only print whatever was not printed before
+                        activity = do['solve_state']['latest_engine_activity']
+                        print(''.join(activity))
+                    except KeyError:
+                        # This must mean that no activity is available yet
+                        pass
             sleep(self.JOB_END_SLEEP_DELAY)
-        return status
+        return status, job_details
 
     @staticmethod
     def get_file_as_data(path):
         with open(path, 'rb') as f:
             data = f.read()
-        #data = data.encode('UTF-8')
         data = base64.b64encode(data)
         data = data.decode('UTF-8')
         return data
