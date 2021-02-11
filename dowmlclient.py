@@ -188,6 +188,16 @@ class DOWMLClient:
     def _get_job_id_from_details(job_details):
         return job_details['metadata']['id']
 
+    @staticmethod
+    def _get_creation_time_from_details(job_details):
+        return job_details['metadata']['created_at']
+
+    @staticmethod
+    def _get_input_names_from_details(job_details):
+        inputs = job_details['entity']['decision_optimization']['input_data']
+        names = [input['id'] for input in inputs]
+        return names
+
     def wait_for_job_end(self, job_id, print_activity=False):
         """Wait for the job to finish and return its status"""
         client = self._get_or_make_client()
@@ -227,7 +237,9 @@ class DOWMLClient:
         for job in job_details['resources']:
             status = self._get_job_status_from_details(job)
             id = self._get_job_id_from_details(job)
-            result.append((status, id))
+            created = self._get_creation_time_from_details(job)
+            names = self._get_input_names_from_details(job)
+            result.append((status, id, created, names))
         return result
 
     def create_job(self, path, deployment_id):
