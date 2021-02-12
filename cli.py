@@ -55,14 +55,14 @@ job id, but none is specified, the last one is used.
         '''Exit the Interactive'''
         return True
 
-    def do_solve(self, path):
-        '''Start a job to solve the CPLEX model specified as argument.'''
-        if not path:
-            print('This command requires a file name as argument.')
+    def do_solve(self, paths):
+        '''Start a job to solve a CPLEX model. At least one file must be specified as argument.'''
+        if not paths:
+            print('This command requires at least one file name as argument.')
             return
         job_id = None
         try:
-            job_id = self.client.solve(path, False)
+            job_id = self.client.solve(paths, False)
         except FileNotFoundError as e:
             print(e)
         else:
