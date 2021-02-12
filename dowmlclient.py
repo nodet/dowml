@@ -312,7 +312,7 @@ class DOWMLClient:
             cdc.DESCRIPTION: "Deployment for the Solve on WML Python script",
             cdc.BATCH: {},
             # FIXME: should be configurable
-            cdc.HARDWARE_SPEC: {'name': self.tshirt_size, 'nodes': 1}
+            cdc.HARDWARE_SPEC: {'name': self.tshirt_size, 'num_nodes': 2}
         }
         deployment = client.deployments.create(artifact_uid=model_id, meta_props=meta_props)
         logging.info(f'Deployment created.')
