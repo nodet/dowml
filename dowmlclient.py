@@ -24,6 +24,7 @@ class DOWMLClient:
     ENVIRONMENT_VARIABLE_NAME = 'WML_CREDENTIALS'
     SPACE_NAME = 'DOWMLClient-space'
     MODEL_NAME = 'DOWMLClient-model'
+    MODEL_TYPES = ['cplex', 'cpo', 'opl', 'docplex']
     DEPLOYMENT_NAME = 'DOWMLClient-deployment'
     JOB_END_SLEEP_DELAY = 2
 
@@ -55,7 +56,7 @@ class DOWMLClient:
         # expensive operation.
         self._client = None
         self._space_id = None
-        self.model_type = 'cplex'
+        self.model_type = self.MODEL_TYPES[0]
 
     def _get_or_make_client(self):
         if self._client is not None:

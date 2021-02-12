@@ -56,6 +56,16 @@ job id, but none is specified, the last one is used.
         '''Exit the Interactive'''
         return True
 
+    def do_type(self, model_type):
+        '''Print current model type (if no argument), or set the model type.'''
+        known_types = ', '.join(self.client.MODEL_TYPES)
+        if not model_type:
+            print(f'Current model type: {self.client.model_type}')
+        elif model_type not in self.client.MODEL_TYPES:
+            print(f'Warning: unknown model type \'{model_type}\'. Known types: {known_types}')
+        # We set the type nevertheless: this code may not be up-to-date
+        self.client.model_type = model_type
+
     def do_solve(self, paths):
         '''Start a job to solve a CPLEX model. At least one file must be specified as argument.'''
         if not paths:
