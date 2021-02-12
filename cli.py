@@ -84,9 +84,13 @@ job id, but none is specified, the last one is used.
         self.last_job_id = job_id
 
     def do_wait(self, job_id):
-        '''Wait until the job is finished, printing activity.'''
+        '''Wait until the job is finished, printing activity. Hit Ctrl-C to interrupt.'''
         job_id = self._number_to_id(job_id)
-        self.client.wait_for_job_end(job_id, True)
+        try:
+            self.client.wait_for_job_end(job_id, True)
+        except KeyboardInterrupt:
+            # The user interrupted. That's perfectly fine...
+            pass
         self.last_job_id = job_id
 
     def do_jobs(self, _):
