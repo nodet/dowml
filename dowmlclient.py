@@ -158,7 +158,6 @@ class DOWMLClient:
         job_details = client.deployments.delete_job(job_id, hard)
         self._logger.info(f'Done.')
 
-
     def decode_log(self, output):
         """ Decode the log from DO4WML
 

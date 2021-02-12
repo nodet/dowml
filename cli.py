@@ -2,6 +2,9 @@ import argparse
 import logging
 import pprint
 from cmd import Cmd
+
+from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
+
 from dowmlclient import DOWMLClient, InvalidCredentials
 
 
@@ -90,9 +93,21 @@ if __name__ == '__main__':
                              'If not specified, credentials are read from an environment variable')
     args = parser.parse_args()
 
+    logging.basicConfig(force=True, format='%(asctime)s %(message)s', level=logging.INFO)
     try:
-        logging.basicConfig(force=True, format='%(asctime)s %(message)s', level=logging.INFO)
-        DOWMLInteractive(args.wml_cred_file).cmdloop()
+        dowml = DOWMLInteractive(args.wml_cred_file)
+        while True:
+            again = False
+            try:
+                dowml.cmdloop()
+            except ApiRequestFailure as failure:
+                # This happens when an invalid job id is specified. We want
+                # to keep running.
+                again = True
+                # But let's not print again the starting banner
+                dowml.intro = ''
+            if not again:
+                break
     except InvalidCredentials:
         print(f'\nERROR: credentials not found!\n')
         parser.print_help()
