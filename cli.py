@@ -56,9 +56,14 @@ job id, but none is specified, the last one is used.
         return True
 
     def do_solve(self, path):
-        '''Start a solve job of the CPLEX model in the specified file'''
-        job_id = self.client.solve(path, False)
-        print(f'Job id: {job_id}')
+        '''Start a job to solve the CPLEX model specified as argument.'''
+        job_id = None
+        try:
+            job_id = self.client.solve(path, False)
+        except FileNotFoundError as e:
+            print(e)
+        else:
+            print(f'Job id: {job_id}')
         self.last_job_id = job_id
 
     def do_wait(self, job_id):
