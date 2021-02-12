@@ -88,12 +88,12 @@ class DOWMLClient:
             wml_cred_str = f.read()
         return wml_cred_str
 
-    def solve(self, path, wait_for_completion=True):
+    def solve(self, paths, wait_for_completion=True):
         """Solve the model, return the job id
 
         The model is sent as online data to WML.
 
-        :param path: pathname to the file to solve
+        :param paths: one or more pathname to the files to send
         :param wait_for_completion: whether to wait for the job to complete
         """
         self._create_connexion()
@@ -101,7 +101,7 @@ class DOWMLClient:
 
         deployment_id = self._get_deployment_id()
         self._logger.info(f'Deployment id: {deployment_id}')
-        job_id = self.create_job(path, deployment_id)
+        job_id = self.create_job(paths, deployment_id)
         self._logger.info(f'Job id: {job_id}')
         if wait_for_completion:
             status, job_details = self.wait_for_job_end(job_id)
@@ -244,7 +244,7 @@ class DOWMLClient:
             result.append(j)
         return result
 
-    def create_job(self, path, deployment_id):
+    def create_job(self, paths, deployment_id):
         client = self._get_or_make_client()
         cdd = client.deployments.DecisionOptimizationMetaNames
         solve_payload = {
@@ -254,17 +254,19 @@ class DOWMLClient:
                 'oaas.includeInputData': 'false',
                 'oaas.resultFormat': 'JSON'
             },
-            cdd.INPUT_DATA: [
-                {
-                    'id': path,
-                    'content': self.get_file_as_data(path)
-                }
-            ],
+            cdd.INPUT_DATA: [],
             cdd.OUTPUT_DATA: [
                 {'id': '.*\.json'},
                 {'id': '.*\.txt'}
             ]
         }
+        # There may be more than one input file
+        for path in paths.split():
+            input = {
+                'id': path,
+                'content': self.get_file_as_data(path)
+            }
+            solve_payload[cdd.INPUT_DATA].append(input)
         self._logger.info(f'Creating the job...')
         job_details = client.deployments.create_job(deployment_id, solve_payload)
         self._logger.info(f'Done. Getting its id...')
