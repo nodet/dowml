@@ -25,6 +25,7 @@ class DOWMLClient:
     SPACE_NAME = 'DOWMLClient-space'
     MODEL_NAME = 'DOWMLClient-model'
     MODEL_TYPES = ['cplex', 'cpo', 'opl', 'docplex']
+    TSHIRT_SIZES = ['S', 'M', 'XL']
     DEPLOYMENT_NAME = 'DOWMLClient-deployment'
     JOB_END_SLEEP_DELAY = 2
 
@@ -57,6 +58,7 @@ class DOWMLClient:
         self._client = None
         self._space_id = None
         self.model_type = self.MODEL_TYPES[0]
+        self.tshirt_size = self.TSHIRT_SIZES[0]
 
     def _get_or_make_client(self):
         if self._client is not None:
@@ -286,7 +288,7 @@ class DOWMLClient:
         deployment_details = client.deployments.get_details()
         logging.info(f'Done.')
         resources = deployment_details['resources']
-        deployment_name = f'{self.DEPLOYMENT_NAME}-{self.model_type}'
+        deployment_name = f'{self.DEPLOYMENT_NAME}-{self.model_type}-{self.tshirt_size}'
         logging.info(f'Got the list. Looking for deployment named \'{deployment_name}\'')
         deployment_id = None
         for r in resources:
@@ -310,7 +312,7 @@ class DOWMLClient:
             cdc.DESCRIPTION: "Deployment for the Solve on WML Python script",
             cdc.BATCH: {},
             # FIXME: should be configurable
-            cdc.HARDWARE_SPEC: {'name': 'S', 'nodes': 1}
+            cdc.HARDWARE_SPEC: {'name': self.tshirt_size, 'nodes': 1}
         }
         deployment = client.deployments.create(artifact_uid=model_id, meta_props=meta_props)
         logging.info(f'Deployment created.')
@@ -320,7 +322,7 @@ class DOWMLClient:
     def _get_model_id(self):
         """Create an empty model"""
         client = self._get_or_make_client()
-        model_name = f'{self.MODEL_NAME}-{self.model_type}'
+        model_name = f'{self.MODEL_NAME}-{self.model_type}-{self.tshirt_size}'
         crm = client.repository.ModelMetaNames
         model_metadata = {
             crm.NAME: model_name,

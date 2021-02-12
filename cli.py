@@ -69,6 +69,20 @@ job id, but none is specified, the last one is used.
         # We set the type nevertheless: this code may not be up-to-date
         self.client.model_type = model_type
 
+    def do_size(self, tshirt_size):
+        '''Print current deployment size (if no argument), or set the deployment size.'''
+        SIZES = self.client.TSHIRT_SIZES
+        known_sizes = ', '.join(SIZES)
+        if not tshirt_size:
+            print(f'Current size: {self.client.tshirt_size}')
+            # Let's make sure we don't set the tshirt_size to None, but
+            # return immediately
+            return
+        if tshirt_size not in SIZES:
+            print(f'Warning: unknown tee-shirt size \'{tshirt_size}\'. Known sizes: {known_sizes}')
+        # We set the size nevertheless: this code may not be up-to-date
+        self.client.tshirt_size = tshirt_size
+
     def do_solve(self, paths):
         '''Start a job to solve a CPLEX model. At least one file of the correct type must be specified as argument.'''
         if not paths:
