@@ -1,8 +1,9 @@
 import argparse
 import logging
 import pprint
-from cmd import Cmd
+import requests
 
+from cmd import Cmd
 from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
 
 from dowmlclient import DOWMLClient, InvalidCredentials
@@ -136,9 +137,12 @@ if __name__ == '__main__':
                 # This happens when an invalid job id is specified. We want
                 # to keep running.
                 again = True
-            except CommandNeedsJobID:
+            except requests.exceptions.ConnectionError as e:
+                print(e)
                 again = True
+            except CommandNeedsJobID:
                 print(f'This command requires a jod id or number.')
+                again = True
             finally:
                 # But let's not print again the starting banner
                 dowml.intro = ''
