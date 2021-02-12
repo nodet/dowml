@@ -55,6 +55,7 @@ class DOWMLClient:
         # expensive operation.
         self._client = None
         self._space_id = None
+        self.model_type = 'cplex'
 
     def _get_or_make_client(self):
         if self._client is not None:
@@ -284,7 +285,7 @@ class DOWMLClient:
         deployment_details = client.deployments.get_details()
         logging.info(f'Done.')
         resources = deployment_details['resources']
-        deployment_name = self.DEPLOYMENT_NAME
+        deployment_name = f'{self.DEPLOYMENT_NAME}-{self.model_type}'
         logging.info(f'Got the list. Looking for deployment named \'{deployment_name}\'')
         deployment_id = None
         for r in resources:
@@ -318,14 +319,13 @@ class DOWMLClient:
     def _get_model_id(self):
         """Create an empty model"""
         client = self._get_or_make_client()
-        model_name = self.MODEL_NAME
+        model_name = f'{self.MODEL_NAME}-{self.model_type}'
         crm = client.repository.ModelMetaNames
         model_metadata = {
             crm.NAME: model_name,
             crm.DESCRIPTION: "Model for the solve-on-wml script",
             # FIXME: Must default to latest version
-            # FIXME: Should be configurable
-            crm.TYPE: "do-cplex_12.10",
+            crm.TYPE: f'do-{self.model_type}_12.10',
             # FIXME: should not be hard-coded
             crm.SOFTWARE_SPEC_UID:
                 client.software_specifications.get_id_by_name("do_12.10")

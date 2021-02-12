@@ -7,6 +7,8 @@ import argparse
 import logging
 import pprint
 
+import ibm_watson_machine_learning
+
 from dowmlclient import DOWMLClient
 
 
@@ -29,10 +31,9 @@ def test():
     logging.basicConfig(force=True, format='%(asctime)s %(message)s', level=logging.INFO)
     c = DOWMLClient('xavier-wml-cred.txt')
     client = c._get_or_make_client()
-    job_details = client.deployments.get_job_details('7be239ba-8a7b-40ea-993a-d009dce5e83e')
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(job_details['entity']['decision_optimization'])
+    result = client.software_specifications._href_definitions.get_sw_specs_href()
+    pprint.pprint(result)
 
 
 if __name__ == '__main__':
-    main()
+    test()
