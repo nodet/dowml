@@ -57,6 +57,9 @@ job id, but none is specified, the last one is used.
 
     def do_solve(self, path):
         '''Start a job to solve the CPLEX model specified as argument.'''
+        if not path:
+            print('This command requires a file name as argument.')
+            return
         job_id = None
         try:
             job_id = self.client.solve(path, False)
