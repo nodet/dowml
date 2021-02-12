@@ -61,7 +61,10 @@ job id, but none is specified, the last one is used.
         known_types = ', '.join(self.client.MODEL_TYPES)
         if not model_type:
             print(f'Current model type: {self.client.model_type}')
-        elif model_type not in self.client.MODEL_TYPES:
+            # Let's make sure we don't set the model_type to None, but
+            # return immediately
+            return
+        if model_type not in self.client.MODEL_TYPES:
             print(f'Warning: unknown model type \'{model_type}\'. Known types: {known_types}')
         # We set the type nevertheless: this code may not be up-to-date
         self.client.model_type = model_type
