@@ -320,9 +320,24 @@ class DOWMLClient:
         return deployment_id
 
     def _get_model_id(self):
-        """Create an empty model"""
+        """Create an empty model if one doesn't exist, return its id"""
+        logging.info(f'Getting models...')
         client = self._get_or_make_client()
-        model_name = f'{self.MODEL_NAME}-{self.model_type}-{self.tshirt_size}'
+        details = client.repository.get_details()
+        logging.info(f'Done.')
+        resources = details['models']['resources']
+        model_name = f'{self.MODEL_NAME}-{self.model_type}'
+        logging.info(f'Got the list. Looking for model named \'{model_name}\'')
+        model_id = None
+        for r in resources:
+            if r['metadata']['name'] == model_name:
+                model_id = r['metadata']['id']
+                logging.info(f'Found it.')
+                break
+        if model_id is not None:
+            return model_id
+
+        logging.info(f'This model doesn\'t exist yet. Creating it...')
         crm = client.repository.ModelMetaNames
         model_metadata = {
             crm.NAME: model_name,
@@ -333,7 +348,6 @@ class DOWMLClient:
             crm.SOFTWARE_SPEC_UID:
                 client.software_specifications.get_id_by_name("do_12.10")
         }
-        logging.info(f'Creating the model...')
         model_details = client.repository.store_model(model='empty.zip',
                                                       meta_props=model_metadata)
         logging.info(f'Model created.')
