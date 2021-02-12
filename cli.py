@@ -8,6 +8,10 @@ from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
 from dowmlclient import DOWMLClient, InvalidCredentials
 
 
+class CommandNeedsJobID(Exception):
+    pass
+
+
 class DOWMLInteractive(Cmd):
     prompt = 'dowml> '
     intro = ('''
@@ -23,12 +27,18 @@ of the job, as displayed by the 'jobs' command.
         super().__init__()
         self.client = DOWMLClient(wml_cred_file)
         self.jobs = []
+        self.last_job_id = None
 
     def emptyline(self) -> bool:
         # Just hitting enter should _not_ repeat a command
         return False
 
     def _number_to_id(self, number):
+        if not number:
+            # If nothing specified, use the last job id
+            number = self.last_job_id
+        if not number:
+            raise CommandNeedsJobID
         if number in self.jobs:
             # Easy: we simply have an existing job id
             return number
@@ -47,11 +57,13 @@ of the job, as displayed by the 'jobs' command.
         '''Start a solve job of the CPLEX model in the specified file'''
         job_id = self.client.solve(path, False)
         print(f'Job id: {job_id}')
+        self.last_job_id = job_id
 
     def do_wait(self, job_id):
         '''Wait until the job is finished, printing activity'''
         job_id = self._number_to_id(job_id)
         self.client.wait_for_job_end(job_id, True)
+        self.last_job_id = job_id
 
     def do_jobs(self, _):
         '''List all the jobs in this deployment'''
@@ -68,22 +80,26 @@ of the job, as displayed by the 'jobs' command.
         job_id = self._number_to_id(job_id)
         log = self.client.get_log(job_id)
         print(log)
+        self.last_job_id = job_id
 
     def do_details(self, job_id):
         '''Print most of the details for the given job'''
         job_id = self._number_to_id(job_id)
         details = self.client.get_job_details(job_id)
         pprint.pprint(details, indent=4, width=120)
+        self.last_job_id = job_id
 
     def do_delete(self, job_id):
         '''Delete the job with the given id'''
         job_id = self._number_to_id(job_id)
         self.client.delete_job(job_id, True)
+        self.last_job_id = None
 
     def do_cancel(self, job_id):
         '''Stops the job with the given id'''
         job_id = self._number_to_id(job_id)
         self.client.delete_job(job_id, False)
+        self.last_job_id = job_id
 
 
 if __name__ == '__main__':
@@ -104,6 +120,10 @@ if __name__ == '__main__':
                 # This happens when an invalid job id is specified. We want
                 # to keep running.
                 again = True
+            except CommandNeedsJobID:
+                again = True
+                print(f'This command requires a jod id or number.')
+            finally:
                 # But let's not print again the starting banner
                 dowml.intro = ''
             if not again:
