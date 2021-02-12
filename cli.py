@@ -19,8 +19,10 @@ Decision Optimization in WML Interactive.
 Submit and manage CPLEX models interactively.
 
 Type ? for a list of commands.
+
 Most commands need an argument that can be either a job id, or the number
-of the job, as displayed by the 'jobs' command.
+of the job, as displayed by the 'jobs' command.  If a command requires a
+job id, but none is specified, the last one is used.
 ''')
 
     def __init__(self, wml_cred_file):
@@ -69,11 +71,17 @@ of the job, as displayed by the 'jobs' command.
         '''List all the jobs in this deployment'''
         jobs = self.client.get_jobs()
         self.jobs = []
-        print('  #   status     id                                    creation date             inputs')
+        print('     #   status     id                                    creation date             inputs')
         for i, j in enumerate(jobs, start=1):
+            # Prepare list of input files
             names = ', '.join(j.names)
+            # Add this job id in the list, to allow for translation from job number
             self.jobs.append(j.id)
-            print(f'{i:>3}: {j.status:>10}  {j.id}  {j.created}  {names}')
+            # Mark the job used if none specified
+            mark = '   '
+            if j.id == self.last_job_id:
+                mark = '=> '
+            print(f'{mark}{i:>3}: {j.status:>10}  {j.id}  {j.created}  {names}')
 
     def do_log(self, job_id):
         '''Print the CPLEX log for the given job'''
