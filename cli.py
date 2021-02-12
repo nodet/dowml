@@ -53,11 +53,11 @@ job id, but none is specified, the last one is used.
         return number
 
     def do_exit(self, inp):
-        '''Exit this program.'''
+        """Exit this program."""
         return True
 
     def do_type(self, model_type):
-        '''Print current model type (if no argument), or set the model type.'''
+        """Print current model type (if no argument), or set the model type."""
         known_types = ', '.join(self.client.MODEL_TYPES)
         if not model_type:
             print(f'Current model type: {self.client.model_type}')
@@ -70,7 +70,7 @@ job id, but none is specified, the last one is used.
         self.client.model_type = model_type
 
     def do_size(self, tshirt_size):
-        '''Print current deployment size (if no argument), or set the deployment size.'''
+        """Print current deployment size (if no argument), or set the deployment size."""
         SIZES = self.client.TSHIRT_SIZES
         known_sizes = ', '.join(SIZES)
         if not tshirt_size:
@@ -84,7 +84,7 @@ job id, but none is specified, the last one is used.
         self.client.tshirt_size = tshirt_size
 
     def do_solve(self, paths):
-        '''Start a job to solve a CPLEX model. At least one file of the correct type must be specified as argument.'''
+        """Start a job to solve a CPLEX model. At least one file of the correct type must be specified as argument."""
         if not paths:
             print('This command requires at least one file name as argument.')
             return
@@ -98,7 +98,7 @@ job id, but none is specified, the last one is used.
         self.last_job_id = job_id
 
     def do_wait(self, job_id):
-        '''Wait until the job is finished, printing activity. Hit Ctrl-C to interrupt.'''
+        """Wait until the job is finished, printing activity. Hit Ctrl-C to interrupt."""
         job_id = self._number_to_id(job_id)
         try:
             self.client.wait_for_job_end(job_id, True)
@@ -108,7 +108,7 @@ job id, but none is specified, the last one is used.
         self.last_job_id = job_id
 
     def do_jobs(self, _):
-        '''List all the jobs in the space.'''
+        """List all the jobs in the space."""
         jobs = self.client.get_jobs()
         self.jobs = []
         print('     #   status     id                                    creation date             inputs')
@@ -124,27 +124,27 @@ job id, but none is specified, the last one is used.
             print(f'{mark}{i:>3}: {j.status:>10}  {j.id}  {j.created}  {names}')
 
     def do_log(self, job_id):
-        '''Print the engine log for the given job.'''
+        """Print the engine log for the given job."""
         job_id = self._number_to_id(job_id)
         log = self.client.get_log(job_id)
         print(log)
         self.last_job_id = job_id
 
     def do_details(self, job_id):
-        '''Print most of the details for the given job.'''
+        """Print most of the details for the given job."""
         job_id = self._number_to_id(job_id)
         details = self.client.get_job_details(job_id)
         pprint.pprint(details, indent=4, width=120)
         self.last_job_id = job_id
 
     def do_delete(self, job_id):
-        '''Delete the job with the given id.'''
+        """Delete the job with the given id."""
         job_id = self._number_to_id(job_id)
         self.client.delete_job(job_id, True)
         self.last_job_id = None
 
     def do_cancel(self, job_id):
-        '''Stops the job with the given id.'''
+        """Stops the job with the given id."""
         job_id = self._number_to_id(job_id)
         self.client.delete_job(job_id, False)
         self.last_job_id = job_id

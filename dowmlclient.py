@@ -1,7 +1,6 @@
 import base64
 import logging
 import os
-import pprint
 from collections import namedtuple
 from time import sleep
 
@@ -133,10 +132,12 @@ class DOWMLClient:
         return None
 
     def get_job_details(self, job_id, with_contents=False):
-        ''' Get the job details for the given job
-        :param job_id:
+        """ Get the job details for the given job
+        :param job_id: The id of the job to look for
+        :param with_contents: if True, returns the input and output files,
+        instead of leaving them out for brevity
         :return: The job details
-        '''
+        """
         client = self._get_or_make_client()
         self._logger.info(f'Fetching output...')
         job_details = client.deployments.get_job_details(job_id)
@@ -153,13 +154,13 @@ class DOWMLClient:
         return job_details
 
     def delete_job(self, job_id, hard=False):
-        ''' Delete the given job
+        """ Delete the given job
         :param job_id: the job to be deleted
         :param hard: if False, cancel the job. If true, delete it completely
-        '''
+        """
         client = self._get_or_make_client()
         self._logger.info(f'Deleting job...')
-        job_details = client.deployments.delete_job(job_id, hard)
+        client.deployments.delete_job(job_id, hard)
         self._logger.info(f'Done.')
 
     def decode_log(self, output):
@@ -199,7 +200,7 @@ class DOWMLClient:
     @staticmethod
     def _get_input_names_from_details(job_details):
         inputs = job_details['entity']['decision_optimization']['input_data']
-        names = [input['id'] for input in inputs]
+        names = [i['id'] for i in inputs]
         return names
 
     def wait_for_job_end(self, job_id, print_activity=False):
@@ -234,21 +235,22 @@ class DOWMLClient:
         return data
 
     def get_jobs(self):
-        '''Return the list of tuples (id, status) for all jobs in the deployment'''
+        """Return the list of tuples (id, status) for all jobs in the deployment"""
         client = self._get_or_make_client()
         job_details = client.deployments.get_job_details()
         result = []
         for job in job_details['resources']:
             status = self._get_job_status_from_details(job)
-            id = self._get_job_id_from_details(job)
+            job_id = self._get_job_id_from_details(job)
             created = self._get_creation_time_from_details(job)
             names = self._get_input_names_from_details(job)
             JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names'])
-            j = JobTuple(status=status, id=id, created=created, names=names)
+            j = JobTuple(status=status, id=job_id, created=created, names=names)
             result.append(j)
         return result
 
     def create_job(self, paths, deployment_id):
+        """Create a deployment job (aka a run) and return its id"""
         client = self._get_or_make_client()
         cdd = client.deployments.DecisionOptimizationMetaNames
         solve_payload = {
