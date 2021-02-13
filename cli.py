@@ -130,10 +130,17 @@ job id, but none is specified, the last one is used.
         print(log)
         self.last_job_id = job_id
 
-    def do_details(self, job_id):
-        """Print most of the details for the given job."""
+    def do_details(self, args):
+        """Print most of the details for the given job. Add 'full' to get the contents."""
+        full = False
+        job_id = None
+        for arg in args.split():
+            if arg == 'full':
+                full = True
+            else:
+                job_id = self._number_to_id(arg)
         job_id = self._number_to_id(job_id)
-        details = self.client.get_job_details(job_id)
+        details = self.client.get_job_details(job_id, with_contents=full)
         pprint.pprint(details, indent=4, width=120)
         self.last_job_id = job_id
 
