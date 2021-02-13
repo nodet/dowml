@@ -148,6 +148,8 @@ job id, but none is specified, the last one is used.
         """Delete the job with the given id."""
         job_id = self._number_to_id(job_id)
         self.client.delete_job(job_id, True)
+        if job_id in self.jobs: self.jobs.remove(job_id)
+        assert job_id not in self.jobs
         self.last_job_id = None
 
     def do_cancel(self, job_id):
