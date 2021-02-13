@@ -85,6 +85,22 @@ class TestJobs(TestCase):
         self.client.client.delete_job.assert_called_once_with('d', True)
         self.assertEqual(self.client.jobs, ['a', 'b', 'c'])
 
+    def test_delete_all(self):
+        self.client.do_delete('*')
+        self.client.client.delete_job.assert_has_calls([
+            call('a', True),
+            call('b', True),
+            call('c', True)
+        ], any_order=True)
+        self.assertEqual(self.client.jobs, [])
+
+    def test_delete_current(self):
+        self.client.last_job_id = 'b'
+        self.client.do_delete('')
+        self.client.client.delete_job.assert_called_once_with('b', True)
+        self.assertEqual(self.client.jobs, ['a', 'c'])
+        self.assertIsNone(self.client.last_job_id)
+
 
 if __name__ == '__main__':
     main()

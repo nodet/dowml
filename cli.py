@@ -145,12 +145,21 @@ job id, but none is specified, the last one is used.
         self.last_job_id = job_id
 
     def do_delete(self, job_id):
-        """Delete the job with the given id."""
+        """Delete the job with the given id. Use '*' to delete all the jobs."""
+        if job_id == '*':
+            while self.jobs:
+                job = self.jobs[0]
+                self.delete_one_job(job)
+        else:
+            self.delete_one_job(job_id)
+        self.last_job_id = None
+
+    def delete_one_job(self, job_id):
         job_id = self._number_to_id(job_id)
         self.client.delete_job(job_id, True)
-        if job_id in self.jobs: self.jobs.remove(job_id)
+        if job_id in self.jobs:
+            self.jobs.remove(job_id)
         assert job_id not in self.jobs
-        self.last_job_id = None
 
     def do_cancel(self, job_id):
         """Stops the job with the given id."""
