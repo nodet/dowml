@@ -145,12 +145,19 @@ class DOWMLClient:
         if with_contents:
             return job_details
         # Let's remove the largest, mostly useless, parts
-        do = job_details['entity']['decision_optimization']
-        for data in do['output_data']:
-            data['content'] = '[not shown]'
-        for data in do['input_data']:
-            data['content'] = '[not shown]'
-        do['solve_state']['latest_engine_activity'] = ['[not shown]']
+        try:
+            do = job_details['entity']['decision_optimization']
+            for data in do['output_data']:
+                if 'content' in data:
+                    data['content'] = '[not shown]'
+            for data in do['input_data']:
+                if 'content' in data:
+                    data['content'] = '[not shown]'
+            if 'latest_engine_activity' in do['solve_state']:
+                do['solve_state']['latest_engine_activity'] = ['[not shown]']
+        except KeyError:
+            # GH-1: This happens when the job failed
+            pass
         return job_details
 
     def delete_job(self, job_id, hard=False):
