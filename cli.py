@@ -158,7 +158,7 @@ job id, but none is specified, the last one is used.
         self.client.delete_job(job_id, True)
         if job_id in self.jobs:
             self.jobs.remove(job_id)
-        assert job_id not in self.jobs
+        assert job_id not in self.jobs  # Because a job appears only once
         if self.last_job_id == job_id:
             self.last_job_id = None
 
