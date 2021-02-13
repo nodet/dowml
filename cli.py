@@ -152,7 +152,6 @@ job id, but none is specified, the last one is used.
                 self.delete_one_job(job)
         else:
             self.delete_one_job(job_id)
-        self.last_job_id = None
 
     def delete_one_job(self, job_id):
         job_id = self._number_to_id(job_id)
@@ -160,6 +159,8 @@ job id, but none is specified, the last one is used.
         if job_id in self.jobs:
             self.jobs.remove(job_id)
         assert job_id not in self.jobs
+        if self.last_job_id == job_id:
+            self.last_job_id = None
 
     def do_cancel(self, job_id):
         """Stops the job with the given id."""

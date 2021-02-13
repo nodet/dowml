@@ -101,6 +101,11 @@ class TestJobs(TestCase):
         self.assertEqual(self.client.jobs, ['a', 'c'])
         self.assertIsNone(self.client.last_job_id)
 
+    def test_delete_not_current(self):
+        self.client.last_job_id = 'b'
+        self.client.do_delete('c')
+        self.assertEqual(self.client.last_job_id, 'b')
+
 
 if __name__ == '__main__':
     main()
