@@ -41,24 +41,24 @@ class TestDetails(TestCase):
 
     def setUp(self) -> None:
         self.client = DOWMLInteractive('test_credentials.txt')
+        self.client.client = Mock(spec=DOWMLClient)
         self.client.jobs = ['a']
         self.client.last_job_id = 'a'
 
     def test_with_no_content(self):
         mock_print = Mock(spec=pprint.pprint)
-        mock_client = Mock(spec=DOWMLClient)
         expected = {'id': 'the_id'}
-        mock_client.get_job_details.return_value = expected
-        self.client.client = mock_client
+        self.client.client.get_job_details.return_value = expected
         self.client.do_details('1', printer=mock_print)
         mock_print.assert_called_once_with(expected, indent=ANY, width=ANY)
-        mock_client.get_job_details.assert_called_once_with('a', with_contents=False)
+        self.client.client.get_job_details.assert_called_once_with('a', with_contents=False)
 
     def with_content_helper(self, input):
-        mock_client = Mock(spec=DOWMLClient)
-        self.client.client = mock_client
+        # It's not very nice to explicitly call setUp, but I'd rather not
+        # create one test for each
+        self.setUp()
         self.client.do_details(input, printer=Mock(spec=pprint.pprint))
-        mock_client.get_job_details.assert_called_once_with('a', with_contents=True)
+        self.client.client.get_job_details.assert_called_once_with('a', with_contents=True)
 
     def test_with_content_removed(self):
         self.with_content_helper('1 full')
@@ -72,18 +72,15 @@ class TestJobs(TestCase):
 
     def setUp(self) -> None:
         self.client = DOWMLInteractive('test_credentials.txt')
+        self.client.client = Mock(spec=DOWMLClient)
         self.client.jobs = ['a', 'b', 'c']
 
     def test_delete_first(self):
-        mock_client = Mock(spec=DOWMLClient)
-        self.client.client = mock_client
         self.client.do_delete('1')
         self.client.client.delete_job.assert_called_once_with('a', True)
         self.assertEqual(self.client.jobs, ['b', 'c'])
 
     def test_delete_not_in_list(self):
-        mock_client = Mock(spec=DOWMLClient)
-        self.client.client = mock_client
         self.client.do_delete('d')
         self.client.client.delete_job.assert_called_once_with('d', True)
         self.assertEqual(self.client.jobs, ['a', 'b', 'c'])
