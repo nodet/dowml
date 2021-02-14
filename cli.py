@@ -60,7 +60,7 @@ job id, but none is specified, the last one is used.
         """Print current model type (if no argument), or set the model type."""
         known_types = ', '.join(self.client.MODEL_TYPES)
         if not model_type:
-            print(f'Current model type: {self.client.model_type}')
+            print(f'Current model type: {self.client.model_type}. Known types: {known_types}')
             # Let's make sure we don't set the model_type to None, but
             # return immediately
             return
@@ -74,7 +74,7 @@ job id, but none is specified, the last one is used.
         sizes = self.client.TSHIRT_SIZES
         known_sizes = ', '.join(sizes)
         if not tshirt_size:
-            print(f'Current size: {self.client.tshirt_size}')
+            print(f'Current size: {self.client.tshirt_size}. Known sizes: {known_sizes}')
             # Let's make sure we don't set the tshirt_size to None, but
             # return immediately
             return
