@@ -8,7 +8,8 @@ In order to use either of them, you need to provide IBM Cloud credentials.
 2. As an alternative, you can specify a file name as argument to `DOWMLClient.__init__`. The credentials will then be read from that file instead of the environment variable. Accordingly, the Interactive has a command line option `--wml-cred-file` that must be followed by the path of the file.
 
 Here's a sample session:
-```$ python3 cli.py --wml-cred-file xavier-wml-cred.txt
+```
+$ python3 cli.py --wml-cred-file xavier-wml-cred.txt
 2021-02-14 14:22:29,753 Looking for credentials in file 'xavier-wml-cred.txt'...
 2021-02-14 14:22:29,753 Found credential string.
 2021-02-14 14:22:29,753 Credentials have the expected structure.
