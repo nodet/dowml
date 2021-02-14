@@ -71,14 +71,14 @@ job id, but none is specified, the last one is used.
 
     def do_size(self, tshirt_size):
         """Print current deployment size (if no argument), or set the deployment size."""
-        SIZES = self.client.TSHIRT_SIZES
-        known_sizes = ', '.join(SIZES)
+        sizes = self.client.TSHIRT_SIZES
+        known_sizes = ', '.join(sizes)
         if not tshirt_size:
             print(f'Current size: {self.client.tshirt_size}')
             # Let's make sure we don't set the tshirt_size to None, but
             # return immediately
             return
-        if tshirt_size not in SIZES:
+        if tshirt_size not in sizes:
             print(f'Warning: unknown tee-shirt size \'{tshirt_size}\'. Known sizes: {known_sizes}')
         # We set the size nevertheless: this code may not be up-to-date
         self.client.tshirt_size = tshirt_size
@@ -91,8 +91,8 @@ job id, but none is specified, the last one is used.
         job_id = None
         try:
             job_id = self.client.solve(paths, False)
-        except FileNotFoundError as e:
-            print(e)
+        except FileNotFoundError as exception:
+            print(exception)
         else:
             print(f'Job id: {job_id}')
         self.last_job_id = job_id
@@ -130,11 +130,11 @@ job id, but none is specified, the last one is used.
         print(log)
         self.last_job_id = job_id
 
-    def do_details(self, args, printer=pprint.pprint):
+    def do_details(self, arguments, printer=pprint.pprint):
         """Print most of the details for the given job. Add 'full' to get the contents."""
         full = False
         job_id = None
-        for arg in args.split():
+        for arg in arguments.split():
             if arg == 'full':
                 full = True
             else:

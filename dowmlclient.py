@@ -274,11 +274,11 @@ class DOWMLClient:
         }
         # There may be more than one input file
         for path in paths.split():
-            input = {
+            input_data = {
                 'id': path,
                 'content': self.get_file_as_data(path)
             }
-            solve_payload[cdd.INPUT_DATA].append(input)
+            solve_payload[cdd.INPUT_DATA].append(input_data)
         self._logger.info(f'Creating the job...')
         job_details = client.deployments.create_job(deployment_id, solve_payload)
         self._logger.info(f'Done. Getting its id...')
