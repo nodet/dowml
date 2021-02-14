@@ -14,7 +14,7 @@ Here's a sample session:
 2021-02-14 14:22:29,753 Credentials have the expected structure.
 
 Decision Optimization in WML Interactive.
-Submit and manage CPLEX models interactively.
+Submit and manage Decision Optimization models interactively.
 
 Type ? for a list of commands.
 

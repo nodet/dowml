@@ -17,7 +17,7 @@ class DOWMLInteractive(Cmd):
     prompt = 'dowml> '
     intro = ('''
 Decision Optimization in WML Interactive.
-Submit and manage CPLEX models interactively.
+Submit and manage Decision Optimization models interactively.
 
 Type ? for a list of commands.
 
