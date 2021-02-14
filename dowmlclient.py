@@ -224,7 +224,6 @@ class DOWMLClient:
                 if print_activity:
                     # There may be a bit of log to look at
                     try:
-                        # FIXME: Only print whatever was not printed before
                         activity = do['solve_state']['latest_engine_activity']
                         print(''.join(activity))
                     except KeyError:
@@ -320,7 +319,6 @@ class DOWMLClient:
             cdc.NAME: deployment_name,
             cdc.DESCRIPTION: "Deployment for the Solve on WML Python script",
             cdc.BATCH: {},
-            # FIXME: should be configurable
             cdc.HARDWARE_SPEC: {'name': self.tshirt_size, 'num_nodes': 2}
         }
         deployment = client.deployments.create(artifact_uid=model_id, meta_props=meta_props)
@@ -351,9 +349,7 @@ class DOWMLClient:
         model_metadata = {
             crm.NAME: model_name,
             crm.DESCRIPTION: "Model for the solve-on-wml script",
-            # FIXME: Must default to latest version
             crm.TYPE: f'do-{self.model_type}_12.10',
-            # FIXME: should not be hard-coded
             crm.SOFTWARE_SPEC_UID:
                 client.software_specifications.get_id_by_name("do_12.10")
         }
