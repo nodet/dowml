@@ -17,6 +17,11 @@ class InvalidCredentials(Error):
     pass
 
 
+class SimilarNamesInJob(Error):
+    """A job can't have two input files with the same name, irrespective of path"""
+    pass
+
+
 class DOWMLClient:
     """A Python client to run DO models on WML"""
 
@@ -274,9 +279,14 @@ class DOWMLClient:
             ]
         }
         # There may be more than one input file
+        names = []
         for path in paths.split():
+            basename = os.path.basename(path)
+            if basename in names:
+                raise SimilarNamesInJob(basename)
+            names.append(basename)
             input_data = {
-                'id': os.path.basename(path),
+                'id': basename,
                 'content': self.get_file_as_data(path)
             }
             solve_payload[cdd.INPUT_DATA].append(input_data)

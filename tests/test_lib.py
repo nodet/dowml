@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from ibm_watson_machine_learning import APIClient
 from ibm_watson_machine_learning.deployments import Deployments
 
-from dowmlclient import DOWMLClient
+from dowmlclient import DOWMLClient, SimilarNamesInJob
 from unittest import TestCase, main
 
 
@@ -59,6 +59,10 @@ class TestSolve(TestCase):
         create_job_mock.assert_called_once()
         kall = create_job_mock.call_args
         self.assertEqual(kall.args[1]['input-data'][0]['id'], 'path')
+
+    def test_solve_same_names(self):
+        with self.assertRaises(SimilarNamesInJob):
+            self.client.solve('path/f1 another/path/f1', False)
 
 
 if __name__ == '__main__':
