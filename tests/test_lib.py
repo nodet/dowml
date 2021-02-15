@@ -15,15 +15,27 @@ class TestSolve(TestCase):
         client._logger = Mock(spec=Logger)
         client._client = Mock(spec=APIClient)
         client._client.deployments = Mock(spec=Deployments)
-        client._client.deployments.DecisionOptimizationMetaNames = Mock()
+        domn = Mock()
+        domn.SOLVE_PARAMETERS = 'solve-parameters'
+        domn.INPUT_DATA = 'input-data'
+        domn.OUTPUT_DATA = 'output-data'
+        client._client.deployments.DecisionOptimizationMetaNames = domn
         client.get_file_as_data = lambda path: 'base-64-content'
         client._space_id = 'space-id'
         client._get_deployment_id = Mock(spec=DOWMLClient._get_deployment_id)
+        client._get_deployment_id.return_value = 'deployment-id'
         self.client = client
 
-    def test_solve_multiple_files(self):
+    def test_solve_single_file(self):
         self.client.solve('afiro.mps', False)
-        self.client._client.deployments.create_job.assert_called_once()
+        create_job_mock = self.client._client.deployments.create_job
+        create_job_mock.assert_called_once()
+        kall = create_job_mock.call_args
+        self.assertEqual(kall.kwargs, {})
+        self.assertEqual(kall.args[0], 'deployment-id')
+        for i in kall.args[1]['input-data']:
+            self.assertEqual(i['content'], 'base-64-content')
+            self.assertEqual(i['id'], 'afiro.mps')
 
 
 if __name__ == '__main__':
