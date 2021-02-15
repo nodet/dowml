@@ -62,7 +62,7 @@ class DOWMLClient:
     def _get_or_make_client(self):
         if self._client is not None:
             return self._client
-        self._create_connexion()
+        self._client = self._create_connexion()
         assert self._client is not None
         self._get_space_id()
         return self._client
@@ -415,7 +415,9 @@ class DOWMLClient:
 
     def _create_connexion(self):
         if self._client is not None:
+            assert "This should never be true"
             return
         logging.info(f'Creating the connexion...')
-        self._client = APIClient(self._wml_credentials)
-        logging.info(f'Creating the connexion succeeded.  Client version is {self._client.version}')
+        client = APIClient(self._wml_credentials)
+        logging.info(f'Creating the connexion succeeded.  Client version is {client.version}')
+        return client
