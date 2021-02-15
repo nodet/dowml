@@ -91,7 +91,7 @@ job id, but none is specified, the last one is used.
             return
         job_id = None
         try:
-            job_id = self.client.solve(paths, False)
+            job_id = self.client.solve(paths)
         except FileNotFoundError as exception:
             print(exception)
         else:

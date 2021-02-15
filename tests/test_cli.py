@@ -1,4 +1,3 @@
-import builtins
 import pprint
 from unittest import TestCase, main, mock
 from unittest.mock import Mock, ANY, call
@@ -54,11 +53,11 @@ class TestDetails(TestCase):
         mock_print.assert_called_once_with(expected, indent=ANY, width=ANY)
         self.client.client.get_job_details.assert_called_once_with('a', with_contents=False)
 
-    def with_content_helper(self, input):
+    def with_content_helper(self, the_input):
         # It's not very nice to explicitly call setUp, but I'd rather not
         # create one test for each
         self.setUp()
-        self.client.do_details(input, printer=Mock(spec=pprint.pprint))
+        self.client.do_details(the_input, printer=Mock(spec=pprint.pprint))
         self.client.client.get_job_details.assert_called_once_with('a', with_contents=True)
 
     def test_with_content_removed(self):
@@ -137,7 +136,9 @@ class TestOutput(TestCase):
         with mock.patch('builtins.open', mock_open) as m:
             self.client.save_content('id', 'name', write_data)
         m.assert_called_once_with('id_name', 'wb')
+        # noinspection PyArgumentList
         handle = m()
+        # noinspection PyUnresolvedReferences
         handle.write.assert_called_once_with(write_data)
 
 
