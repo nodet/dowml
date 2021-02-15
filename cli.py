@@ -177,7 +177,10 @@ if __name__ == '__main__':
                              'If not specified, credentials are read from an environment variable')
     args = parser.parse_args()
 
-    logging.basicConfig(force=True, format='%(asctime)s %(message)s', level=logging.INFO)
+    # The force parameter is not listed in the arguments to basicConfig
+    # noinspection PyArgumentList
+    logging.basicConfig(force=True, format='%(asctime)s %(message)s',
+                        level=logging.INFO)
     try:
         dowml = DOWMLInteractive(args.wml_cred_file)
         while True:
