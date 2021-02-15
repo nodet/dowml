@@ -132,8 +132,19 @@ job id, but none is specified, the last one is used.
         self.last_job_id = job_id
 
     def do_output(self, job_id):
-        """Print the solution of a job"""
-        pass
+        """Download all the outputs of a job"""
+        job_id = self._number_to_id(job_id)
+        outputs = self.client.get_output(job_id)
+        for o in outputs:
+            (name, content) = o
+            self.save_content(name, content)
+        self.last_job_id = job_id
+
+    @staticmethod
+    def save_content(name, content):
+        with open(name, 'wb') as f:
+            print(f'Storing {name}')
+            f.write(content)
 
     def do_details(self, arguments, printer=pprint.pprint):
         """Print most of the details for the given job. Add 'full' to get the contents."""

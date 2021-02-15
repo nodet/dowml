@@ -1,5 +1,6 @@
+import builtins
 import pprint
-from unittest import TestCase, main
+from unittest import TestCase, main, mock
 from unittest.mock import Mock, ANY, call
 
 from cli import DOWMLInteractive, CommandNeedsJobID
@@ -115,7 +116,29 @@ class TestOutput(TestCase):
         self.client.jobs = ['a', 'b', 'c']
 
     def test_command_exists(self):
-        self.client.do_output(1)
+        self.client.client.get_output.return_value = []
+        self.client.do_output('1')
+
+    def test_store_files(self):
+        self.client.client.get_output.return_value = [
+            ('out1', b'content-a'),
+            ('out2', b'content-b'),
+        ]
+        self.client.save_content = Mock()
+        self.client.do_output('1')
+        self.client.save_content.assert_has_calls([
+            call('out1', b'content-a'),
+            call('out2', b'content-b')
+        ])
+
+    def test_save_content(self):
+        write_data = b'content'
+        mock_open = mock.mock_open()
+        with mock.patch('builtins.open', mock_open) as m:
+            self.client.save_content('name', write_data)
+        m.assert_called_once_with('name', 'wb')
+        handle = m()
+        handle.write.assert_called_once_with(write_data)
 
 
 if __name__ == '__main__':
