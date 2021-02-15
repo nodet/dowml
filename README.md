@@ -27,7 +27,7 @@ dowml> help
 
 Documented commands (type help <topic>):
 ========================================
-cancel  delete  details  exit  help  jobs  log  size  solve  type  wait
+cancel  delete  details  exit  help  jobs  log  output size  solve  type  wait
 
 dowml> help cancel
 Stops the job with the given id.
@@ -43,6 +43,8 @@ dowml> help jobs
 List all the jobs in the space.
 dowml> help log
 Print the engine log for the given job.
+dowml> help output
+Download all the outputs of a job
 dowml> help size
 Print current deployment size (if no argument), or set the deployment size.
 dowml> help solve
