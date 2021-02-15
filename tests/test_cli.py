@@ -127,16 +127,16 @@ class TestOutput(TestCase):
         self.client.save_content = Mock()
         self.client.do_output('1')
         self.client.save_content.assert_has_calls([
-            call('out1', b'content-a'),
-            call('out2', b'content-b')
+            call('a', 'out1', b'content-a'),
+            call('a', 'out2', b'content-b')
         ])
 
     def test_save_content(self):
         write_data = b'content'
         mock_open = mock.mock_open()
         with mock.patch('builtins.open', mock_open) as m:
-            self.client.save_content('name', write_data)
-        m.assert_called_once_with('name', 'wb')
+            self.client.save_content('id', 'name', write_data)
+        m.assert_called_once_with('id_name', 'wb')
         handle = m()
         handle.write.assert_called_once_with(write_data)
 
