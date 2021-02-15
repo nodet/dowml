@@ -27,7 +27,7 @@ class TestSolve(TestCase):
         self.client = client
 
     def test_solve_single_file(self):
-        self.client.solve('afiro.mps', False)
+        self.client.solve('afiro.mps')
         create_job_mock = self.client._client.deployments.create_job
         create_job_mock.assert_called_once()
         kall = create_job_mock.call_args
@@ -39,7 +39,7 @@ class TestSolve(TestCase):
         self.assertEqual(i['id'], 'afiro.mps')
 
     def test_solve_multiple_files(self):
-        self.client.solve('f1.lp f2.prm', False)
+        self.client.solve('f1.lp f2.prm')
         create_job_mock = self.client._client.deployments.create_job
         create_job_mock.assert_called_once()
         kall = create_job_mock.call_args
@@ -47,14 +47,14 @@ class TestSolve(TestCase):
         self.assertEqual(kall.args[1]['input-data'][1]['id'], 'f2.prm')
 
     def test_solve_with_path(self):
-        self.client.solve('/this/is/an/absolute/path', False)
+        self.client.solve('/this/is/an/absolute/path')
         create_job_mock = self.client._client.deployments.create_job
         create_job_mock.assert_called_once()
         kall = create_job_mock.call_args
         self.assertEqual(kall.args[1]['input-data'][0]['id'], 'path')
 
     def test_solve_relative_path(self):
-        self.client.solve('this/is/a/relative/path', False)
+        self.client.solve('this/is/a/relative/path')
         create_job_mock = self.client._client.deployments.create_job
         create_job_mock.assert_called_once()
         kall = create_job_mock.call_args
@@ -62,7 +62,7 @@ class TestSolve(TestCase):
 
     def test_solve_same_names(self):
         with self.assertRaises(SimilarNamesInJob):
-            self.client.solve('path/f1 another/path/f1', False)
+            self.client.solve('path/f1 another/path/f1')
 
 
 if __name__ == '__main__':

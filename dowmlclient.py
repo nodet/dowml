@@ -97,13 +97,12 @@ class DOWMLClient:
             wml_cred_str = f.read()
         return wml_cred_str
 
-    def solve(self, paths, wait_for_completion=True):
+    def solve(self, paths):
         """Solve the model, return the job id
 
         The model is sent as online data to WML.
 
         :param paths: one or more pathname to the files to send
-        :param wait_for_completion: whether to wait for the job to complete
         """
         self._create_connexion()
         self._get_space_id()
@@ -112,10 +111,6 @@ class DOWMLClient:
         self._logger.info(f'Deployment id: {deployment_id}')
         job_id = self.create_job(paths, deployment_id)
         self._logger.info(f'Job id: {job_id}')
-        if wait_for_completion:
-            status, job_details = self.wait_for_job_end(job_id)
-            print(f'Job {status}')
-            print(self.get_log(job_id, job_details))
         return job_id
 
     def get_log(self, job_id):
