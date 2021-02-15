@@ -118,17 +118,13 @@ class DOWMLClient:
             print(self.get_log(job_id, job_details))
         return job_id
 
-    def get_log(self, job_id, job_details=None):
+    def get_log(self, job_id):
         """Extracts the CPLEX log from the job
 
         :param job_id: The id of the job to get the log from
-        :param job_details: If not None, this should be the job details
-        previously downloaded for that job. If None, the job details will be
-        fetched from WML
         :return: The decoded log, or None
         """
-        if job_details is None:
-            job_details = self.get_job_details(job_id, with_contents=True)
+        job_details = self.get_job_details(job_id, with_contents=True)
         for output_data in job_details['entity']['decision_optimization']['output_data']:
             if output_data['id'] == 'log.txt':
                 output = output_data['content']
