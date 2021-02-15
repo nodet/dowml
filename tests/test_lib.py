@@ -33,9 +33,20 @@ class TestSolve(TestCase):
         kall = create_job_mock.call_args
         self.assertEqual(kall.kwargs, {})
         self.assertEqual(kall.args[0], 'deployment-id')
-        for i in kall.args[1]['input-data']:
-            self.assertEqual(i['content'], 'base-64-content')
-            self.assertEqual(i['id'], 'afiro.mps')
+        self.assertEqual(len(kall.args[1]['input-data']), 1)
+        i = kall.args[1]['input-data'][0]
+        self.assertEqual(i['content'], 'base-64-content')
+        self.assertEqual(i['id'], 'afiro.mps')
+
+    def test_solve_multiple_files(self):
+        self.client.solve('f1.lp f2.prm', False)
+        create_job_mock = self.client._client.deployments.create_job
+        create_job_mock.assert_called_once()
+        kall = create_job_mock.call_args
+        self.assertEqual(kall.kwargs, {})
+        self.assertEqual(kall.args[0], 'deployment-id')
+        self.assertEqual(kall.args[1]['input-data'][0]['id'], 'f1.lp')
+        self.assertEqual(kall.args[1]['input-data'][1]['id'], 'f2.prm')
 
 
 if __name__ == '__main__':
