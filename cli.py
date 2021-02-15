@@ -131,6 +131,10 @@ job id, but none is specified, the last one is used.
         print(log)
         self.last_job_id = job_id
 
+    def do_output(self, job_id):
+        """Print the solution of a job"""
+        pass
+
     def do_details(self, arguments, printer=pprint.pprint):
         """Print most of the details for the given job. Add 'full' to get the contents."""
         full = False

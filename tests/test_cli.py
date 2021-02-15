@@ -107,5 +107,16 @@ class TestJobs(TestCase):
         self.assertEqual(self.client.last_job_id, 'b')
 
 
+class TestOutput(TestCase):
+
+    def setUp(self) -> None:
+        self.client = DOWMLInteractive('test_credentials.txt')
+        self.client.client = Mock(spec=DOWMLClient)
+        self.client.jobs = ['a', 'b', 'c']
+
+    def test_command_exists(self):
+        self.client.do_output(1)
+
+
 if __name__ == '__main__':
     main()
