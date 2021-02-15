@@ -43,10 +43,22 @@ class TestSolve(TestCase):
         create_job_mock = self.client._client.deployments.create_job
         create_job_mock.assert_called_once()
         kall = create_job_mock.call_args
-        self.assertEqual(kall.kwargs, {})
-        self.assertEqual(kall.args[0], 'deployment-id')
         self.assertEqual(kall.args[1]['input-data'][0]['id'], 'f1.lp')
         self.assertEqual(kall.args[1]['input-data'][1]['id'], 'f2.prm')
+
+    def test_solve_with_path(self):
+        self.client.solve('/this/is/an/absolute/path', False)
+        create_job_mock = self.client._client.deployments.create_job
+        create_job_mock.assert_called_once()
+        kall = create_job_mock.call_args
+        self.assertEqual(kall.args[1]['input-data'][0]['id'], 'path')
+
+    def test_solve_relative_path(self):
+        self.client.solve('this/is/a/relative/path', False)
+        create_job_mock = self.client._client.deployments.create_job
+        create_job_mock.assert_called_once()
+        kall = create_job_mock.call_args
+        self.assertEqual(kall.args[1]['input-data'][0]['id'], 'path')
 
 
 if __name__ == '__main__':

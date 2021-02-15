@@ -276,7 +276,7 @@ class DOWMLClient:
         # There may be more than one input file
         for path in paths.split():
             input_data = {
-                'id': path,
+                'id': os.path.basename(path),
                 'content': self.get_file_as_data(path)
             }
             solve_payload[cdd.INPUT_DATA].append(input_data)
