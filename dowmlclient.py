@@ -1,6 +1,7 @@
 import base64
 import logging
 import os
+import tempfile
 from collections import namedtuple
 from time import sleep
 
@@ -364,8 +365,20 @@ class DOWMLClient:
             crm.SOFTWARE_SPEC_UID:
                 client.software_specifications.get_id_by_name("do_12.10")
         }
-        model_details = client.repository.store_model(model='empty.zip',
-                                                      meta_props=model_metadata)
+        # We need an empty.zip file, because APIClient doesn't know better
+        handle, path = tempfile.mkstemp(suffix='.zip', text=False)
+        try:
+            # This string is the result of converting the file
+            # empty.zip in the repository using
+            #   openssl base64 < empty.zip
+            os.write(handle, base64.b64decode('UEsFBgAAAAAAAAAAAAAAAAAAAAAAAA=='))
+        finally:
+            os.close(handle)
+        try:
+            model_details = client.repository.store_model(model=path,
+                                                          meta_props=model_metadata)
+        finally:
+            os.remove(path)
         logging.info(f'Model created.')
         model_id = client.repository.get_model_id(model_details)
         logging.info(f'Model id: {model_id}')
