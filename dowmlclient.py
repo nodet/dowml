@@ -295,8 +295,7 @@ class DOWMLClient:
             },
             cdd.INPUT_DATA: [],
             cdd.OUTPUT_DATA: [
-                {'id': '.*\\.json'},
-                {'id': '.*\\.txt'}
+                {'id': '.*\\.*'}
             ]
         }
         # There may be more than one input file
