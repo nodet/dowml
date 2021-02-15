@@ -52,7 +52,8 @@ job id, but none is specified, the last one is used.
         # It may be a job we don't know yet...
         return number
 
-    def do_exit(self, inp):
+    @staticmethod
+    def do_exit(_):
         """Exit this program."""
         return True
 
