@@ -211,7 +211,7 @@ class DOWMLClient:
         return names
 
     def wait_for_job_end(self, job_id, print_activity=False):
-        """Wait for the job to finish and return its status"""
+        """Wait for the job to finish, return its status and details as a tuple"""
         client = self._get_or_make_client()
         while True:
             job_details = client.deployments.get_job_details(job_id)
