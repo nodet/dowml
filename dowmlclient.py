@@ -357,7 +357,8 @@ class DOWMLClient:
             return model_id
 
         logging.info(f'This model doesn\'t exist yet. Creating it...')
-        crm = client.repository.ModelMetaNames
+        cr = client.repository
+        crm = cr.ModelMetaNames
         model_metadata = {
             crm.NAME: model_name,
             crm.DESCRIPTION: "Model for the solve-on-wml script",
@@ -371,12 +372,13 @@ class DOWMLClient:
             # This string is the result of converting the file
             # empty.zip in the repository using
             #   openssl base64 < empty.zip
-            os.write(handle, base64.b64decode('UEsFBgAAAAAAAAAAAAAAAAAAAAAAAA=='))
+            file_content = base64.b64decode('UEsFBgAAAAAAAAAAAAAAAAAAAAAAAA==')
+            os.write(handle, file_content)
         finally:
             os.close(handle)
         try:
-            model_details = client.repository.store_model(model=path,
-                                                          meta_props=model_metadata)
+            model_details = cr.store_model(model=path,
+                                           meta_props=model_metadata)
         finally:
             os.remove(path)
         logging.info(f'Model created.')
