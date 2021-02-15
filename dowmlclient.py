@@ -225,7 +225,8 @@ class DOWMLClient:
                     # There may be a bit of log to look at
                     try:
                         activity = do['solve_state']['latest_engine_activity']
-                        print(''.join(activity))
+                        if activity:
+                            print(''.join(activity))
                     except KeyError:
                         # This must mean that no activity is available yet
                         pass
