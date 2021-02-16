@@ -187,7 +187,7 @@ class DOWMLLib:
         :param hard: if False, cancel the job. If true, delete it completely
         """
         client = self._get_or_make_client()
-        self._logger.info(f'Deleting job...')
+        self._logger.info(f'Deleting job {job_id}...')
         client.deployments.delete_job(job_id, hard)
         self._logger.info(f'Done.')
 
