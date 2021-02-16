@@ -235,7 +235,7 @@ class DOWMLLib:
             job_details = client.deployments.get_job_details(job_id)
             do = job_details['entity']['decision_optimization']
             status = self._get_job_status_from_details(job_details)
-            self._logger.debug(f'Job status: {status}')
+            self._logger.info(f'Job status: {status}')
             if status in ['completed', 'failed', 'canceled']:
                 break
             else:
