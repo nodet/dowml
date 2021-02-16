@@ -58,7 +58,8 @@ job id, but none is specified, the last one is used.
         return True
 
     def do_type(self, model_type):
-        """Print current model type (if no argument), or set the model type."""
+        """type [type-of-model]
+Prints current model type (if no argument), or sets the model type."""
         known_types = ', '.join(self.client.MODEL_TYPES)
         if not model_type:
             print(f'Current model type: {self.client.model_type}. Known types: {known_types}')
@@ -71,7 +72,8 @@ job id, but none is specified, the last one is used.
         self.client.model_type = model_type
 
     def do_size(self, tshirt_size):
-        """Print current deployment size (if no argument), or set the deployment size."""
+        """size [size-of-deployment]
+Prints current deployment size (if no argument), or sets the deployment size."""
         sizes = self.client.TSHIRT_SIZES
         known_sizes = ', '.join(sizes)
         if not tshirt_size:
@@ -85,7 +87,8 @@ job id, but none is specified, the last one is used.
         self.client.tshirt_size = tshirt_size
 
     def do_solve(self, paths):
-        """Start a job to solve a CPLEX model. At least one file of the correct type must be specified as argument."""
+        """solve file1 [file2 ... [filen]]
+Starts a job to solve a CPLEX model. At least one file of the correct type must be specified as argument."""
         if not paths:
             print('This command requires at least one file name as argument.')
             return
@@ -99,7 +102,9 @@ job id, but none is specified, the last one is used.
         self.last_job_id = job_id
 
     def do_wait(self, job_id):
-        """Wait until the job is finished, printing activity. Hit Ctrl-C to interrupt."""
+        """wait [job]
+Waits until the job is finished, printing activity. Hit Ctrl-C to interrupt.
+job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._number_to_id(job_id)
         try:
             self.client.wait_for_job_end(job_id, True)
@@ -109,7 +114,9 @@ job id, but none is specified, the last one is used.
         self.last_job_id = job_id
 
     def do_jobs(self, _):
-        """List all the jobs in the space."""
+        """job
+Lists all the jobs in the space.
+Current job, if any, is indicated with an arrow."""
         jobs = self.client.get_jobs()
         self.jobs = []
         print('     #   status     id                                    creation date             inputs')
@@ -125,14 +132,18 @@ job id, but none is specified, the last one is used.
             print(f'{mark}{i:>3}: {j.status:>10}  {j.id}  {j.created}  {names}')
 
     def do_log(self, job_id):
-        """Print the engine log for the given job."""
+        """log [job]
+Prints the engine log for the given job.
+job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._number_to_id(job_id)
         log = self.client.get_log(job_id)
         print(log)
         self.last_job_id = job_id
 
     def do_output(self, job_id):
-        """Download all the outputs of a job"""
+        """output [job]
+Downloads all the outputs of a job.
+job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._number_to_id(job_id)
         outputs = self.client.get_output(job_id)
         for name, content in outputs:
@@ -147,7 +158,9 @@ job id, but none is specified, the last one is used.
             f.write(content)
 
     def do_details(self, arguments, printer=pprint.pprint):
-        """Print most of the details for the given job. Add 'full' to get the contents."""
+        """details [job] [full]
+Prints most of the details for the given job. Add 'full' to get the actual contents of inputs and outputs.
+job is either a job number or a job id. Uses current job if not specified."""
         full = False
         job_id = None
         for arg in arguments.split():
@@ -161,7 +174,9 @@ job id, but none is specified, the last one is used.
         self.last_job_id = job_id
 
     def do_delete(self, job_id):
-        """Delete the job with the given id. Use '*' to delete all the jobs."""
+        """delete [job|*]
+Deletes the job specified. Use '*' to delete all the jobs.
+job is either a job number or a job id. Uses current job if not specified."""
         if job_id == '*':
             while self.jobs:
                 job = self.jobs[0]
@@ -179,7 +194,9 @@ job id, but none is specified, the last one is used.
             self.last_job_id = None
 
     def do_cancel(self, job_id):
-        """Stops the job with the given id."""
+        """cancel [job]
+Stops the job specified.
+job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._number_to_id(job_id)
         self.client.delete_job(job_id, False)
         self.last_job_id = job_id
@@ -212,7 +229,8 @@ if __name__ == '__main__':
                 print(e)
                 again = True
             except CommandNeedsJobID:
-                print(f'This command requires a jod id or number.')
+                print(f'This command requires a jod id or number, but you '
+                      f'didn\'t specify one.  And there is no current job either.')
                 again = True
             finally:
                 # But let's not print again the starting banner
