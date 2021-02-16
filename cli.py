@@ -187,7 +187,7 @@ job id, but none is specified, the last one is used.
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Interactive program for DO on WML')
-    parser.add_argument('--wml-cred-file', default=None,
+    parser.add_argument('-w', '--wml-cred-file', default=None,
                         help='Name of the file from which to read WML credentials. '
                              'If not specified, credentials are read from an environment variable')
     args = parser.parse_args()
