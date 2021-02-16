@@ -2,7 +2,7 @@ import pprint
 from unittest import TestCase, main, mock
 from unittest.mock import Mock, ANY, call
 
-from cli import DOWMLInteractive, CommandNeedsJobID
+from dowml import DOWMLInteractive, CommandNeedsJobID
 from dowmlclient import DOWMLClient
 
 EXPECTED = 'expected'
