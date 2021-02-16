@@ -244,7 +244,12 @@ class DOWMLLib:
                     try:
                         activity = do['solve_state']['latest_engine_activity']
                         if activity:
-                            print(''.join(activity))
+                            # We are joining the lines in the activity with a CR,
+                            # only to remove them if they were already included...
+                            # FIXME: what a waste!
+                            act = '\n'.join(activity)
+                            act = self.remove_empty_lines(act)
+                            print(act)
                     except KeyError:
                         # This must mean that no activity is available yet
                         pass
