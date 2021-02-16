@@ -114,7 +114,7 @@ job is either a job number or a job id. Uses current job if not specified."""
         self.last_job_id = job_id
 
     def do_jobs(self, _):
-        """job
+        """jobs
 Lists all the jobs in the space.
 Current job, if any, is indicated with an arrow."""
         jobs = self.lib.get_jobs()
