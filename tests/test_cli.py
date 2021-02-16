@@ -11,54 +11,54 @@ EXPECTED = 'expected'
 class TestNumberToId(TestCase):
 
     def setUp(self) -> None:
-        self.client = DOWMLInteractive('test_credentials.txt')
+        self.cli = DOWMLInteractive('test_credentials.txt')
 
     def test_return_last_job_id(self):
         with self.assertRaises(CommandNeedsJobID):
-            self.client._number_to_id(None)
+            self.cli._number_to_id(None)
 
     def test_there_must_be_a_previous(self):
-        self.client.last_job_id = EXPECTED
-        result = self.client._number_to_id(None)
+        self.cli.last_job_id = EXPECTED
+        result = self.cli._number_to_id(None)
         self.assertEqual(result, EXPECTED)
 
     def test_real_ids(self):
-        self.client.jobs = ['a', 'b']
-        self.assertEqual(self.client._number_to_id('a'), 'a')
-        self.assertEqual(self.client._number_to_id('b'), 'b')
+        self.cli.jobs = ['a', 'b']
+        self.assertEqual(self.cli._number_to_id('a'), 'a')
+        self.assertEqual(self.cli._number_to_id('b'), 'b')
         # Fall-through
-        self.assertEqual(self.client._number_to_id('c'), 'c')
+        self.assertEqual(self.cli._number_to_id('c'), 'c')
 
     def test_numbers(self):
-        self.client.jobs = ['a', 'b']
-        self.assertEqual(self.client._number_to_id('1'), 'a')
-        self.assertEqual(self.client._number_to_id('2'), 'b')
+        self.cli.jobs = ['a', 'b']
+        self.assertEqual(self.cli._number_to_id('1'), 'a')
+        self.assertEqual(self.cli._number_to_id('2'), 'b')
         # out of list
-        self.assertEqual(self.client._number_to_id('3'), '3')
+        self.assertEqual(self.cli._number_to_id('3'), '3')
 
 
 class TestDetails(TestCase):
 
     def setUp(self) -> None:
-        self.client = DOWMLInteractive('test_credentials.txt')
-        self.client.client = Mock(spec=DOWMLLib)
-        self.client.jobs = ['a']
-        self.client.last_job_id = 'a'
+        self.cli = DOWMLInteractive('test_credentials.txt')
+        self.cli.lib = Mock(spec=DOWMLLib)
+        self.cli.jobs = ['a']
+        self.cli.last_job_id = 'a'
 
     def test_with_no_content(self):
         mock_print = Mock(spec=pprint.pprint)
         expected = {'id': 'the_id'}
-        self.client.client.get_job_details.return_value = expected
-        self.client.do_details('1', printer=mock_print)
+        self.cli.lib.get_job_details.return_value = expected
+        self.cli.do_details('1', printer=mock_print)
         mock_print.assert_called_once_with(expected, indent=ANY, width=ANY)
-        self.client.client.get_job_details.assert_called_once_with('a', with_contents=False)
+        self.cli.lib.get_job_details.assert_called_once_with('a', with_contents=False)
 
     def with_content_helper(self, the_input):
         # It's not very nice to explicitly call setUp, but I'd rather not
         # create one test for each
         self.setUp()
-        self.client.do_details(the_input, printer=Mock(spec=pprint.pprint))
-        self.client.client.get_job_details.assert_called_once_with('a', with_contents=True)
+        self.cli.do_details(the_input, printer=Mock(spec=pprint.pprint))
+        self.cli.lib.get_job_details.assert_called_once_with('a', with_contents=True)
 
     def test_with_content_removed(self):
         self.with_content_helper('1 full')
@@ -71,61 +71,61 @@ class TestDetails(TestCase):
 class TestJobs(TestCase):
 
     def setUp(self) -> None:
-        self.client = DOWMLInteractive('test_credentials.txt')
-        self.client.client = Mock(spec=DOWMLLib)
-        self.client.jobs = ['a', 'b', 'c']
+        self.cli = DOWMLInteractive('test_credentials.txt')
+        self.cli.lib = Mock(spec=DOWMLLib)
+        self.cli.jobs = ['a', 'b', 'c']
 
     def test_delete_first(self):
-        self.client.do_delete('1')
-        self.client.client.delete_job.assert_called_once_with('a', True)
-        self.assertEqual(self.client.jobs, ['b', 'c'])
+        self.cli.do_delete('1')
+        self.cli.lib.delete_job.assert_called_once_with('a', True)
+        self.assertEqual(self.cli.jobs, ['b', 'c'])
 
     def test_delete_not_in_list(self):
-        self.client.do_delete('d')
-        self.client.client.delete_job.assert_called_once_with('d', True)
-        self.assertEqual(self.client.jobs, ['a', 'b', 'c'])
+        self.cli.do_delete('d')
+        self.cli.lib.delete_job.assert_called_once_with('d', True)
+        self.assertEqual(self.cli.jobs, ['a', 'b', 'c'])
 
     def test_delete_all(self):
-        self.client.do_delete('*')
-        self.client.client.delete_job.assert_has_calls([
+        self.cli.do_delete('*')
+        self.cli.lib.delete_job.assert_has_calls([
             call('a', True),
             call('b', True),
             call('c', True)
         ], any_order=True)
-        self.assertEqual(self.client.jobs, [])
+        self.assertEqual(self.cli.jobs, [])
 
     def test_delete_current(self):
-        self.client.last_job_id = 'b'
-        self.client.do_delete('')
-        self.client.client.delete_job.assert_called_once_with('b', True)
-        self.assertEqual(self.client.jobs, ['a', 'c'])
-        self.assertIsNone(self.client.last_job_id)
+        self.cli.last_job_id = 'b'
+        self.cli.do_delete('')
+        self.cli.lib.delete_job.assert_called_once_with('b', True)
+        self.assertEqual(self.cli.jobs, ['a', 'c'])
+        self.assertIsNone(self.cli.last_job_id)
 
     def test_delete_not_current(self):
-        self.client.last_job_id = 'b'
-        self.client.do_delete('c')
-        self.assertEqual(self.client.last_job_id, 'b')
+        self.cli.last_job_id = 'b'
+        self.cli.do_delete('c')
+        self.assertEqual(self.cli.last_job_id, 'b')
 
 
 class TestOutput(TestCase):
 
     def setUp(self) -> None:
-        self.client = DOWMLInteractive('test_credentials.txt')
-        self.client.client = Mock(spec=DOWMLLib)
-        self.client.jobs = ['a', 'b', 'c']
+        self.cli = DOWMLInteractive('test_credentials.txt')
+        self.cli.lib = Mock(spec=DOWMLLib)
+        self.cli.jobs = ['a', 'b', 'c']
 
     def test_command_exists(self):
-        self.client.client.get_output.return_value = []
-        self.client.do_output('1')
+        self.cli.lib.get_output.return_value = []
+        self.cli.do_output('1')
 
     def test_store_files(self):
-        self.client.client.get_output.return_value = [
+        self.cli.lib.get_output.return_value = [
             ('out1', b'content-a'),
             ('out2', b'content-b'),
         ]
-        self.client.save_content = Mock()
-        self.client.do_output('1')
-        self.client.save_content.assert_has_calls([
+        self.cli.save_content = Mock()
+        self.cli.do_output('1')
+        self.cli.save_content.assert_has_calls([
             call('a', 'out1', b'content-a'),
             call('a', 'out2', b'content-b')
         ])
@@ -134,7 +134,7 @@ class TestOutput(TestCase):
         write_data = b'content'
         mock_open = mock.mock_open()
         with mock.patch('builtins.open', mock_open) as m:
-            self.client.save_content('id', 'name', write_data)
+            self.cli.save_content('id', 'name', write_data)
         m.assert_called_once_with('id_name', 'wb')
         # noinspection PyArgumentList
         handle = m()

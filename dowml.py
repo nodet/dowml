@@ -28,7 +28,7 @@ job id, but none is specified, the last one is used.
 
     def __init__(self, wml_cred_file):
         super().__init__()
-        self.client = DOWMLLib(wml_cred_file)
+        self.lib = DOWMLLib(wml_cred_file)
         self.jobs = []
         self.last_job_id = None
 
@@ -60,31 +60,31 @@ job id, but none is specified, the last one is used.
     def do_type(self, model_type):
         """type [type-of-model]
 Prints current model type (if no argument), or sets the model type."""
-        known_types = ', '.join(self.client.MODEL_TYPES)
+        known_types = ', '.join(self.lib.MODEL_TYPES)
         if not model_type:
-            print(f'Current model type: {self.client.model_type}. Known types: {known_types}')
+            print(f'Current model type: {self.lib.model_type}. Known types: {known_types}')
             # Let's make sure we don't set the model_type to None, but
             # return immediately
             return
-        if model_type not in self.client.MODEL_TYPES:
+        if model_type not in self.lib.MODEL_TYPES:
             print(f'Warning: unknown model type \'{model_type}\'. Known types: {known_types}')
         # We set the type nevertheless: this code may not be up-to-date
-        self.client.model_type = model_type
+        self.lib.model_type = model_type
 
     def do_size(self, tshirt_size):
         """size [size-of-deployment]
 Prints current deployment size (if no argument), or sets the deployment size."""
-        sizes = self.client.TSHIRT_SIZES
+        sizes = self.lib.TSHIRT_SIZES
         known_sizes = ', '.join(sizes)
         if not tshirt_size:
-            print(f'Current size: {self.client.tshirt_size}. Known sizes: {known_sizes}')
+            print(f'Current size: {self.lib.tshirt_size}. Known sizes: {known_sizes}')
             # Let's make sure we don't set the tshirt_size to None, but
             # return immediately
             return
         if tshirt_size not in sizes:
             print(f'Warning: unknown tee-shirt size \'{tshirt_size}\'. Known sizes: {known_sizes}')
         # We set the size nevertheless: this code may not be up-to-date
-        self.client.tshirt_size = tshirt_size
+        self.lib.tshirt_size = tshirt_size
 
     def do_solve(self, paths):
         """solve file1 [file2 ... [filen]]
@@ -94,7 +94,7 @@ Starts a job to solve a CPLEX model. At least one file of the correct type must 
             return
         job_id = None
         try:
-            job_id = self.client.solve(paths)
+            job_id = self.lib.solve(paths)
         except FileNotFoundError as exception:
             print(exception)
         else:
@@ -107,7 +107,7 @@ Waits until the job is finished, printing activity. Hit Ctrl-C to interrupt.
 job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._number_to_id(job_id)
         try:
-            self.client.wait_for_job_end(job_id, True)
+            self.lib.wait_for_job_end(job_id, True)
         except KeyboardInterrupt:
             # The user interrupted. That's perfectly fine...
             pass
@@ -117,7 +117,7 @@ job is either a job number or a job id. Uses current job if not specified."""
         """job
 Lists all the jobs in the space.
 Current job, if any, is indicated with an arrow."""
-        jobs = self.client.get_jobs()
+        jobs = self.lib.get_jobs()
         self.jobs = []
         print('     #   status     id                                    creation date             inputs')
         for i, j in enumerate(jobs, start=1):
@@ -136,7 +136,7 @@ Current job, if any, is indicated with an arrow."""
 Prints the engine log for the given job.
 job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._number_to_id(job_id)
-        log = self.client.get_log(job_id)
+        log = self.lib.get_log(job_id)
         print(log)
         self.last_job_id = job_id
 
@@ -145,7 +145,7 @@ job is either a job number or a job id. Uses current job if not specified."""
 Downloads all the outputs of a job.
 job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._number_to_id(job_id)
-        outputs = self.client.get_output(job_id)
+        outputs = self.lib.get_output(job_id)
         for name, content in outputs:
             self.save_content(job_id, name, content)
         self.last_job_id = job_id
@@ -169,7 +169,7 @@ job is either a job number or a job id. Uses current job if not specified."""
             else:
                 job_id = self._number_to_id(arg)
         job_id = self._number_to_id(job_id)
-        details = self.client.get_job_details(job_id, with_contents=full)
+        details = self.lib.get_job_details(job_id, with_contents=full)
         printer(details, indent=4, width=120)
         self.last_job_id = job_id
 
@@ -186,7 +186,7 @@ job is either a job number or a job id. Uses current job if not specified."""
 
     def delete_one_job(self, job_id):
         job_id = self._number_to_id(job_id)
-        self.client.delete_job(job_id, True)
+        self.lib.delete_job(job_id, True)
         if job_id in self.jobs:
             self.jobs.remove(job_id)
         assert job_id not in self.jobs  # Because a job appears only once
@@ -198,7 +198,7 @@ job is either a job number or a job id. Uses current job if not specified."""
 Stops the job specified.
 job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._number_to_id(job_id)
-        self.client.delete_job(job_id, False)
+        self.lib.delete_job(job_id, False)
         self.last_job_id = job_id
 
 
