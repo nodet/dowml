@@ -3,7 +3,7 @@ from unittest import TestCase, main, mock
 from unittest.mock import Mock, ANY, call
 
 from dowml import DOWMLInteractive, CommandNeedsJobID
-from dowmlclient import DOWMLClient
+from dowmllib import DOWMLLib
 
 EXPECTED = 'expected'
 
@@ -41,7 +41,7 @@ class TestDetails(TestCase):
 
     def setUp(self) -> None:
         self.client = DOWMLInteractive('test_credentials.txt')
-        self.client.client = Mock(spec=DOWMLClient)
+        self.client.client = Mock(spec=DOWMLLib)
         self.client.jobs = ['a']
         self.client.last_job_id = 'a'
 
@@ -72,7 +72,7 @@ class TestJobs(TestCase):
 
     def setUp(self) -> None:
         self.client = DOWMLInteractive('test_credentials.txt')
-        self.client.client = Mock(spec=DOWMLClient)
+        self.client.client = Mock(spec=DOWMLLib)
         self.client.jobs = ['a', 'b', 'c']
 
     def test_delete_first(self):
@@ -111,7 +111,7 @@ class TestOutput(TestCase):
 
     def setUp(self) -> None:
         self.client = DOWMLInteractive('test_credentials.txt')
-        self.client.client = Mock(spec=DOWMLClient)
+        self.client.client = Mock(spec=DOWMLLib)
         self.client.jobs = ['a', 'b', 'c']
 
     def test_command_exists(self):

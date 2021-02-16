@@ -23,7 +23,7 @@ class SimilarNamesInJob(Error):
     pass
 
 
-class DOWMLClient:
+class DOWMLLib:
     """A Python client to run DO models on WML"""
 
     ENVIRONMENT_VARIABLE_NAME = 'WML_CREDENTIALS'

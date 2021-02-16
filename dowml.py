@@ -6,7 +6,7 @@ import requests
 from cmd import Cmd
 from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
 
-from dowmlclient import DOWMLClient, InvalidCredentials
+from dowmllib import DOWMLLib, InvalidCredentials
 
 
 class CommandNeedsJobID(Exception):
@@ -28,7 +28,7 @@ job id, but none is specified, the last one is used.
 
     def __init__(self, wml_cred_file):
         super().__init__()
-        self.client = DOWMLClient(wml_cred_file)
+        self.client = DOWMLLib(wml_cred_file)
         self.jobs = []
         self.last_job_id = None
 
@@ -208,7 +208,7 @@ if __name__ == '__main__':
                         help=f'Name of the file from which to read WML '
                              f'credentials. If not specified, credentials ' 
                              f'are read from environment variable '
-                             f'${DOWMLClient.ENVIRONMENT_VARIABLE_NAME}.')
+                             f'${DOWMLLib.ENVIRONMENT_VARIABLE_NAME}.')
     args = parser.parse_args()
 
     # The force parameter is not listed in the arguments to basicConfig

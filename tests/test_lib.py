@@ -4,14 +4,14 @@ from unittest.mock import Mock
 from ibm_watson_machine_learning import APIClient
 from ibm_watson_machine_learning.deployments import Deployments
 
-from dowmlclient import DOWMLClient, SimilarNamesInJob
+from dowmllib import DOWMLLib, SimilarNamesInJob
 from unittest import TestCase, main
 
 
 class TestSolve(TestCase):
 
     def setUp(self) -> None:
-        client = DOWMLClient('test_credentials.txt')
+        client = DOWMLLib('test_credentials.txt')
         client._logger = Mock(spec=Logger)
         client._client = Mock(spec=APIClient)
         client._client.deployments = Mock(spec=Deployments)
@@ -22,7 +22,7 @@ class TestSolve(TestCase):
         client._client.deployments.DecisionOptimizationMetaNames = domn
         client.get_file_as_data = lambda path: 'base-64-content'
         client._space_id = 'space-id'
-        client._get_deployment_id = Mock(spec=DOWMLClient._get_deployment_id)
+        client._get_deployment_id = Mock(spec=DOWMLLib._get_deployment_id)
         client._get_deployment_id.return_value = 'deployment-id'
         self.client = client
 
