@@ -102,8 +102,7 @@ class DOWMLLib:
 
         :param paths: one or more pathname to the files to send
         """
-        self._create_connexion()
-        self._get_space_id()
+        self._get_or_make_client()
 
         deployment_id = self._get_deployment_id()
         self._logger.info(f'Deployment id: {deployment_id}')
