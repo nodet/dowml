@@ -1,4 +1,5 @@
 import pprint
+from collections import namedtuple
 from unittest import TestCase, main, mock
 from unittest.mock import Mock, ANY, call
 
@@ -140,6 +141,37 @@ class TestOutput(TestCase):
         handle = m()
         # noinspection PyUnresolvedReferences
         handle.write.assert_called_once_with(write_data)
+
+
+class TestOneJobShouldBeCurrent(TestCase):
+
+    def setUp(self) -> None:
+        self.cli = DOWMLInteractive('test_credentials.txt')
+        self.cli.lib = Mock(spec=DOWMLLib)
+        self.cli.jobs = ['a', 'b']
+
+    def test_delete_leaves_last(self):
+        cli = self.cli
+        cli.last_job_id = None
+        cli.do_delete('1')
+        self.assertEqual(cli.last_job_id, 'b')
+
+    def test_delete_leaves_first(self):
+        cli = self.cli
+        cli.last_job_id = None
+        cli.do_delete('2')
+        self.assertEqual(cli.last_job_id, 'a')
+
+    def test_only_one_job(self):
+        cli = self.cli
+        JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names'])
+        jobs = [
+            JobTuple(status='', id='a', created='', names=''),
+        ]
+        cli.lib.get_jobs.return_value = jobs
+        assert cli.last_job_id is None
+        cli.do_jobs('')
+        self.assertEqual(cli.last_job_id, 'a')
 
 
 if __name__ == '__main__':

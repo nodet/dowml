@@ -118,6 +118,7 @@ job is either a job number or a job id. Uses current job if not specified."""
 Lists all the jobs in the space.
 Current job, if any, is indicated with an arrow."""
         jobs = self.lib.get_jobs()
+        jobs_len = len(jobs)
         self.jobs = []
         print('     #   status     id                                    creation date             inputs')
         for i, j in enumerate(jobs, start=1):
@@ -127,6 +128,10 @@ Current job, if any, is indicated with an arrow."""
             self.jobs.append(j.id)
             # Mark the job used if none specified
             mark = '   '
+            if jobs_len == 1:
+                assert i == 1
+                # This is the only job. Let's make it current
+                self.last_job_id = j.id
             if j.id == self.last_job_id:
                 mark = '=> '
             print(f'{mark}{i:>3}: {j.status:>10}  {j.id}  {j.created}  {names}')
@@ -192,6 +197,8 @@ job is either a job number or a job id. Uses current job if not specified."""
         assert job_id not in self.jobs  # Because a job appears only once
         if self.last_job_id == job_id:
             self.last_job_id = None
+        if len(self.jobs) == 1:
+            self.last_job_id = self.jobs[0]
 
     def do_cancel(self, job_id):
         """cancel [job]
