@@ -1,6 +1,22 @@
 # dowml
 A library and command line client to use Decision Optimization on WML
 
+## tldr;
+
+```
+$ git clone git@github.ibm.com:xavier-nodet/dowml.git
+$ cd dowml
+$ source venv/bin/activate
+$ cat echo "{'apikey': '<apikey>', 'url': 'https://us-south.ml.cloud.ibm.com'}" > wml-cred.txt
+$ python3 dowml.py -w wml-cred.txt
+dowml> solve examples/afiro.mps
+dowml> wait
+dowml> log
+dowml> exit
+```
+
+## Introduction
+
 The class `DOWMLLib` provides an API to upload Decision Optimization models (CPLEX, CP Optimizer, OPL or docplex) to WML, check their status, and download results.  The script `dowml.py` is an interactive program on top of that library.
 
 In order to use either of them, you need to provide IBM Cloud credentials.
