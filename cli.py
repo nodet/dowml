@@ -188,8 +188,10 @@ job id, but none is specified, the last one is used.
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Interactive program for DO on WML')
     parser.add_argument('-w', '--wml-cred-file', default=None,
-                        help='Name of the file from which to read WML credentials. '
-                             'If not specified, credentials are read from an environment variable')
+                        help=f'Name of the file from which to read WML '
+                             f'credentials. If not specified, credentials ' 
+                             f'are read from environment variable '
+                             f'${DOWMLClient.ENVIRONMENT_VARIABLE_NAME}.')
     args = parser.parse_args()
 
     # The force parameter is not listed in the arguments to basicConfig
