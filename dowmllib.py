@@ -46,7 +46,7 @@ class DOWMLLib:
             wml_cred_str = self._read_wml_credentials_from_file(wml_credentials_file)
         else:
             wml_cred_str = self._read_wml_credentials_from_env(self.ENVIRONMENT_VARIABLE_NAME)
-        self._logger.info(f'Found credential string.')
+        self._logger.debug(f'Found credential string.')
 
         wml_credentials = eval(wml_cred_str)
         assert type(wml_credentials) is dict
@@ -54,7 +54,7 @@ class DOWMLLib:
         assert type(wml_credentials['apikey']) is str
         assert 'url' in wml_credentials
         assert type(wml_credentials['url']) is str
-        self._logger.info(f'Credentials have the expected structure.')
+        self._logger.debug(f'Credentials have the expected structure.')
 
         self._wml_credentials = wml_credentials
 
@@ -73,12 +73,11 @@ class DOWMLLib:
         self._get_space_id()
         return self._client
 
-    @staticmethod
-    def _read_wml_credentials_from_env(var_name):
+    def _read_wml_credentials_from_env(self, var_name):
         """Return a string of credentials suitable for WML from the environment
 
         Raises InvalidCredentials if anything is wrong."""
-        logging.info(f'Looking for credentials in environment variable {var_name}...')
+        self._logger.debug(f'Looking for credentials in environment variable {var_name}...')
         try:
             wml_cred_str = os.environ[var_name]
         except KeyError:
@@ -89,10 +88,9 @@ class DOWMLLib:
 
         return wml_cred_str
 
-    @staticmethod
-    def _read_wml_credentials_from_file(file):
+    def _read_wml_credentials_from_file(self, file):
         """Return the content of the file, assumed to be WML credentials"""
-        logging.info(f'Looking for credentials in file \'{file}\'...')
+        self._logger.debug(f'Looking for credentials in file \'{file}\'...')
         with open(file) as f:
             wml_cred_str = f.read()
         return wml_cred_str
@@ -160,9 +158,9 @@ class DOWMLLib:
         :return: The job details
         """
         client = self._get_or_make_client()
-        self._logger.info(f'Fetching output...')
+        self._logger.debug(f'Fetching output...')
         job_details = client.deployments.get_job_details(job_id)
-        self._logger.info(f'Done.')
+        self._logger.debug(f'Done.')
         if with_contents:
             return job_details
         # Let's remove the largest, mostly useless, parts
@@ -187,9 +185,9 @@ class DOWMLLib:
         :param hard: if False, cancel the job. If true, delete it completely
         """
         client = self._get_or_make_client()
-        self._logger.info(f'Deleting job {job_id}...')
+        self._logger.debug(f'Deleting job {job_id}...')
         client.deployments.delete_job(job_id, hard)
-        self._logger.info(f'Done.')
+        self._logger.debug(f'Done.')
 
     def decode_log(self, output):
         """ Decode the log from DO4WML
@@ -238,7 +236,7 @@ class DOWMLLib:
             job_details = client.deployments.get_job_details(job_id)
             do = job_details['entity']['decision_optimization']
             status = self._get_job_status_from_details(job_details)
-            self._logger.info(f'Job status: {status}')
+            self._logger.debug(f'Job status: {status}')
             if status in ['completed', 'failed', 'canceled']:
                 break
             else:
@@ -265,9 +263,9 @@ class DOWMLLib:
     def get_jobs(self):
         """Return the list of tuples (id, status) for all jobs in the deployment"""
         client = self._get_or_make_client()
-        self._logger.info(f'Getting job details...')
+        self._logger.debug(f'Getting job details...')
         job_details = client.deployments.get_job_details()
-        self._logger.info(f'Done.')
+        self._logger.debug(f'Done.')
         result = []
         for job in job_details['resources']:
             status = self._get_job_status_from_details(job)
@@ -307,9 +305,9 @@ class DOWMLLib:
                 'content': self.get_file_as_data(path)
             }
             solve_payload[cdd.INPUT_DATA].append(input_data)
-        self._logger.info(f'Creating the job...')
+        self._logger.debug(f'Creating the job...')
         job_details = client.deployments.create_job(deployment_id, solve_payload)
-        self._logger.info(f'Done. Getting its id...')
+        self._logger.debug(f'Done. Getting its id...')
         job_id = client.deployments.get_job_uid(job_details)
         return job_id
 
@@ -319,29 +317,29 @@ class DOWMLLib:
         if not self._space_id:
             self._space_id = self._get_space_id()
 
-        logging.info(f'Getting deployments...')
+        self._logger.debug(f'Getting deployments...')
         client = self._get_or_make_client()
         deployment_details = client.deployments.get_details()
-        logging.info(f'Done.')
+        self._logger.debug(f'Done.')
         resources = deployment_details['resources']
         deployment_name = f'{self.DEPLOYMENT_NAME}-{self.model_type}-{self.tshirt_size}'
-        logging.info(f'Got the list. Looking for deployment named \'{deployment_name}\'')
+        self._logger.debug(f'Got the list. Looking for deployment named \'{deployment_name}\'')
         deployment_id = None
         for r in resources:
             if r['entity']['name'] == deployment_name:
                 deployment_id = r['metadata']['id']
-                logging.info(f'Found it.')
+                self._logger.debug(f'Found it.')
                 break
         if deployment_id is not None:
             return deployment_id
 
-        logging.info(f'This deployment doesn\'t exist yet. Creating it...')
+        self._logger.debug(f'This deployment doesn\'t exist yet. Creating it...')
 
         # We need a model to create a deployment
         model_id = self._get_model_id()
 
         # Create the deployment
-        logging.info(f'Creating the deployment itself...')
+        self._logger.debug(f'Creating the deployment itself...')
         cdc = client.deployments.ConfigurationMetaNames
         meta_props = {
             cdc.NAME: deployment_name,
@@ -350,29 +348,29 @@ class DOWMLLib:
             cdc.HARDWARE_SPEC: {'name': self.tshirt_size, 'num_nodes': 2}
         }
         deployment = client.deployments.create(artifact_uid=model_id, meta_props=meta_props)
-        logging.info(f'Deployment created.')
+        self._logger.debug(f'Deployment created.')
         deployment_id = client.deployments.get_id(deployment)
         return deployment_id
 
     def _get_model_id(self):
         """Create an empty model if one doesn't exist, return its id"""
-        logging.info(f'Getting models...')
+        self._logger.debug(f'Getting models...')
         client = self._get_or_make_client()
         details = client.repository.get_details()
-        logging.info(f'Done.')
+        self._logger.debug(f'Done.')
         resources = details['models']['resources']
         model_name = f'{self.MODEL_NAME}-{self.model_type}'
-        logging.info(f'Got the list. Looking for model named \'{model_name}\'')
+        self._logger.debug(f'Got the list. Looking for model named \'{model_name}\'')
         model_id = None
         for r in resources:
             if r['metadata']['name'] == model_name:
                 model_id = r['metadata']['id']
-                logging.info(f'Found it.')
+                self._logger.debug(f'Found it.')
                 break
         if model_id is not None:
             return model_id
 
-        logging.info(f'This model doesn\'t exist yet. Creating it...')
+        self._logger.debug(f'This model doesn\'t exist yet. Creating it...')
         cr = client.repository
         crm = cr.ModelMetaNames
         model_metadata = {
@@ -397,9 +395,9 @@ class DOWMLLib:
                                            meta_props=model_metadata)
         finally:
             os.remove(path)
-        logging.info(f'Model created.')
+        self._logger.debug(f'Model created.')
         model_id = client.repository.get_model_id(model_details)
-        logging.info(f'Model id: {model_id}')
+        self._logger.debug(f'Model id: {model_id}')
         return model_id
 
     def _get_space_id(self):
@@ -408,7 +406,7 @@ class DOWMLLib:
             return self._space_id
 
         client = self._get_or_make_client()
-        logging.info(f'Fetching existing spaces...')
+        self._logger.debug(f'Fetching existing spaces...')
         space_name = self.SPACE_NAME
         cos_resource_crn = ('crn:v1:bluemix:public:cloud-object-storage:global'
                             ':a/76260f9157016d38ed1b725fa796f7bc:'
@@ -432,24 +430,24 @@ class DOWMLLib:
 
         space_details = client.spaces.get_details()
         resources = space_details['resources']
-        logging.info(f'Got the list. Looking for space named \'{space_name}\'')
+        self._logger.debug(f'Got the list. Looking for space named \'{space_name}\'')
         space_id = None
         for r in resources:
             if r['entity']['name'] == space_name:
                 space_id = r['metadata']['id']
-                logging.info(f'Found it.')
+                self._logger.debug(f'Found it.')
                 break
         if space_id is None:
-            logging.info(f'This space doesn\'t exist yet. Creating it...')
+            self._logger.debug(f'This space doesn\'t exist yet. Creating it...')
             # Create the space
             space = client.spaces.store(meta_props=metadata)
-            logging.info(f'Space created')
+            self._logger.debug(f'Space created')
             space_id = client.spaces.get_id(space)
-        logging.info(f'Space id: {space_id}')
+        self._logger.info(f'Space id: {space_id}')
 
-        self._logger.info(f'Setting default space...')
+        self._logger.debug(f'Setting default space...')
         self._client.set.default_space(space_id)
-        self._logger.info(f'Done.')
+        self._logger.debug(f'Done.')
 
         self._space_id = space_id
         return space_id
@@ -458,7 +456,7 @@ class DOWMLLib:
         if self._client is not None:
             assert "This should never be true"
             return
-        logging.info(f'Creating the connexion...')
+        self._logger.debug(f'Creating the connexion...')
         client = APIClient(self._wml_credentials)
-        logging.info(f'Creating the connexion succeeded.  Client version is {client.version}')
+        self._logger.info(f'Creating the connexion succeeded.  Client version is {client.version}')
         return client

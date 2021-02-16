@@ -209,12 +209,17 @@ if __name__ == '__main__':
                              f'credentials. If not specified, credentials ' 
                              f'are read from environment variable '
                              f'${DOWMLLib.ENVIRONMENT_VARIABLE_NAME}.')
+    parser.add_argument('--verbose', '-v', action='count', default=0,
+                        help=f'Verbose mode.  Causes the program to print debugging '
+                             f'messages about its progress.  Multiple -v options '
+                             f'increase the verbosity.  The maximum is 2.')
     args = parser.parse_args()
 
+    log_levels = [logging.WARNING, logging.INFO, logging.DEBUG]
     # The force parameter is not listed in the arguments to basicConfig
     # noinspection PyArgumentList
     logging.basicConfig(force=True, format='%(asctime)s %(message)s',
-                        level=logging.INFO)
+                        level=log_levels[args.verbose])
     try:
         dowml = DOWMLInteractive(args.wml_cred_file)
         while True:
