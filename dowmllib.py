@@ -265,7 +265,9 @@ class DOWMLLib:
     def get_jobs(self):
         """Return the list of tuples (id, status) for all jobs in the deployment"""
         client = self._get_or_make_client()
+        self._logger.info(f'Getting job details...')
         job_details = client.deployments.get_job_details()
+        self._logger.info(f'Done.')
         result = []
         for job in job_details['resources']:
             status = self._get_job_status_from_details(job)
