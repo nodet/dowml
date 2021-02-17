@@ -237,18 +237,20 @@ def main_loop():
         parser.print_help()
 
 
-# We will mock the 'request' function that's used by APIClient
+# We will mock the 'requests' function that's used by APIClient
 # So first we save the original function
-orig_requests_request = requests.api.request
+orig_requests_session_send = requests.Session.send
 
 
-# And here's the function that replaces 'request'
-def mocked_requests_request(*arguments, **kwargs):
-    request_type, url = arguments
-    params = kwargs.get('params', '')
-    print(f'                        {request_type} {url} ({params})')
-    resp = orig_requests_request(*arguments, **kwargs)
-    print(f'                        {resp.status_code}')
+# And here's the function that replaces 'Session.send'
+def mocked_requests_session_send(*arguments, **kwargs):
+    session, prepared_request = arguments
+    method = prepared_request.method
+    url = prepared_request.url
+    #       2021-02-17 16:59:39,710
+    print(f'           {method} {url}')
+    resp = orig_requests_session_send(*arguments, **kwargs)
+    # print(f'                        {resp.status_code}')
     return resp
 
 
@@ -274,7 +276,7 @@ if __name__ == '__main__':
                         level=log_levels[args.verbose])
 
     if args.verbose >= 3:
-        # Let's record the sending of REST queries
-        requests.api.request = mocked_requests_request
+        # Let's report the sending of REST queries
+        requests.Session.send = mocked_requests_session_send
 
     main_loop()
