@@ -33,8 +33,10 @@ Interactive program for DO on WML
 optional arguments:
   -h, --help            show this help message and exit
   -w WML_CRED_FILE, --wml-cred-file WML_CRED_FILE
-                        Name of the file from which to read WML credentials. If not specified, credentials are read
-                        from environment variable $WML_CREDENTIALS.
+                        Name of the file from which to read WML credentials. If not specified, 
+                        credentials are read from environment variable $WML_CREDENTIALS.
+  --verbose, -v         Verbose mode. Causes the program to print debugging messages about its 
+                        progress. Multiple -v options increase the verbosity. The maximum is 3.
 $
 $
 $ python3 dowml.py -w xavier-wml-cred.txt
