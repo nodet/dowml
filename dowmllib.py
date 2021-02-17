@@ -339,11 +339,15 @@ class DOWMLLib:
 
         self._logger.debug(f'This deployment doesn\'t exist yet. Creating it...')
 
+        deployment_id = self._create_deployment(deployment_name)
+        return deployment_id
+
+    def _create_deployment(self, deployment_name):
         # We need a model to create a deployment
         model_id = self._get_model_id()
-
         # Create the deployment
         self._logger.debug(f'Creating the deployment itself...')
+        client = self._get_or_make_client()
         cdc = client.deployments.ConfigurationMetaNames
         meta_props = {
             cdc.NAME: deployment_name,
@@ -370,11 +374,15 @@ class DOWMLLib:
             if r['metadata']['name'] == model_name:
                 model_id = r['metadata']['id']
                 self._logger.debug(f'Found it.')
+                self._logger.debug(f'Model id: {model_id}')
                 break
-        if model_id is not None:
-            return model_id
+        if model_id is None:
+            self._logger.debug(f'This model doesn\'t exist yet. Creating it...')
+            model_id = self._create_model(model_name)
+        return model_id
 
-        self._logger.debug(f'This model doesn\'t exist yet. Creating it...')
+    def _create_model(self, model_name):
+        client = self._get_or_make_client()
         cr = client.repository
         crm = cr.ModelMetaNames
         model_metadata = {
