@@ -209,31 +209,14 @@ job is either a job number or a job id. Uses current job if not specified."""
         self.last_job_id = job_id
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Interactive program for DO on WML')
-    parser.add_argument('-w', '--wml-cred-file', default=None,
-                        help=f'Name of the file from which to read WML '
-                             f'credentials. If not specified, credentials ' 
-                             f'are read from environment variable '
-                             f'${DOWMLLib.ENVIRONMENT_VARIABLE_NAME}.')
-    parser.add_argument('--verbose', '-v', action='count', default=0,
-                        help=f'Verbose mode.  Causes the program to print debugging '
-                             f'messages about its progress.  Multiple -v options '
-                             f'increase the verbosity.  The maximum is 2.')
-    args = parser.parse_args()
-
-    log_levels = [logging.WARNING, logging.INFO, logging.DEBUG]
-    # The force parameter is not listed in the arguments to basicConfig
-    # noinspection PyArgumentList
-    logging.basicConfig(force=True, format='%(asctime)s %(message)s',
-                        level=log_levels[args.verbose])
+def main_loop():
     try:
         dowml = DOWMLInteractive(args.wml_cred_file)
         while True:
             again = False
             try:
                 dowml.cmdloop()
-            except ApiRequestFailure as failure:
+            except ApiRequestFailure:
                 # This happens when an invalid job id is specified. We want
                 # to keep running.
                 again = True
@@ -252,3 +235,46 @@ if __name__ == '__main__':
     except InvalidCredentials:
         print(f'\nERROR: credentials not found!\n')
         parser.print_help()
+
+
+# We will mock the 'request' function that's used by APIClient
+# So first we save the original function
+orig_requests_request = requests.api.request
+
+
+# And here's the function that replaces 'request'
+def mocked_requests_request(*arguments, **kwargs):
+    request_type, url = arguments
+    params = kwargs.get('params', '')
+    print(f'                        {request_type} {url} ({params})')
+    resp = orig_requests_request(*arguments, **kwargs)
+    print(f'                        {resp.status_code}')
+    return resp
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Interactive program for DO on WML')
+    parser.add_argument('-w', '--wml-cred-file', default=None,
+                        help=f'Name of the file from which to read WML '
+                             f'credentials. If not specified, credentials ' 
+                             f'are read from environment variable '
+                             f'${DOWMLLib.ENVIRONMENT_VARIABLE_NAME}.')
+    parser.add_argument('--verbose', '-v', action='count', default=0,
+                        help=f'Verbose mode.  Causes the program to print debugging '
+                             f'messages about its progress.  Multiple -v options '
+                             f'increase the verbosity.  The maximum is 3.')
+    args = parser.parse_args()
+
+    # Last logging level repeated as many times as necessary to accomodate
+    # for level higher than what logging does (eg REST queries)
+    log_levels = [logging.WARNING, logging.INFO, logging.DEBUG, logging.DEBUG]
+    # The force parameter is not listed in the arguments to basicConfig
+    # noinspection PyArgumentList
+    logging.basicConfig(force=True, format='%(asctime)s %(message)s',
+                        level=log_levels[args.verbose])
+
+    if args.verbose >= 3:
+        # Let's record the sending of REST queries
+        requests.api.request = mocked_requests_request
+
+    main_loop()
