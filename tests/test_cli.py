@@ -113,6 +113,7 @@ class TestOutput(TestCase):
     def setUp(self) -> None:
         self.cli = DOWMLInteractive('test_credentials.txt')
         self.cli.lib = Mock(spec=DOWMLLib)
+        self.cli.lib.get_job_details.return_value = {}
         self.cli.jobs = ['a', 'b', 'c']
 
     def test_command_exists(self):
@@ -128,8 +129,9 @@ class TestOutput(TestCase):
         self.cli.do_output('1')
         self.cli.save_content.assert_has_calls([
             call('a', 'out1', b'content-a'),
-            call('a', 'out2', b'content-b')
-        ])
+            call('a', 'out2', b'content-b'),
+            call('a', 'details.json', '{}', text=True)
+        ], any_order=True)
 
     def test_save_content(self):
         write_data = b'content'

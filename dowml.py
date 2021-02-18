@@ -147,18 +147,24 @@ job is either a job number or a job id. Uses current job if not specified."""
 
     def do_output(self, job_id):
         """output [job]
-Downloads all the outputs of a job.
+Downloads all the outputs of a job, as well as the details/status of the job.
 job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._number_to_id(job_id)
-        outputs = self.lib.get_output(job_id)
+        details = self.lib.get_job_details(job_id, with_contents=True)
+        outputs = self.lib.get_output(details)
         for name, content in outputs:
             self.save_content(job_id, name, content)
         self.last_job_id = job_id
+        # We don't want to store all the outputs in the details themselves
+        self.lib.filter_large_chunks_from_details(details)
+        details = pprint.pformat(details)
+        self.save_content(job_id, 'details.json', details, text=True)
 
     @staticmethod
-    def save_content(job_id, name, content):
+    def save_content(job_id, name, content, text=False):
         file_name = f'{job_id}_{name}'
-        with open(file_name, 'wb') as f:
+        flags = 'wt' if text else 'wb'
+        with open(file_name, flags) as f:
             print(f'Storing {file_name}')
             f.write(content)
 
@@ -267,8 +273,8 @@ if __name__ == '__main__':
                              f'increase the verbosity.  The maximum is 3.')
     args = parser.parse_args()
 
-    # Last logging level repeated as many times as necessary to accomodate
-    # for level higher than what logging does (eg REST queries)
+    # Last logging level repeated as many times as necessary to accommodate
+    # for levels higher than what logging does (eg REST queries)
     log_levels = [logging.WARNING, logging.INFO, logging.DEBUG, logging.DEBUG]
     # The force parameter is not listed in the arguments to basicConfig
     # noinspection PyArgumentList

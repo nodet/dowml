@@ -125,7 +125,7 @@ class DOWMLLib:
                 return output
         return None
 
-    def get_output(self, job_id):
+    def get_output(self, details):
         """"Extracts the outputs from the job
 
         :param job_id: The id of the job to get the output from
@@ -134,9 +134,9 @@ class DOWMLLib:
         decoded content, as bytes. We don't assume that the content is actually
         text.
         """
-        job_details = self.get_job_details(job_id, with_contents=True)
+        job_id = self._get_job_id_from_details(details)
         try:
-            outputs = job_details['entity']['decision_optimization']['output_data']
+            outputs = details['entity']['decision_optimization']['output_data']
         except KeyError:
             self._logger.warning(f'No output structure available for this job')
             return []
@@ -162,7 +162,11 @@ class DOWMLLib:
         self._logger.debug(f'Done.')
         if with_contents:
             return job_details
-        # Let's remove the largest, mostly useless, parts
+        self.filter_large_chunks_from_details(job_details)
+        return job_details
+
+    def filter_large_chunks_from_details(self, job_details):
+        """Remove from the large blobs (input/output) from the given job_details."""
         try:
             do = job_details['entity']['decision_optimization']
             for data in do['output_data']:
@@ -176,7 +180,6 @@ class DOWMLLib:
         except KeyError:
             # GH-1: This happens when the job failed
             pass
-        return job_details
 
     def delete_job(self, job_id, hard=False):
         """ Delete the given job
