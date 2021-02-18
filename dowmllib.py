@@ -128,13 +128,12 @@ class DOWMLLib:
     def get_output(self, details):
         """"Extracts the outputs from the job
 
-        :param job_id: The id of the job to get the output from
+        :param details: The details of the job to get the output from
         :return: A list of outputs. Each output is a tuple (name, content)
         where the name is, well, the name of the output, and content is the
         decoded content, as bytes. We don't assume that the content is actually
         text.
         """
-        job_id = self._get_job_id_from_details(details)
         try:
             outputs = details['entity']['decision_optimization']['output_data']
         except KeyError:
@@ -160,13 +159,13 @@ class DOWMLLib:
         self._logger.debug(f'Fetching output...')
         job_details = client.deployments.get_job_details(job_id)
         self._logger.debug(f'Done.')
-        if with_contents:
-            return job_details
-        self.filter_large_chunks_from_details(job_details)
+        if not with_contents:
+            self.filter_large_chunks_from_details(job_details)
         return job_details
 
-    def filter_large_chunks_from_details(self, job_details):
-        """Remove from the large blobs (input/output) from the given job_details."""
+    @staticmethod
+    def filter_large_chunks_from_details(job_details):
+        """Remove the large blobs (input/output) from the given job_details."""
         try:
             do = job_details['entity']['decision_optimization']
             for data in do['output_data']:
