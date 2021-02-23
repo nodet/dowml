@@ -64,6 +64,7 @@ class DOWMLLib:
         self._space_id = None
         self.model_type = self.MODEL_TYPES[0]
         self.tshirt_size = self.TSHIRT_SIZES[0]
+        self.timelimit = None
 
     def _get_or_make_client(self):
         if self._client is not None:
@@ -299,6 +300,9 @@ class DOWMLLib:
                 {'id': '.*\\.*'}
             ]
         }
+        if self.timelimit:
+            params = solve_payload[cdd.SOLVE_PARAMETERS]
+            params['oaas.timeLimit'] = 1000 * self.timelimit
         # There may be more than one input file
         names = []
         for path in paths.split():

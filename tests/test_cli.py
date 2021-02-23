@@ -3,7 +3,8 @@ from collections import namedtuple
 from unittest import TestCase, main, mock
 from unittest.mock import Mock, ANY, call
 
-from dowml import DOWMLInteractive, CommandNeedsJobID
+from dowml import DOWMLInteractive, \
+    CommandNeedsJobID, CommandNeedsNonNullInteger
 from dowmllib import DOWMLLib
 
 EXPECTED = 'expected'
@@ -175,6 +176,35 @@ class TestOneJobShouldBeCurrent(TestCase):
         cli.do_jobs('')
         self.assertEqual(cli.last_job_id, 'a')
 
+
+class TestTimeLimit(TestCase):
+
+    def setUp(self) -> None:
+        self.cli = DOWMLInteractive('test_credentials.txt')
+
+    def test_default_is_no_timelimit(self):
+        cli = self.cli
+        self.assertIsNone(cli.lib.timelimit)
+
+    def test_setting_timelimit(self):
+        cli = self.cli
+        cli.do_time('10')
+        self.assertEqual(cli.lib.timelimit, 10)
+
+    def test_cant_set_to_non_integer(self):
+        cli = self.cli
+        with self.assertRaises(CommandNeedsNonNullInteger):
+            cli.do_time('foo')
+
+    def test_cant_set_to_negative_integer(self):
+        cli = self.cli
+        with self.assertRaises(CommandNeedsNonNullInteger):
+            cli.do_time('-1')
+
+    def test_zero_means_no_timelimit(self):
+        cli = self.cli
+        cli.do_time('0')
+        self.assertIsNone(cli.lib.timelimit)
 
 if __name__ == '__main__':
     main()

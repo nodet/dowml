@@ -64,6 +64,34 @@ class TestSolve(TestCase):
         with self.assertRaises(SimilarNamesInJob):
             self.lib.solve('path/f1 another/path/f1')
 
+    @staticmethod
+    def get_params(create_job_mock):
+        return create_job_mock.call_args.args[1]['solve-parameters']
+
+    def test_solve_defaults_to_no_timelimit(self):
+        self.assertIsNone(self.lib.timelimit)
+        self.lib.solve('path')
+        create_job_mock = self.lib._client.deployments.create_job
+        create_job_mock.assert_called_once()
+        self.assertNotIn('oaas.timeLimit', self.get_params(create_job_mock))
+
+    def test_solve_defaults_with_time_limit(self):
+        lim = 10
+        self.lib.timelimit = lim
+        self.lib.solve('path')
+        create_job_mock = self.lib._client.deployments.create_job
+        create_job_mock.assert_called_once()
+        params = self.get_params(create_job_mock)
+        self.assertIn('oaas.timeLimit', params)
+        self.assertEqual(params['oaas.timeLimit'], 1000*lim)
+
+    def test_solve_defaults_with_zero_limit(self):
+        self.lib.timelimit = 0
+        self.lib.solve('path')
+        create_job_mock = self.lib._client.deployments.create_job
+        create_job_mock.assert_called_once()
+        self.assertNotIn('oaas.timeLimit', self.get_params(create_job_mock))
+
 
 if __name__ == '__main__':
     main()

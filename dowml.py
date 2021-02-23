@@ -11,6 +11,8 @@ from dowmllib import DOWMLLib, InvalidCredentials
 
 class CommandNeedsJobID(Exception):
     pass
+class CommandNeedsNonNullInteger(Exception):
+    pass
 
 
 class DOWMLInteractive(Cmd):
@@ -85,6 +87,22 @@ Prints current deployment size (if no argument), or sets the deployment size."""
             print(f'Warning: unknown tee-shirt size \'{tshirt_size}\'. Known sizes: {known_sizes}')
         # We set the size nevertheless: this code may not be up-to-date
         self.lib.tshirt_size = tshirt_size
+
+    def do_time(self, limit):
+        """time [non-negative-integer]
+Prints current time limit (if no argument), or sets the time limit (in seconds). 0 to remove the time limit."""
+        if not limit:
+            print(f'Current time limit: {self.lib.timelimit}')
+            return
+        try:
+            limit = int(limit)
+        except ValueError:
+            raise CommandNeedsNonNullInteger
+        if limit < 0:
+            raise CommandNeedsNonNullInteger
+        if limit == 0:
+            limit = None
+        self.lib.timelimit = limit
 
     def do_solve(self, paths):
         """solve file1 [file2 ... [filen]]
