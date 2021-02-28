@@ -135,7 +135,7 @@ class DOWMLLib:
         :param job_id: The id of the job to get the log from
         :return: The decoded log, or None
         """
-        job_details = self.get_job_details(job_id, with_contents=True)
+        job_details = self.get_job_details(job_id, with_contents='log')
         for output_data in job_details['entity']['decision_optimization']['output_data']:
             if output_data['id'] == 'log.txt':
                 output = output_data['content']
@@ -172,7 +172,7 @@ class DOWMLLib:
         :param job_id: The id of the job to look for
         :param with_contents: if 'names', the details returned include
         the input and output files names. If 'full', the content of these files
-        is included as well.
+        is included as well. If 'log', the content only includes the output files
         :return: The job details
         """
         client = self._get_or_make_client()
@@ -180,9 +180,11 @@ class DOWMLLib:
         filter = None
         if not with_contents:
             filter = 'solve_parameters,solve_state,status'
+        elif with_contents == 'log':
+            filter = 'output_data'
         job_details = self.client_get_job_details(client, job_id, filter)
         self._logger.debug(f'Done.')
-        if with_contents != 'full':
+        if with_contents != 'full' and with_contents != 'log':
             self.filter_large_chunks_from_details(job_details)
         return job_details
 

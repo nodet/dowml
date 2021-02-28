@@ -168,7 +168,7 @@ job is either a job number or a job id. Uses current job if not specified."""
 Downloads all the outputs of a job, as well as the details/status of the job.
 job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._number_to_id(job_id)
-        details = self.lib.get_job_details(job_id, with_contents=True)
+        details = self.lib.get_job_details(job_id, with_contents='full')
         outputs = self.lib.get_output(details)
         for name, content in outputs:
             self.save_content(job_id, name, content)
