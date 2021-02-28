@@ -26,7 +26,8 @@ old_params = None
 def patch_params():
     global old_params
     result = old_params()
-    result['include'] = 'solve_parameters, solve_state, status'
+    # Beware: the parameter list must not have spaces!
+    result['include'] = 'solve_parameters,solve_state,status'
     return result
 
 
@@ -36,12 +37,14 @@ def main():
                         level=logging.DEBUG)
     requests.Session.send = mocked_requests_session_send
     lib = DOWMLLib()
-
     lib._get_or_make_client()
+
     old_params = lib._client._params
-    lib._client._params = patch_params
-    details=lib.get_job_details('2e2a0fe4-8bd3-48cf-85f7-a299bd0450f9')
-    lib._client._params = old_params
+    try:
+        lib._client._params = patch_params
+        details = lib.get_job_details('4f90302a-930d-4b97-b98a-d5db8c83b004')
+    finally:
+        lib._client._params = old_params
 
     pprint.pprint(details)
 

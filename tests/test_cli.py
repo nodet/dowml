@@ -55,12 +55,20 @@ class TestDetails(TestCase):
         mock_print.assert_called_once_with(expected, indent=ANY, width=ANY)
         self.cli.lib.get_job_details.assert_called_once_with('a', with_contents=False)
 
+    def test_with_names_only(self):
+        mock_print = Mock(spec=pprint.pprint)
+        expected = {'id': 'the_id'}
+        self.cli.lib.get_job_details.return_value = expected
+        self.cli.do_details('1 names', printer=mock_print)
+        mock_print.assert_called_once_with(expected, indent=ANY, width=ANY)
+        self.cli.lib.get_job_details.assert_called_once_with('a', with_contents='names')
+
     def with_content_helper(self, the_input):
         # It's not very nice to explicitly call setUp, but I'd rather not
         # create one test for each
         self.setUp()
         self.cli.do_details(the_input, printer=Mock(spec=pprint.pprint))
-        self.cli.lib.get_job_details.assert_called_once_with('a', with_contents=True)
+        self.cli.lib.get_job_details.assert_called_once_with('a', with_contents='full')
 
     def test_with_content_removed(self):
         self.with_content_helper('1 full')

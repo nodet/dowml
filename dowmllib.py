@@ -23,6 +23,24 @@ class SimilarNamesInJob(Error):
     pass
 
 
+#
+# We patch APIClient._params with this function instead
+#
+the_filter = None
+the_old_params = None
+
+
+def new_params():
+    global the_old_params
+    global the_filter
+    result = the_old_params()
+    if the_filter:
+        # Beware: the parameter list must not have spaces!
+        result['include'] = the_filter
+    return result
+
+
+
 class DOWMLLib:
     """A Python client to run DO models on WML"""
 
@@ -149,30 +167,46 @@ class DOWMLLib:
             result.append((name, content))
         return result
 
-    def get_job_details(self, job_id, with_contents=False):
+    def get_job_details(self, job_id, with_contents=None):
         """ Get the job details for the given job
         :param job_id: The id of the job to look for
-        :param with_contents: if True, returns the input and output files,
-        instead of leaving them out for brevity
+        :param with_contents: if 'names', the details returned include
+        the input and output files names. If 'full', the content of these files
+        is included as well.
         :return: The job details
         """
         client = self._get_or_make_client()
         self._logger.debug(f'Fetching output...')
-        job_details = client.deployments.get_job_details(job_id)
-        self._logger.debug(f'Done.')
+        filter = None
         if not with_contents:
+            filter = 'solve_parameters,solve_state,status'
+        job_details = self.client_get_job_details(client, job_id, filter)
+        self._logger.debug(f'Done.')
+        if with_contents != 'full':
             self.filter_large_chunks_from_details(job_details)
         return job_details
+
+    def client_get_job_details(self, client, job_id, filter=None):
+        global the_filter
+        global the_old_params
+        the_filter = filter
+        the_old_params = client._params
+        client._params = new_params
+        try:
+            result = client.deployments.get_job_details(job_id)
+        finally:
+            client._params = the_old_params
+        return result
 
     @staticmethod
     def filter_large_chunks_from_details(job_details):
         """Remove the large blobs (input/output) from the given job_details."""
         try:
             do = job_details['entity']['decision_optimization']
-            for data in do['output_data']:
+            for data in do.get('output_data', []):
                 if 'content' in data:
                     data['content'] = '[not shown]'
-            for data in do['input_data']:
+            for data in do.get('input_data', []):
                 if 'content' in data:
                     data['content'] = '[not shown]'
             if 'latest_engine_activity' in do['solve_state']:
@@ -235,7 +269,7 @@ class DOWMLLib:
         """Wait for the job to finish, return its status and details as a tuple"""
         client = self._get_or_make_client()
         while True:
-            job_details = client.deployments.get_job_details(job_id)
+            job_details = self.client_get_job_details(client, job_id, filter='solve_state,status')
             do = job_details['entity']['decision_optimization']
             status = self._get_job_status_from_details(job_details)
             self._logger.info(f'Job status: {status}')

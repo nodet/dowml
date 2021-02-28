@@ -187,18 +187,19 @@ job is either a job number or a job id. Uses current job if not specified."""
             f.write(content)
 
     def do_details(self, arguments, printer=pprint.pprint):
-        """details [job] [full]
-Prints most of the details for the given job. Add 'full' to get the actual contents of inputs and outputs.
+        """details [job] [names|full]
+Prints most of the details for the given job. Add 'names' to get the names of the
+input and output file names. Add 'full' to get the actual contents of inputs and outputs.
 job is either a job number or a job id. Uses current job if not specified."""
-        full = False
+        with_contents = False
         job_id = None
         for arg in arguments.split():
-            if arg == 'full':
-                full = True
+            if arg == 'full' or arg == 'names':
+                with_contents = arg
             else:
                 job_id = self._number_to_id(arg)
         job_id = self._number_to_id(job_id)
-        details = self.lib.get_job_details(job_id, with_contents=full)
+        details = self.lib.get_job_details(job_id, with_contents=with_contents)
         printer(details, indent=4, width=120)
         self.last_job_id = job_id
 
