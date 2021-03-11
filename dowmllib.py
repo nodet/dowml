@@ -462,9 +462,13 @@ class DOWMLLib:
         client = self._get_or_make_client()
         self._logger.debug(f'Fetching existing spaces...')
         space_name = self.SPACE_NAME
+        # This string is the 'resource_instance_id' in the cos_credentials file
         cos_resource_crn = ('crn:v1:bluemix:public:cloud-object-storage:global'
                             ':a/76260f9157016d38ed1b725fa796f7bc:'
                             '7df9ff41-d7db-4df7-9efa-b6fadcbb1228::')
+        # This one is the CRN for the ML service to use. Open
+        # https://cloud.ibm.com/resources, find the service you want to use,
+        # click anywhere on the line except the name, and copy the CRN
         instance_crn = ('crn:v1:bluemix:public:pm-20:eu-de:a/'
                         '76260f9157016d38ed1b725fa796f7bc:'
                         '031c5823-a324-4f66-a585-c41a5734efe1::')
