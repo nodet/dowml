@@ -40,11 +40,10 @@ def new_params():
     return result
 
 
-
 class DOWMLLib:
     """A Python client to run DO models on WML"""
 
-    ENVIRONMENT_VARIABLE_NAME = 'WML_CREDENTIALS'
+    ENVIRONMENT_VARIABLE_NAME = 'DOWML_CREDENTIALS'
     SPACE_NAME = 'DOWMLClient-space'
     MODEL_NAME = 'DOWMLClient-model'
     MODEL_TYPES = ['cplex', 'cpo', 'opl', 'docplex']
@@ -72,6 +71,14 @@ class DOWMLLib:
         assert type(wml_credentials['apikey']) is str
         assert 'url' in wml_credentials
         assert type(wml_credentials['url']) is str
+        # This string is the 'resource_instance_id' in the cos_credentials file
+        assert 'cos_resource_crn' in wml_credentials
+        assert type(wml_credentials['cos_resource_crn']) is str
+        # This one is the CRN for the ML service to use. Open
+        # https://cloud.ibm.com/resources, find the service you want to use,
+        # click anywhere on the line except the name, and copy the CRN
+        assert 'ml_instance_crn' in wml_credentials
+        assert type(wml_credentials['ml_instance_crn']) is str
         self._logger.debug(f'Credentials have the expected structure.')
 
         self._wml_credentials = wml_credentials
@@ -462,27 +469,17 @@ class DOWMLLib:
         client = self._get_or_make_client()
         self._logger.debug(f'Fetching existing spaces...')
         space_name = self.SPACE_NAME
-        # This string is the 'resource_instance_id' in the cos_credentials file
-        cos_resource_crn = ('crn:v1:bluemix:public:cloud-object-storage:global'
-                            ':a/76260f9157016d38ed1b725fa796f7bc:'
-                            '7df9ff41-d7db-4df7-9efa-b6fadcbb1228::')
-        # This one is the CRN for the ML service to use. Open
-        # https://cloud.ibm.com/resources, find the service you want to use,
-        # click anywhere on the line except the name, and copy the CRN
-        instance_crn = ('crn:v1:bluemix:public:pm-20:eu-de:a/'
-                        '76260f9157016d38ed1b725fa796f7bc:'
-                        '031c5823-a324-4f66-a585-c41a5734efe1::')
         csc = client.spaces.ConfigurationMetaNames
         metadata = {
             csc.NAME: space_name,
             csc.DESCRIPTION: space_name + ' description',
             csc.STORAGE: {
                 "type": "bmcos_object_storage",
-                "resource_crn": cos_resource_crn
+                "resource_crn": self._wml_credentials['cos_resource_crn']
             },
             csc.COMPUTE: {
                 "name": "existing_instance_id",
-                "crn": instance_crn
+                "crn": self._wml_credentials['ml_instance_crn']
             }
         }
 
