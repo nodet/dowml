@@ -7,8 +7,17 @@ A library and command line client to use Decision Optimization on WML
 $ git clone git@github.ibm.com:xavier-nodet/dowml.git
 $ cd dowml
 $ source venv/bin/activate
-$ cat echo "{'apikey': '<apikey>', 'url': 'https://us-south.ml.cloud.ibm.com'}" > wml-cred.txt
-$ python3 dowml.py -w wml-cred.txt
+$ cat tests/test_credentials.txt
+{
+    'apikey': '<apikey>',
+    'url': 'https://us-south.ml.cloud.ibm.com',
+    'cos_resource_crn' = 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9...',
+    'ml_instance_crn': 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f...'
+}
+$ cp tests/test_credentials.txt my-credentials.txt
+$ open my-credentials.txt
+... put your own credentials
+$ python3 dowml.py -w my-credentials.txt
 dowml> solve examples/afiro.mps
 dowml> wait
 dowml> log
@@ -20,29 +29,37 @@ dowml> exit
 The class `DOWMLLib` provides an API to upload Decision Optimization models (CPLEX, CP Optimizer, OPL or docplex) to WML, check their status, and download results.  The script `dowml.py` is an interactive program on top of that library.
 
 In order to use either of them, you need to provide IBM Cloud credentials.
-1. By default, `DOWMLLib` (and therefore the Interactive) look for these credentials in an environment variable named `WML_CREDENTIALS`. This variable shoud have a value looking like `{'apikey': '<apikey>', 'url': 'https://us-south.ml.cloud.ibm.com'}`.
+1. By default, `DOWMLLib` (and therefore the Interactive) look for these credentials in an environment variable named `DOWML_CREDENTIALS`. This variable shoud have a value looking like 
+   ```
+   {
+       'apikey': '<apikey>', 
+       'url': 'https://us-south.ml.cloud.ibm.com', 
+       'cos_resource_crn' = 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9...', 
+       'ml_instance_crn': 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f...'
+   }
+   ```
+   See below for how/where to get these credentials. 
 2. As an alternative, you can specify a file name as argument to `DOWMLLib.__init__`. The credentials will then be read from that file instead of the environment variable. Accordingly, the Interactive has a command line option `-w` (or `--wml-cred-file`) that must be followed by the path of the file.
 
 Here's a sample session:
 ```
 $ python3 dowml.py -h
-usage: dowml.py [-h] [-w WML_CRED_FILE]
+usage: dowml.py [-h] [-w WML_CRED_FILE] [--verbose]
 
 Interactive program for DO on WML
 
 optional arguments:
   -h, --help            show this help message and exit
   -w WML_CRED_FILE, --wml-cred-file WML_CRED_FILE
-                        Name of the file from which to read WML credentials. If not specified, 
-                        credentials are read from environment variable $WML_CREDENTIALS.
-  --verbose, -v         Verbose mode. Causes the program to print debugging messages about its 
-                        progress. Multiple -v options increase the verbosity. The maximum is 3.
+                        Name of the file from which to read WML credentials. If 
+                        not specified, credentials are read from environment 
+                        variable $DOWML_CREDENTIALS.
+  --verbose, -v         Verbose mode. Causes the program to print debugging 
+                        messages about its progress. Multiple -v options increase 
+                        the verbosity. The maximum is 3.
 $
 $
 $ python3 dowml.py -w xavier-wml-cred.txt
-2021-02-16 13:51:14,377 Looking for credentials in file 'xavier-wml-cred.txt'...
-2021-02-16 13:51:14,378 Found credential string.
-2021-02-16 13:51:14,379 Credentials have the expected structure.
 
 Decision Optimization in WML Interactive.
 Submit and manage Decision Optimization models interactively.
@@ -57,41 +74,18 @@ dowml> help
 
 Documented commands (type help <topic>):
 ========================================
-cancel  delete  details  exit  help  jobs  log  output  size  solve  type  wait
+cancel  details  help  log     size   time  wait
+delete  exit     jobs  output  solve  type
 
 dowml> type
 Current model type: cplex. Known types: cplex, cpo, opl, docplex
 dowml> size
 Current size: S. Known sizes: S, M, XL
 dowml> solve examples/afiro.mps
-2021-02-16 13:53:51,057 Creating the connexion...
-2021-02-16 13:53:54,439 Creating the connexion succeeded.  Client version is 1.0.45
-2021-02-16 13:53:54,439 Creating the connexion...
-2021-02-16 13:53:57,127 Creating the connexion succeeded.  Client version is 1.0.45
-2021-02-16 13:53:57,127 Fetching existing spaces...
-2021-02-16 13:53:58,628 Got the list. Looking for space named 'DOWMLClient-space'
-2021-02-16 13:53:58,628 Found it.
-2021-02-16 13:53:58,629 Space id: 15f1a4b1-1e2b-4a60-8b4f-cf540ca65d36
-2021-02-16 13:53:58,629 Setting default space...
-2021-02-16 13:54:04,915 Done.
-2021-02-16 13:54:04,915 Fetching existing spaces...
-2021-02-16 13:54:06,039 Got the list. Looking for space named 'DOWMLClient-space'
-2021-02-16 13:54:06,039 Found it.
-2021-02-16 13:54:06,039 Space id: 15f1a4b1-1e2b-4a60-8b4f-cf540ca65d36
-2021-02-16 13:54:06,039 Setting default space...
-2021-02-16 13:54:10,894 Done.
-2021-02-16 13:54:10,894 Getting deployments...
-2021-02-16 13:54:12,294 Done.
-2021-02-16 13:54:12,294 Got the list. Looking for deployment named 'DOWMLClient-deployment-cplex-S'
-2021-02-16 13:54:12,294 Found it.
-2021-02-16 13:54:12,294 Deployment id: 82d98524-d9de-4bda-bb82-224305ab2c5a
-2021-02-16 13:54:12,295 Creating the job...
-2021-02-16 13:54:16,563 Done. Getting its id...
-2021-02-16 13:54:16,563 Job id: 3746c20a-cbfa-4922-9df7-29652d8f1b89
-Job id: 3746c20a-cbfa-4922-9df7-29652d8f1b89
+Job id: d8645223-41ef-4d53-a227-b223ea311c3c
 dowml> jobs
      #   status     id                                    creation date             inputs
-=>   1:  completed  3746c20a-cbfa-4922-9df7-29652d8f1b89  2021-02-16T12:54:16.051Z  afiro.mps
+=>   1:  completed  d8645223-41ef-4d53-a227-b223ea311c3c  2021-03-12T10:07:47.367Z  afiro.mps
 dowml> log
 2021-02-16 13:54:54,002 Fetching output...
 2021-02-16 13:54:55,305 Done.
@@ -129,22 +123,41 @@ dowml> log
 [2021-02-16T12:54:17Z, INFO] optimal (1)
 dowml> type docplex
 dowml> solve examples/markshare.py examples/markshare1.mps.gz
-2021-02-16 13:57:04,796 Getting deployments...
-2021-02-16 13:57:05,936 Done.
-2021-02-16 13:57:05,936 Got the list. Looking for deployment named 'DOWMLClient-deployment-docplex-S'
-2021-02-16 13:57:05,936 Found it.
-2021-02-16 13:57:05,936 Deployment id: 71653010-db88-4ca9-a8a9-857ee66a93e0
-2021-02-16 13:57:05,938 Creating the job...
-2021-02-16 13:57:10,058 Done. Getting its id...
-2021-02-16 13:57:10,058 Job id: adb0e1f9-d765-45e1-9dc3-b3ad3088fd2f
 Job id: adb0e1f9-d765-45e1-9dc3-b3ad3088fd2f
 dowml> jobs
      #   status     id                                    creation date             inputs
      1:  completed  3746c20a-cbfa-4922-9df7-29652d8f1b89  2021-02-16T12:54:16.051Z  afiro.mps
 =>   2:  completed  adb0e1f9-d765-45e1-9dc3-b3ad3088fd2f  2021-02-16T12:57:09.423Z  markshare.py, markshare1.mps.gz
 dowml> output
-2021-02-16 13:58:20,530 Fetching output...
-2021-02-16 13:58:21,762 Done.
 Storing adb0e1f9-d765-45e1-9dc3-b3ad3088fd2f_solution.json
 Storing adb0e1f9-d765-45e1-9dc3-b3ad3088fd2f_log.txt
 ```
+
+
+## WML credentials
+
+There are four pieces of information that are required in order to submit jobs on WML.
+
+1. The `apikey` is a secret that identifies the IBM Cloud user. You typically create
+   one key per application or service, in order to be able to revoke them individually
+   if needed.
+   To generate such a key, open https://cloud.ibm.com/iam/apikeys, and click the blue 
+   'Create an IBM Cloud API key' on the right.  
+   
+2. The `url` is the base URL for the REST calls to WML.  The possible values are
+   found in https://cloud.ibm.com/apidocs/machine-learning, and depend on which
+   region you want to use.
+   
+3. WML needs to store some data in a Cloud Object Storage instance.  Open 
+   https://cloud.ibm.com/resources and locate the 'Storage' section.  Create an
+   instance of the Cloud Object Storage service if needed. Once it's listed on
+   the resource page, click anywhere on the line for that service, except on its 
+   name.  This will open a pane on the right which lists the CRN.  Click on the
+   symbol at the right to copy this information.
+   
+4. Similarly, you need to identify an instance of Machine Learning service to use
+   to solve your jobs.  In the same page https://cloud.ibm.com/resources, open the
+   'Services' section.  The 'Product' columns tells you the type of service.  If
+   you don't have a 'Machine Learning' instance already, create one.  Then click
+   on the corresponding line anywhere except on the name, and copy the CRN displayed
+   in the pane that open on the right.
