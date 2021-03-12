@@ -297,8 +297,8 @@ if __name__ == '__main__':
     log_levels = [logging.WARNING, logging.INFO, logging.DEBUG, logging.DEBUG]
     # The force parameter is not listed in the arguments to basicConfig
     # noinspection PyArgumentList
-    logging.basicConfig(force=True, format='%(asctime)s %(message)s',
-                        level=log_levels[args.verbose])
+    logging.basicConfig(force=True, format='%(asctime)s %(message)s')
+    logging.getLogger(DOWMLLib.__name__).setLevel(log_levels[args.verbose])
 
     if args.verbose >= 3:
         # Let's report the sending of REST queries

@@ -1,0 +1,4 @@
+jmespath<1.0.0,>=0.7.1
+docutils<0.16,>=0.10
+requests<3.0,>=2.18
+python-dateutil<3.0.0,>=2.1

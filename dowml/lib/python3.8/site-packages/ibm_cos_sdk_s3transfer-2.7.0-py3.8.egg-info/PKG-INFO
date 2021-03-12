@@ -1,0 +1,25 @@
+Metadata-Version: 2.1
+Name: ibm-cos-sdk-s3transfer
+Version: 2.7.0
+Summary: IBM S3 Transfer Manager
+Home-page: https://github.com/ibm/ibm-cos-sdk-python-s3transfer
+Author: IBM
+Author-email: 
+License: Apache License 2.0
+Description: # s3transfer - An IBM COS Transfer Manager for Python
+        
+        `s3transfer` is a Python library for managing IBM COS transfers.
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Natural Language :: English
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Requires-Python: ~=3.5
+Description-Content-Type: text/markdown

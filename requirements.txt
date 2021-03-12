@@ -4,12 +4,14 @@ docutils==0.15.2
 ibm-cos-sdk==2.7.0
 ibm-cos-sdk-core==2.7.0
 ibm-cos-sdk-s3transfer==2.7.0
-ibm-watson-machine-learning==1.0.45
+ibm-watson-machine-learning==1.0.53
 idna==2.10
 jmespath==0.10.0
 lomond==0.3.3
 numpy==1.20.1
+packaging==20.9
 pandas==1.0.5
+pyparsing==2.4.7
 python-dateutil==2.8.1
 pytz==2021.1
 requests==2.25.1
