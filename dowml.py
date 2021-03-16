@@ -289,12 +289,12 @@ if __name__ == '__main__':
     parser.add_argument('--verbose', '-v', action='count', default=0,
                         help=f'Verbose mode.  Causes the program to print debugging '
                              f'messages about its progress.  Multiple -v options '
-                             f'increase the verbosity.  The maximum is 3.')
+                             f'increase the verbosity.  The maximum is 4.')
     args = parser.parse_args()
 
     # Last logging level repeated as many times as necessary to accommodate
     # for levels higher than what logging does (eg REST queries)
-    log_levels = [logging.WARNING, logging.INFO, logging.DEBUG, logging.DEBUG]
+    log_levels = [logging.WARNING, logging.INFO, logging.DEBUG, logging.DEBUG, logging.DEBUG]
     # The force parameter is not listed in the arguments to basicConfig
     # noinspection PyArgumentList
     logging.basicConfig(force=True, format='%(asctime)s %(message)s')
@@ -303,5 +303,14 @@ if __name__ == '__main__':
     if args.verbose >= 3:
         # Let's report the sending of REST queries
         requests.Session.send = mocked_requests_session_send
+
+    if args.verbose >= 4:
+        # Let's print the responses we get
+        logging.getLogger('ibm_watson_machine_learning').setLevel(logging.DEBUG)
+        #logging.getLogger('urllib3').setLevel(logging.DEBUG)
+        #logging.getLogger('requests').setLevel(logging.DEBUG)
+        #logging.getLogger('swagger_client').setLevel(logging.DEBUG)
+        #logging.getLogger('ibm_botocore').setLevel(logging.DEBUG)
+        #logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
 
     main_loop()
