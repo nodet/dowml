@@ -90,6 +90,7 @@ class DOWMLLib:
         self.model_type = self.MODEL_TYPES[0]
         self.tshirt_size = self.TSHIRT_SIZES[0]
         self.timelimit = None
+        self.use_references = False
 
     def _get_or_make_client(self):
         if self._client is not None:
@@ -331,6 +332,12 @@ class DOWMLLib:
         """Create a deployment job (aka a run) and return its id"""
         client = self._get_or_make_client()
         cdd = client.deployments.DecisionOptimizationMetaNames
+
+        cdd_inputdata = cdd.INPUT_DATA
+        cdd_outputdata = cdd.OUTPUT_DATA
+        if self.use_references:
+            cdd_inputdata = cdd.INPUT_DATA_REFERENCES
+            cdd_outputdata = cdd.OUTPUT_DATA_REFERENCES
         solve_payload = {
             cdd.SOLVE_PARAMETERS: {
                 'oaas.logAttachmentName': 'log.txt',
@@ -338,8 +345,8 @@ class DOWMLLib:
                 'oaas.includeInputData': 'false',
                 'oaas.resultFormat': 'JSON'
             },
-            cdd.INPUT_DATA: [],
-            cdd.OUTPUT_DATA: [
+            cdd_inputdata: [],
+            cdd_outputdata: [
                 {'id': '.*\\.*'}
             ]
         }
