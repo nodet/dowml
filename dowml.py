@@ -307,10 +307,10 @@ if __name__ == '__main__':
     if args.verbose >= 4:
         # Let's print the responses we get
         logging.getLogger('ibm_watson_machine_learning').setLevel(logging.DEBUG)
-        #logging.getLogger('urllib3').setLevel(logging.DEBUG)
-        #logging.getLogger('requests').setLevel(logging.DEBUG)
-        #logging.getLogger('swagger_client').setLevel(logging.DEBUG)
-        #logging.getLogger('ibm_botocore').setLevel(logging.DEBUG)
-        #logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
+        logging.getLogger('urllib3').setLevel(logging.DEBUG)
+        logging.getLogger('requests').setLevel(logging.DEBUG)
+        logging.getLogger('swagger_client').setLevel(logging.DEBUG)
+        logging.getLogger('ibm_botocore').setLevel(logging.DEBUG)
+        logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
 
     main_loop()

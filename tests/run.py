@@ -1,6 +1,12 @@
+import logging
+import os
+import pprint
+
 import ibm_boto3
 from ibm_botocore.config import Config
 from ibm_botocore.exceptions import ClientError
+
+from dowmllib import DOWMLLib
 
 COS_ENDPOINT = "https://s3.par01.cloud-object-storage.appdomain.cloud"
 COS_BUCKET = 'dowml-client-bucket'
@@ -22,9 +28,37 @@ def test_cos_connection():
     except Exception as e:
         print(f'Unable to retrieve contents: {e}')
 
+    path = 'foo.lp'
+    basename = os.path.basename(path)
+    cos_client.Object(COS_BUCKET, basename).upload_file(path)
+
+
+NAME = 'foo.lp.gz'
+
+def solve_through_cos_connection():
+    lib = DOWMLLib('xavier-wml-prod.txt')
+    client = lib._get_or_make_client()
+    #print(lib._find_asset_id_by_name('connected-afiro.mps'))
+    #lib.create_asset(NAME)
+    #print(lib._find_asset_id_by_name(NAME))
+    lib.solve(NAME)
+    #pprint.pprint(lib._get_asset_details())
+    pprint.pprint(client.data_assets.ConfigurationMetaNames.get())
+    pprint.pprint(client.data_assets.get_details(lib._find_asset_id_by_name(NAME)))
+    pprint.pprint(client.data_assets.get_details('bace73ec-cf4f-4efb-9ddb-4180cfba75cd'))
+
 
 def main():
-    test_cos_connection()
+    logging.basicConfig(force=True, format='%(asctime)s %(message)s', level=logging.DEBUG)
+    logging.getLogger('ibm_watson_machine_learning').setLevel(logging.DEBUG)
+    logging.getLogger('urllib3').setLevel(logging.DEBUG)
+    logging.getLogger('requests').setLevel(logging.DEBUG)
+    logging.getLogger('swagger_client').setLevel(logging.DEBUG)
+    logging.getLogger('ibm_botocore').setLevel(logging.DEBUG)
+    logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
+
+    #test_cos_connection()
+    solve_through_cos_connection()
 
 
 if __name__ == '__main__':

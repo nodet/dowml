@@ -1,10 +1,12 @@
 import base64
 import logging
 import os
+import pprint
 import tempfile
 from collections import namedtuple
 from time import sleep
 
+import requests
 from ibm_watson_machine_learning import APIClient
 
 
@@ -21,6 +23,9 @@ class InvalidCredentials(Error):
 class SimilarNamesInJob(Error):
     """A job can't have two input files with the same name, irrespective of path"""
     pass
+
+class ConnectionIdNotFound(Error):
+    """Using Cloud Object Storage requires a connection, but none was found"""
 
 
 #
@@ -81,6 +86,12 @@ class DOWMLLib:
         assert type(wml_credentials['ml_instance_crn']) is str
         self._logger.debug(f'Credentials have the expected structure.')
 
+        # This one is not required to create the APIClient, but can be used
+        # to get data through Cloud Object Storage or any other type of
+        # external storage.
+        if 'connection_id' in wml_credentials:
+            self._logger.debug(f'And they contain a connection id.')
+
         self._wml_credentials = wml_credentials
 
         # We don't initialize the client at this time, because this is an
@@ -90,7 +101,7 @@ class DOWMLLib:
         self.model_type = self.MODEL_TYPES[0]
         self.tshirt_size = self.TSHIRT_SIZES[0]
         self.timelimit = None
-        self.use_references = False
+        self.use_references = True
 
     def _get_or_make_client(self):
         if self._client is not None:
@@ -271,8 +282,15 @@ class DOWMLLib:
 
     @staticmethod
     def _get_input_names_from_details(job_details):
-        inputs = job_details['entity']['decision_optimization']['input_data']
+        do = job_details['entity']['decision_optimization']
+        inputs = do.get('input_data', [])
         names = [i['id'] for i in inputs]
+        inputs = do.get('input_data_references', [])
+        for i in inputs:
+            if 'id' in i:
+                names.append('*' + i['id'])
+            else:
+                names.append('Unknown')
         return names
 
     def wait_for_job_end(self, job_id, print_activity=False):
@@ -337,7 +355,7 @@ class DOWMLLib:
         cdd_outputdata = cdd.OUTPUT_DATA
         if self.use_references:
             cdd_inputdata = cdd.INPUT_DATA_REFERENCES
-            cdd_outputdata = cdd.OUTPUT_DATA_REFERENCES
+            # cdd_outputdata = cdd.OUTPUT_DATA_REFERENCES
         solve_payload = {
             cdd.SOLVE_PARAMETERS: {
                 'oaas.logAttachmentName': 'log.txt',
@@ -360,12 +378,25 @@ class DOWMLLib:
             if basename in names:
                 raise SimilarNamesInJob(basename)
             names.append(basename)
-            input_data = {
-                'id': basename,
-                'content': self.get_file_as_data(path)
-            }
-            solve_payload[cdd.INPUT_DATA].append(input_data)
+            if not self.use_references:
+                input_data = {
+                    'id': basename,
+                    'content': self.get_file_as_data(path)
+                }
+            else:
+                data_asset_id = self._find_asset_id_by_name(path)
+                if not data_asset_id:
+                    data_asset_id = self.create_asset(path)
+                input_data = {
+                    'id': basename,
+                    "type": "data_asset",
+                    "location": {
+                        "href": "/v2/assets/" + data_asset_id + "?space_id=" + self._space_id
+                    }
+                }
+            solve_payload[cdd_inputdata].append(input_data)
         self._logger.debug(f'Creating the job...')
+        self._logger.debug(repr(solve_payload))
         job_details = client.deployments.create_job(deployment_id, solve_payload)
         self._logger.debug(f'Done. Getting its id...')
         job_id = client.deployments.get_job_uid(job_details)
@@ -522,3 +553,100 @@ class DOWMLLib:
         client = APIClient(self._wml_credentials)
         self._logger.info(f'Creating the connexion succeeded.  Client version is {client.version}')
         return client
+
+    def _get_connection_details(self):
+        client = self._get_or_make_client()
+        if client.WSD:
+            header_param = client._get_headers(wsdconnection_api_req=True)
+        else:
+            header_param = client._get_headers()
+        if not client.ICP_30 and not client.ICP and not client.WSD:
+            response = requests.get(client.connections._href_definitions.get_connections_href(),
+                                    params=client._params(),
+                                    headers=header_param)
+        else:
+            response = requests.get(client.connections._href_definitions.get_connections_href(),
+                                    params=client._params(),
+                                    headers=header_param, verify=False)
+        client.connections._handle_response(200, u'list datasource type', response)
+        datasource_details = client.connections._handle_response(200, u'list datasource types', response)['resources']
+        return datasource_details
+
+    def _get_asset_details(self):
+        client = self._get_or_make_client()
+        href = client.data_assets._href_definitions.get_search_asset_href()
+        data = {
+                "query": "*:*"
+        }
+        if not client.data_assets._ICP and not client.WSD:
+            response = requests.post(href, params=self._client._params(), headers=self._client._get_headers(),json=data)
+        else:
+            response = requests.post(href, params=self._client._params(), headers=self._client._get_headers(),json=data, verify=False)
+        client.data_assets._handle_response(200, u'list assets', response)
+        asset_details = client.data_assets._handle_response(200, u'list assets', response)["results"]
+        return asset_details
+
+    def _find_connection_to_use(self):
+        connection_id = self._wml_credentials.get('connection_id', '')
+        if connection_id:
+            print(f'Found the connection to use in the WML credentials: {connection_id}')
+            return connection_id
+        client = self._get_or_make_client()
+        connections = self._get_connection_details()
+        for c in connections:
+            if c['entity']['name'] == 'DOWMLClient-connection':
+                connection_id = c['metadata']['asset_id']
+        return connection_id
+
+    def get_connections(self):
+        connection_id = self._find_connection_to_use()
+        if not connection_id:
+            print(f'No connection named "DOWMLClient-connection" found, and no \'connection_id\' in the WML credentials.')
+            return
+        print(f'Found the connection to use: {connection_id}')
+        client = self._get_or_make_client()
+        connection = client.connections.get_details(connection_id)
+        return connection
+
+    def get_data_assets(self):
+        client = self._get_or_make_client()
+        assets = self._get_asset_details()
+        return assets
+
+    def _find_asset_id_by_name(self, name):
+        assets = self.get_data_assets()
+        for asset in assets:
+            metadata = asset['metadata']
+            if metadata['name'] == name:
+                return metadata['asset_id']
+        return None
+
+    def create_asset(self, name):
+        connection_id = self._find_connection_to_use()
+        if not connection_id:
+            raise ConnectionIdNotFound
+        client = self._get_or_make_client()
+        cdaCMN = client.data_assets.ConfigurationMetaNames
+        metadata = {
+            cdaCMN.NAME: name,
+            cdaCMN.DESCRIPTION: 'Created by DOWMLClient',
+            cdaCMN.CONNECTION_ID: connection_id,
+            cdaCMN.DATA_CONTENT_NAME: name,
+        }
+        # 'columns': [{'name': '\\Problem name',
+        #                                         'type': {'length': 1024.0,
+        #                                                  'nullable': True,
+        #                                                  'scale': 0.0,
+        #                                                  'signed': False,
+        #                                                  'type': 'varchar'}},
+        #                                        {'name': ' infeasible.lp',
+        #                                         'type': {'length': 1024.0,
+        #                                                  'nullable': True,
+        #                                                  'scale': 0.0,
+        #                                                  'signed': False,
+        #                                                  'type': 'varchar'}}],
+        #                            'dataset': True,
+        #asset_details = client.data_assets.store(meta_props=metadata)
+        asset_details = client.data_assets.create(name, name)
+        pprint.pprint(asset_details)
+        return asset_details['metadata']['guid']
