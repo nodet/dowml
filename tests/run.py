@@ -36,16 +36,16 @@ def test_cos_connection():
 NAME = 'foo.lp.gz'
 
 def solve_through_cos_connection():
-    lib = DOWMLLib('xavier-wml-prod.txt')
+    lib = DOWMLLib('xavier-wml-dev.txt')
     client = lib._get_or_make_client()
     #print(lib._find_asset_id_by_name('connected-afiro.mps'))
     #lib.create_asset(NAME)
     #print(lib._find_asset_id_by_name(NAME))
-    lib.solve(NAME)
+    #lib.solve('gui-foo.sav')
+    lib.solve('foo.sav')
     #pprint.pprint(lib._get_asset_details())
-    pprint.pprint(client.data_assets.ConfigurationMetaNames.get())
-    pprint.pprint(client.data_assets.get_details(lib._find_asset_id_by_name(NAME)))
-    pprint.pprint(client.data_assets.get_details('bace73ec-cf4f-4efb-9ddb-4180cfba75cd'))
+    pprint.pprint(client.data_assets.get_details(lib._find_asset_id_by_name('foo.sav')))
+    #pprint.pprint(client.data_assets.get_details(lib._find_asset_id_by_name('gui-foo.sav')))
 
 
 def main():

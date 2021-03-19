@@ -587,26 +587,20 @@ class DOWMLLib:
         return asset_details
 
     def _find_connection_to_use(self):
+        client = self._get_or_make_client()
         connection_id = self._wml_credentials.get('connection_id', '')
         if connection_id:
             print(f'Found the connection to use in the WML credentials: {connection_id}')
-            return connection_id
-        client = self._get_or_make_client()
+            connection = client.connections.get_details(connection_id)
+            return connection_id, connection['entity']['properties']['bucket']
         connections = self._get_connection_details()
+        bucket = None
         for c in connections:
             if c['entity']['name'] == 'DOWMLClient-connection':
                 connection_id = c['metadata']['asset_id']
-        return connection_id
-
-    def get_connections(self):
-        connection_id = self._find_connection_to_use()
-        if not connection_id:
-            print(f'No connection named "DOWMLClient-connection" found, and no \'connection_id\' in the WML credentials.')
-            return
-        print(f'Found the connection to use: {connection_id}')
-        client = self._get_or_make_client()
-        connection = client.connections.get_details(connection_id)
-        return connection
+                bucket = c['entity']['properties']['bucket']
+                pprint.pprint(c)
+        return connection_id, bucket
 
     def get_data_assets(self):
         client = self._get_or_make_client()
@@ -622,7 +616,7 @@ class DOWMLLib:
         return None
 
     def create_asset(self, name):
-        connection_id = self._find_connection_to_use()
+        connection_id, bucket_id = self._find_connection_to_use()
         if not connection_id:
             raise ConnectionIdNotFound
         client = self._get_or_make_client()
@@ -631,7 +625,7 @@ class DOWMLLib:
             cdaCMN.NAME: name,
             cdaCMN.DESCRIPTION: 'Created by DOWMLClient',
             cdaCMN.CONNECTION_ID: connection_id,
-            cdaCMN.DATA_CONTENT_NAME: name,
+            cdaCMN.DATA_CONTENT_NAME: f'/{bucket_id}/{name}',
         }
         # 'columns': [{'name': '\\Problem name',
         #                                         'type': {'length': 1024.0,
@@ -646,7 +640,7 @@ class DOWMLLib:
         #                                                  'signed': False,
         #                                                  'type': 'varchar'}}],
         #                            'dataset': True,
-        #asset_details = client.data_assets.store(meta_props=metadata)
-        asset_details = client.data_assets.create(name, name)
+        asset_details = client.data_assets.store(meta_props=metadata)
+        #asset_details = client.data_assets.create(name, name)
         pprint.pprint(asset_details)
         return asset_details['metadata']['guid']
