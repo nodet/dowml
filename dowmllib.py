@@ -424,9 +424,9 @@ class DOWMLLib:
                                         )
         files = cos_client.Bucket(COS_BUCKET).objects.all()
         already_exists = False
+        self._logger.debug(f'Checking the files already in bucket: {COS_BUCKET}')
         try:
             for file in files:
-                self._logger.debug(f'Checking the files already in bucket: {COS_BUCKET}')
                 self._logger.debug(f'Item: {file.key} ({file.size} bytes).')
                 if file.key == basename:
                     already_exists = True
@@ -634,17 +634,25 @@ class DOWMLLib:
         client = self._get_or_make_client()
         connection_id = self._wml_credentials.get('connection_id', '')
         if connection_id:
-            print(f'Found the connection to use in the WML credentials: {connection_id}')
-            connection = client.connections.get_details(connection_id)
-            return connection_id, connection['entity']['properties']['bucket']
-        connections = self._get_connection_details()
-        bucket = None
-        for c in connections:
-            if c['entity']['name'] == 'DOWMLClient-connection':
-                connection_id = c['metadata']['asset_id']
-                bucket = c['entity']['properties']['bucket']
-                pprint.pprint(c)
-        return connection_id, bucket
+            self._logger.debug(f'Found the connection id to use in the WML credentials: {connection_id}')
+        else:
+            name = 'DOWMLClient-connection'
+            self._logger.debug(f'Looking for a connection named "{name}"...')
+            connections = self._get_connection_details()
+            for c in connections:
+                if c['entity']['name'] == name:
+                    connection_id = c['metadata']['asset_id']
+        if not connection_id:
+            self._logger.error(f'Could not find a Connection to get the data!')
+            raise ConnectionIdNotFound
+        connection = client.connections.get_details(connection_id)
+        pprint.pprint(connection)
+        DataConnection = namedtuple('DataConnection', ['connection_id', 'bucket_name', 'endpoint_url'])
+        dc = DataConnection(connection_id,
+                            connection['entity']['properties']['bucket'],
+                            connection['entity']['properties']['url'],
+                            )
+        return dc
 
     def get_data_assets(self):
         client = self._get_or_make_client()
@@ -660,7 +668,7 @@ class DOWMLLib:
         return None
 
     def create_asset(self, name):
-        connection_id, bucket_id = self._find_connection_to_use()
+        connection_id, bucket_id, _ = self._find_connection_to_use()
         if not connection_id:
             raise ConnectionIdNotFound
         client = self._get_or_make_client()
