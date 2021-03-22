@@ -6,7 +6,10 @@ import tempfile
 from collections import namedtuple
 from time import sleep
 
+import ibm_boto3
 import requests
+from ibm_botocore.config import Config
+from ibm_botocore.exceptions import ClientError
 from ibm_watson_machine_learning import APIClient
 
 
@@ -384,9 +387,12 @@ class DOWMLLib:
                     'content': self.get_file_as_data(path)
                 }
             else:
-                data_asset_id = self._find_asset_id_by_name(basename)
-                if not data_asset_id:
-                    data_asset_id = self.create_asset(basename)
+                # FIXME: This should not be hard-coded
+                COS_ENDPOINT = "https://s3.par01.cloud-object-storage.appdomain.cloud"
+                COS_BUCKET = 'dowml-client-bucket'
+                self._upload_on_COS_if_necessary(COS_BUCKET, COS_ENDPOINT, basename, path)
+
+                data_asset_id = self._create_data_asset_if_necessary(basename)
                 input_data = {
                     'id': basename,
                     "type": "data_asset",
@@ -401,6 +407,37 @@ class DOWMLLib:
         self._logger.debug(f'Done. Getting its id...')
         job_id = client.deployments.get_job_uid(job_details)
         return job_id
+
+    def _create_data_asset_if_necessary(self, basename):
+        self._logger.debug(f'Checking whether a WML "connected data" asset named "{basename}" already exists.')
+        data_asset_id = self._find_asset_id_by_name(basename)
+        if not data_asset_id:
+            self._logger.debug(f'Not found any. Creating one...')
+            data_asset_id = self.create_asset(basename)
+            self._logger.debug(f'Done.')
+        return data_asset_id
+
+    def _upload_on_COS_if_necessary(self, COS_BUCKET, COS_ENDPOINT, basename, path):
+        cos_client = ibm_boto3.resource("s3",
+                                        config=Config(signature_version="oauth"),
+                                        endpoint_url=COS_ENDPOINT,
+                                        )
+        files = cos_client.Bucket(COS_BUCKET).objects.all()
+        already_exists = False
+        try:
+            for file in files:
+                self._logger.debug(f'Checking the files already in bucket: {COS_BUCKET}')
+                self._logger.debug(f'Item: {file.key} ({file.size} bytes).')
+                if file.key == basename:
+                    already_exists = True
+        except ClientError as be:
+            self._logger.error(f'CLIENT ERROR: {be}')
+        except Exception as e:
+            self._logger.error(f'Unable to retrieve contents: {e}')
+        if not already_exists:
+            self._logger.info(f'Uploading {path} to {COS_BUCKET}/{basename}...')
+            cos_client.Object(COS_BUCKET, basename).upload_file(path)
+            self._logger.info(f'Done.')
 
     def _get_deployment_id(self):
         """Create deployment if doesn't exist already, return its id"""

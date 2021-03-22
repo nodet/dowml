@@ -15,23 +15,31 @@ COS_BUCKET = 'dowml-client-bucket'
 def test_cos_connection():
     ibm_boto3.turn_debug_on()
 
+    path = 'examples/more/neos-4332810-sesia.mps.gz'
+    basename = os.path.basename(path)
+
     cos_client = ibm_boto3.resource("s3",
                                     config=Config(signature_version="oauth"),
                                     endpoint_url=COS_ENDPOINT,
                                     )
     files = cos_client.Bucket(COS_BUCKET).objects.all()
+    already_exists = False
     try:
         for file in files:
             print(f'Item: {file.key} ({file.size} bytes).')
+            if file.key == basename:
+                already_exists = True
     except ClientError as be:
         print(f'CLIENT ERROR: {be}')
     except Exception as e:
         print(f'Unable to retrieve contents: {e}')
 
-    path = 'foo.lp'
-    basename = os.path.basename(path)
-    cos_client.Object(COS_BUCKET, basename).upload_file(path)
-
+    if not already_exists:
+        print(f'Uploading {path} to {COS_BUCKET}/{basename}...')
+        cos_client.Object(COS_BUCKET, basename).upload_file(path)
+        print(f'Done.')
+    else:
+        print(f'The file already exists!')
 
 NAME = 'foo.lp.gz'
 
@@ -57,8 +65,8 @@ def main():
     logging.getLogger('ibm_botocore').setLevel(logging.DEBUG)
     logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
 
-    #test_cos_connection()
-    solve_through_cos_connection()
+    test_cos_connection()
+    #solve_through_cos_connection()
 
 
 if __name__ == '__main__':
