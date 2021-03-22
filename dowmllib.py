@@ -384,9 +384,9 @@ class DOWMLLib:
                     'content': self.get_file_as_data(path)
                 }
             else:
-                data_asset_id = self._find_asset_id_by_name(path)
+                data_asset_id = self._find_asset_id_by_name(basename)
                 if not data_asset_id:
-                    data_asset_id = self.create_asset(path)
+                    data_asset_id = self.create_asset(basename)
                 input_data = {
                     'id': basename,
                     "type": "data_asset",
@@ -579,9 +579,16 @@ class DOWMLLib:
                 "query": "*:*"
         }
         if not client.data_assets._ICP and not client.WSD:
-            response = requests.post(href, params=self._client._params(), headers=self._client._get_headers(),json=data)
+            response = requests.post(href,
+                                     params=self._client._params(),
+                                     headers=self._client._get_headers(),
+                                     json=data)
         else:
-            response = requests.post(href, params=self._client._params(), headers=self._client._get_headers(),json=data, verify=False)
+            response = requests.post(href,
+                                     params=self._client._params(),
+                                     headers=self._client._get_headers(),
+                                     json=data,
+                                     verify=False)
         client.data_assets._handle_response(200, u'list assets', response)
         asset_details = client.data_assets._handle_response(200, u'list assets', response)["results"]
         return asset_details
@@ -640,7 +647,9 @@ class DOWMLLib:
         #                                                  'signed': False,
         #                                                  'type': 'varchar'}}],
         #                            'dataset': True,
+        # FIXME: what about actually uploading the files to COS?
         asset_details = client.data_assets.store(meta_props=metadata)
+        # FIXME: should there be a mode that uses this kind of asset below?
         #asset_details = client.data_assets.create(name, name)
         pprint.pprint(asset_details)
         return asset_details['metadata']['guid']
