@@ -387,11 +387,7 @@ class DOWMLLib:
                     'content': self.get_file_as_data(path)
                 }
             else:
-                # FIXME: This should not be hard-coded
-                COS_ENDPOINT = "https://s3.par01.cloud-object-storage.appdomain.cloud"
-                COS_BUCKET = 'dowml-client-bucket'
-                self._upload_on_COS_if_necessary(COS_BUCKET, COS_ENDPOINT, basename, path)
-
+                self._upload_on_COS_if_necessary(basename, path)
                 data_asset_id = self._create_data_asset_if_necessary(basename)
                 input_data = {
                     'id': basename,
@@ -417,14 +413,15 @@ class DOWMLLib:
             self._logger.debug(f'Done.')
         return data_asset_id
 
-    def _upload_on_COS_if_necessary(self, COS_BUCKET, COS_ENDPOINT, basename, path):
+    def _upload_on_COS_if_necessary(self, basename, path):
+        connection_id, bucket_id, endpoint_url = self._find_connection_to_use()
         cos_client = ibm_boto3.resource("s3",
                                         config=Config(signature_version="oauth"),
-                                        endpoint_url=COS_ENDPOINT,
+                                        endpoint_url=endpoint_url,
                                         )
-        files = cos_client.Bucket(COS_BUCKET).objects.all()
+        files = cos_client.Bucket(bucket_id).objects.all()
         already_exists = False
-        self._logger.debug(f'Checking the files already in bucket: {COS_BUCKET}')
+        self._logger.debug(f'Checking the files already in bucket {bucket_id} through enpoint {endpoint_url}')
         try:
             for file in files:
                 self._logger.debug(f'Item: {file.key} ({file.size} bytes).')
@@ -434,9 +431,11 @@ class DOWMLLib:
             self._logger.error(f'CLIENT ERROR: {be}')
         except Exception as e:
             self._logger.error(f'Unable to retrieve contents: {e}')
-        if not already_exists:
-            self._logger.info(f'Uploading {path} to {COS_BUCKET}/{basename}...')
-            cos_client.Object(COS_BUCKET, basename).upload_file(path)
+        if already_exists:
+            self._logger.debug(f'Found {bucket_id}/{basename}.')
+        else:
+            self._logger.info(f'Uploading {path} to {bucket_id}/{basename}...')
+            cos_client.Object(bucket_id, basename).upload_file(path)
             self._logger.info(f'Done.')
 
     def _get_deployment_id(self):
@@ -646,7 +645,6 @@ class DOWMLLib:
             self._logger.error(f'Could not find a Connection to get the data!')
             raise ConnectionIdNotFound
         connection = client.connections.get_details(connection_id)
-        pprint.pprint(connection)
         DataConnection = namedtuple('DataConnection', ['connection_id', 'bucket_name', 'endpoint_url'])
         dc = DataConnection(connection_id,
                             connection['entity']['properties']['bucket'],
