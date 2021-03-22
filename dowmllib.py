@@ -106,6 +106,17 @@ class DOWMLLib:
         self.timelimit = None
         self.use_references = True
 
+    def _create_connexion(self):
+        """Create the Python APIClient instance"""
+        # FIXME: should assert the condition itself
+        if self._client is not None:
+            assert "This should never be true"
+            return
+        self._logger.debug(f'Creating the connexion...')
+        client = APIClient(self._wml_credentials)
+        self._logger.info(f'Creating the connexion succeeded.  Client version is {client.version}')
+        return client
+
     def _get_or_make_client(self):
         if self._client is not None:
             return self._client
@@ -326,6 +337,7 @@ class DOWMLLib:
 
     @staticmethod
     def get_file_as_data(path):
+        """Returns the base-64 encoded content of a file"""
         with open(path, 'rb') as f:
             data = f.read()
         data = base64.b64encode(data)
@@ -387,7 +399,7 @@ class DOWMLLib:
                     'content': self.get_file_as_data(path)
                 }
             else:
-                self._upload_on_COS_if_necessary(basename, path)
+                self._upload_on_COS_if_necessary(path)
                 data_asset_id = self._create_data_asset_if_necessary(basename)
                 input_data = {
                     'id': basename,
@@ -404,26 +416,30 @@ class DOWMLLib:
         job_id = client.deployments.get_job_uid(job_details)
         return job_id
 
-    def _upload_on_COS_if_necessary(self, basename, path):
-        connection_id, bucket_id, endpoint_url = self._find_connection_to_use()
+    def _upload_on_COS_if_necessary(self, path):
+        """Upload the specified name on Cloud Object Storage
+
+        The file is uploaded in the bucket that the WS connection refers to. The
+        name of the object is the name of the file (without the path)."""
+        _, bucket_id, endpoint_url = self._find_connection_to_use()
         cos_client = ibm_boto3.resource("s3",
                                         config=Config(signature_version="oauth"),
                                         endpoint_url=endpoint_url,
                                         )
         files = cos_client.Bucket(bucket_id).objects.all()
-        already_exists = False
-        self._logger.debug(f'Checking the files already in bucket {bucket_id} through enpoint {endpoint_url}')
+        basename = os.path.basename(path)
+        file_size = -1
+        self._logger.debug(f'Checking whether the files already in bucket {bucket_id} through endpoint {endpoint_url}')
         try:
             for file in files:
-                self._logger.debug(f'Item: {file.key} ({file.size} bytes).')
                 if file.key == basename:
-                    already_exists = True
+                    file_size = file.size
         except ClientError as be:
             self._logger.error(f'CLIENT ERROR: {be}')
         except Exception as e:
             self._logger.error(f'Unable to retrieve contents: {e}')
-        if already_exists:
-            self._logger.debug(f'Found {bucket_id}/{basename}.')
+        if file_size >= 0:
+            self._logger.debug(f'Found {bucket_id}/{basename} ({file_size} bytes).')
         else:
             self._logger.info(f'Uploading {path} to {bucket_id}/{basename}...')
             cos_client.Object(bucket_id, basename).upload_file(path)
@@ -572,16 +588,12 @@ class DOWMLLib:
         self._space_id = space_id
         return space_id
 
-    def _create_connexion(self):
-        if self._client is not None:
-            assert "This should never be true"
-            return
-        self._logger.debug(f'Creating the connexion...')
-        client = APIClient(self._wml_credentials)
-        self._logger.info(f'Creating the connexion succeeded.  Client version is {client.version}')
-        return client
-
     def _get_connection_details(self):
+        """This function returns the list of all the connections in the space
+
+        This function should have been in the wml Python client, but unfortunately,
+        it's not.  At least, not as of version 1.0.53.
+        C.f. https://github.ibm.com/NGP-TWC/ml-planning/issues/21577#issuecomment-28950762"""
         client = self._get_or_make_client()
         if client.WSD:
             header_param = client._get_headers(wsdconnection_api_req=True)
@@ -599,28 +611,25 @@ class DOWMLLib:
         datasource_details = client.connections._handle_response(200, u'list datasource types', response)['resources']
         return datasource_details
 
-    def _get_asset_details(self):
-        client = self._get_or_make_client()
-        href = client.data_assets._href_definitions.get_search_asset_href()
-        data = {
-                "query": "*:*"
-        }
-        if not client.data_assets._ICP and not client.WSD:
-            response = requests.post(href,
-                                     params=self._client._params(),
-                                     headers=self._client._get_headers(),
-                                     json=data)
-        else:
-            response = requests.post(href,
-                                     params=self._client._params(),
-                                     headers=self._client._get_headers(),
-                                     json=data,
-                                     verify=False)
-        client.data_assets._handle_response(200, u'list assets', response)
-        asset_details = client.data_assets._handle_response(200, u'list assets', response)["results"]
-        return asset_details
-
     def _find_connection_to_use(self):
+        """Returns information about the connection to use
+
+        A Watson Studio data asset doesn't (or doesn't necessarily) contain the
+        information necessary to actually get the data from the external service.
+        It actually has the id of a 'connection'. That connection holds all the
+        information (API key, secret key, etc).
+
+        This function looks for a suitable connection in the WS space.  It can be
+        either a connection the id of which was given in the DOWML credentials,
+        or one that simply exists in the space and is named
+        'DOWMLClient-connection'.
+
+        The information from this connection is also used to check whether the
+        model to solve already exists on Cloud Object Storage, and upload it there
+        if that's not the case.
+
+        This function returns a named tuple: 'connection_id', 'bucket_name',
+        'endpoint_url'. """
         client = self._get_or_make_client()
         connection_id = self._wml_credentials.get('connection_id', '')
         if connection_id:
@@ -643,12 +652,40 @@ class DOWMLLib:
                             )
         return dc
 
+    def _get_asset_details(self):
+        """This function returns the list of all the data assets in the space
+
+        This function should have been in the wml Python client, but unfortunately,
+        it's not.  At least, not as of version 1.0.53.
+        C.f. https://github.ibm.com/NGP-TWC/ml-planning/issues/21577#issuecomment-29056420"""
+        client = self._get_or_make_client()
+        href = client.data_assets._href_definitions.get_search_asset_href()
+        data = {
+                "query": "*:*"
+        }
+        if not client.data_assets._ICP and not client.WSD:
+            response = requests.post(href,
+                                     params=self._client._params(),
+                                     headers=self._client._get_headers(),
+                                     json=data)
+        else:
+            response = requests.post(href,
+                                     params=self._client._params(),
+                                     headers=self._client._get_headers(),
+                                     json=data,
+                                     verify=False)
+        client.data_assets._handle_response(200, u'list assets', response)
+        asset_details = client.data_assets._handle_response(200, u'list assets', response)["results"]
+        return asset_details
+
     def get_data_assets(self):
+        """Returns the list of existing data assets in the Watson Studio space"""
         client = self._get_or_make_client()
         assets = self._get_asset_details()
         return assets
 
     def _find_asset_id_by_name(self, name):
+        """Looks for a data asset with the given name, returns its id, or None"""
         assets = self.get_data_assets()
         for asset in assets:
             metadata = asset['metadata']
@@ -657,6 +694,13 @@ class DOWMLLib:
         return None
 
     def create_asset(self, name):
+        """Create a data asset with the given name
+
+        A Watson Studio data asset is an entity that mimicks a file.  It actually
+        connects to some external service to fetch the data.  It does so using
+        a Connection.  In this case, we create an asset that reads the object in
+        Cloud Object Storage.  The connection gives us the information about
+        the bucket to use and the endpoint to contact to read the object."""
         connection_id, bucket_id, _ = self._find_connection_to_use()
         if not connection_id:
             raise ConnectionIdNotFound
@@ -675,11 +719,14 @@ class DOWMLLib:
         return asset_details['metadata']['guid']
 
     def _create_data_asset_if_necessary(self, basename):
+        """Create a data asset if it doesn't exist already"""
         self._logger.debug(f'Checking whether a WML "connected data" asset named "{basename}" already exists.')
         data_asset_id = self._find_asset_id_by_name(basename)
         if not data_asset_id:
             self._logger.debug(f'Not found any. Creating one...')
             data_asset_id = self.create_asset(basename)
             self._logger.debug(f'Done.')
+        else:
+            self._logger.debug(f'Yes, with id {data_asset_id}.')
         return data_asset_id
 
