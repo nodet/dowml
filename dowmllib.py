@@ -404,15 +404,6 @@ class DOWMLLib:
         job_id = client.deployments.get_job_uid(job_details)
         return job_id
 
-    def _create_data_asset_if_necessary(self, basename):
-        self._logger.debug(f'Checking whether a WML "connected data" asset named "{basename}" already exists.')
-        data_asset_id = self._find_asset_id_by_name(basename)
-        if not data_asset_id:
-            self._logger.debug(f'Not found any. Creating one...')
-            data_asset_id = self.create_asset(basename)
-            self._logger.debug(f'Done.')
-        return data_asset_id
-
     def _upload_on_COS_if_necessary(self, basename, path):
         connection_id, bucket_id, endpoint_url = self._find_connection_to_use()
         cos_client = ibm_boto3.resource("s3",
@@ -677,22 +668,18 @@ class DOWMLLib:
             cdaCMN.CONNECTION_ID: connection_id,
             cdaCMN.DATA_CONTENT_NAME: f'/{bucket_id}/{name}',
         }
-        # 'columns': [{'name': '\\Problem name',
-        #                                         'type': {'length': 1024.0,
-        #                                                  'nullable': True,
-        #                                                  'scale': 0.0,
-        #                                                  'signed': False,
-        #                                                  'type': 'varchar'}},
-        #                                        {'name': ' infeasible.lp',
-        #                                         'type': {'length': 1024.0,
-        #                                                  'nullable': True,
-        #                                                  'scale': 0.0,
-        #                                                  'signed': False,
-        #                                                  'type': 'varchar'}}],
-        #                            'dataset': True,
-        # FIXME: what about actually uploading the files to COS?
         asset_details = client.data_assets.store(meta_props=metadata)
         # FIXME: should there be a mode that uses this kind of asset below?
         #asset_details = client.data_assets.create(name, name)
         pprint.pprint(asset_details)
         return asset_details['metadata']['guid']
+
+    def _create_data_asset_if_necessary(self, basename):
+        self._logger.debug(f'Checking whether a WML "connected data" asset named "{basename}" already exists.')
+        data_asset_id = self._find_asset_id_by_name(basename)
+        if not data_asset_id:
+            self._logger.debug(f'Not found any. Creating one...')
+            data_asset_id = self.create_asset(basename)
+            self._logger.debug(f'Done.')
+        return data_asset_id
+
