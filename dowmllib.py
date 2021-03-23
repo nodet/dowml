@@ -104,7 +104,7 @@ class DOWMLLib:
         self.model_type = self.MODEL_TYPES[0]
         self.tshirt_size = self.TSHIRT_SIZES[0]
         self.timelimit = None
-        self.use_references = True
+        self.inline = True
 
     def _create_connexion(self):
         """Create the Python APIClient instance"""
@@ -368,7 +368,7 @@ class DOWMLLib:
 
         cdd_inputdata = cdd.INPUT_DATA
         cdd_outputdata = cdd.OUTPUT_DATA
-        if self.use_references:
+        if not self.inline:
             cdd_inputdata = cdd.INPUT_DATA_REFERENCES
             # cdd_outputdata = cdd.OUTPUT_DATA_REFERENCES
         solve_payload = {
@@ -393,7 +393,7 @@ class DOWMLLib:
             if basename in names:
                 raise SimilarNamesInJob(basename)
             names.append(basename)
-            if not self.use_references:
+            if self.inline:
                 input_data = {
                     'id': basename,
                     'content': self.get_file_as_data(path)
@@ -429,7 +429,7 @@ class DOWMLLib:
         files = cos_client.Bucket(bucket_id).objects.all()
         basename = os.path.basename(path)
         file_size = -1
-        self._logger.debug(f'Checking whether the files already in bucket {bucket_id} through endpoint {endpoint_url}')
+        self._logger.debug(f'Checking files already in bucket {bucket_id} through endpoint {endpoint_url}')
         try:
             for file in files:
                 if file.key == basename:
@@ -644,12 +644,14 @@ class DOWMLLib:
         if not connection_id:
             self._logger.error(f'Could not find a Connection to get the data!')
             raise ConnectionIdNotFound
+        self._logger.debug(f'Found one: {connection_id}')
         connection = client.connections.get_details(connection_id)
         DataConnection = namedtuple('DataConnection', ['connection_id', 'bucket_name', 'endpoint_url'])
         dc = DataConnection(connection_id,
                             connection['entity']['properties']['bucket'],
                             connection['entity']['properties']['url'],
                             )
+        self._logger.debug(f'Fetched its details.')
         return dc
 
     def _get_asset_details(self):
@@ -720,7 +722,7 @@ class DOWMLLib:
 
     def _create_data_asset_if_necessary(self, basename):
         """Create a data asset if it doesn't exist already"""
-        self._logger.debug(f'Checking whether a WML "connected data" asset named "{basename}" already exists.')
+        self._logger.debug(f'Checking whether a connected data asset named "{basename}" already exists.')
         data_asset_id = self._find_asset_id_by_name(basename)
         if not data_asset_id:
             self._logger.debug(f'Not found any. Creating one...')

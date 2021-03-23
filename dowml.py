@@ -13,6 +13,8 @@ class CommandNeedsJobID(Exception):
     pass
 class CommandNeedsNonNullInteger(Exception):
     pass
+class CommandNeedsBool(Exception):
+    pass
 
 
 class DOWMLInteractive(Cmd):
@@ -103,6 +105,19 @@ Prints current time limit (if no argument), or sets the time limit (in seconds).
         if limit == 0:
             limit = None
         self.lib.timelimit = limit
+
+    def do_inline(self, arg):
+        """inline [yes|no]
+Prints whether jobs are created with inline data (if no argument), or sets the flag ('yes' or 'no')."""
+        if not arg:
+            print(f'Current inline flag: {self.lib.inline}')
+            return
+        if arg == 'yes':
+            self.lib.inline = True
+        elif arg == 'no':
+            self.lib.inline = False
+        else:
+            raise CommandNeedsBool
 
     def do_solve(self, paths):
         """solve file1 [file2 ... [filen]]

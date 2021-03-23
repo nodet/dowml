@@ -4,7 +4,7 @@ from unittest import TestCase, main, mock
 from unittest.mock import Mock, ANY, call
 
 from dowml import DOWMLInteractive, \
-    CommandNeedsJobID, CommandNeedsNonNullInteger
+    CommandNeedsJobID, CommandNeedsNonNullInteger, CommandNeedsBool
 from dowmllib import DOWMLLib
 
 EXPECTED = 'expected'
@@ -213,6 +213,22 @@ class TestTimeLimit(TestCase):
         cli = self.cli
         cli.do_time('0')
         self.assertIsNone(cli.lib.timelimit)
+
+
+class TestInline(TestCase):
+
+    def setUp(self) -> None:
+        self.cli = DOWMLInteractive('test_credentials.txt')
+
+    def test_default_is_inline(self):
+        cli = self.cli
+        self.assertTrue(cli.lib.inline)
+
+    def test_yes_or_no_only(self):
+        cli = self.cli
+        with self.assertRaises(CommandNeedsBool):
+            cli.do_inline('y')
+
 
 if __name__ == '__main__':
     main()
