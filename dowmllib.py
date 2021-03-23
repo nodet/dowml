@@ -27,8 +27,10 @@ class SimilarNamesInJob(Error):
     """A job can't have two input files with the same name, irrespective of path"""
     pass
 
+
 class ConnectionIdNotFound(Error):
     """Using Cloud Object Storage requires a connection, but none was found"""
+    pass
 
 
 #
@@ -207,12 +209,12 @@ class DOWMLLib:
         """
         client = self._get_or_make_client()
         self._logger.debug(f'Fetching output...')
-        filter = None
+        output_filter = None
         if not with_contents:
-            filter = 'solve_parameters,solve_state,status'
+            output_filter = 'solve_parameters,solve_state,status'
         elif with_contents == 'log':
-            filter = 'output_data'
-        job_details = self.client_get_job_details(client, job_id, filter)
+            output_filter = 'output_data'
+        job_details = self.client_get_job_details(client, job_id, output_filter)
         self._logger.debug(f'Done.')
         if with_contents != 'full' and with_contents != 'log':
             self.filter_large_chunks_from_details(job_details)
@@ -396,7 +398,7 @@ class DOWMLLib:
                     'content': self.get_file_as_data(path)
                 }
             else:
-                self._upload_on_COS_if_necessary(path)
+                self._upload_if_necessary(path)
                 data_asset_id = self._create_data_asset_if_necessary(basename)
                 input_data = {
                     'id': basename,
@@ -413,7 +415,7 @@ class DOWMLLib:
         job_id = client.deployments.get_job_uid(job_details)
         return job_id
 
-    def _upload_on_COS_if_necessary(self, path):
+    def _upload_if_necessary(self, path):
         """Upload the specified name on Cloud Object Storage
 
         The file is uploaded in the bucket that the WS connection refers to. The
@@ -677,15 +679,9 @@ class DOWMLLib:
         asset_details = client.data_assets._handle_response(200, u'list assets', response)["results"]
         return asset_details
 
-    def get_data_assets(self):
-        """Returns the list of existing data assets in the Watson Studio space"""
-        client = self._get_or_make_client()
-        assets = self._get_asset_details()
-        return assets
-
     def _find_asset_id_by_name(self, name):
         """Looks for a data asset with the given name, returns its id, or None"""
-        assets = self.get_data_assets()
+        assets = self._get_asset_details()
         for asset in assets:
             metadata = asset['metadata']
             if metadata['name'] == name:
@@ -704,17 +700,14 @@ class DOWMLLib:
         if not connection_id:
             raise ConnectionIdNotFound
         client = self._get_or_make_client()
-        cdaCMN = client.data_assets.ConfigurationMetaNames
+        cda_cmn = client.data_assets.ConfigurationMetaNames
         metadata = {
-            cdaCMN.NAME: name,
-            cdaCMN.DESCRIPTION: 'Created by DOWMLClient',
-            cdaCMN.CONNECTION_ID: connection_id,
-            cdaCMN.DATA_CONTENT_NAME: f'/{bucket_id}/{name}',
+            cda_cmn.NAME: name,
+            cda_cmn.DESCRIPTION: 'Created by DOWMLClient',
+            cda_cmn.CONNECTION_ID: connection_id,
+            cda_cmn.DATA_CONTENT_NAME: f'/{bucket_id}/{name}',
         }
         asset_details = client.data_assets.store(meta_props=metadata)
-        # FIXME: should there be a mode that uses this kind of asset below?
-        #asset_details = client.data_assets.create(name, name)
-        pprint.pprint(asset_details)
         return asset_details['metadata']['guid']
 
     def _create_data_asset_if_necessary(self, basename):
@@ -728,4 +721,3 @@ class DOWMLLib:
         else:
             self._logger.debug(f'Yes, with id {data_asset_id}.')
         return data_asset_id
-
