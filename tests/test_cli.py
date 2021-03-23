@@ -220,9 +220,9 @@ class TestInline(TestCase):
     def setUp(self) -> None:
         self.cli = DOWMLInteractive('test_credentials.txt')
 
-    def test_default_is_inline(self):
+    def test_default_is_not_inline(self):
         cli = self.cli
-        self.assertTrue(cli.lib.inline)
+        self.assertFalse(cli.lib.inline)
 
     def test_yes_or_no_only(self):
         cli = self.cli

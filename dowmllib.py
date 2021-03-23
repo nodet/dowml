@@ -106,7 +106,7 @@ class DOWMLLib:
         self.model_type = self.MODEL_TYPES[0]
         self.tshirt_size = self.TSHIRT_SIZES[0]
         self.timelimit = None
-        self.inline = True
+        self.inline = False
 
     def _create_connexion(self):
         """Create the Python APIClient instance"""
@@ -398,8 +398,7 @@ class DOWMLLib:
                     'content': self.get_file_as_data(path)
                 }
             else:
-                self._upload_if_necessary(path)
-                data_asset_id = self._create_data_asset_if_necessary(basename)
+                data_asset_id = self._create_data_asset_and_upload_if_necessary(path)
                 input_data = {
                     'id': basename,
                     "type": "data_asset",
@@ -414,35 +413,6 @@ class DOWMLLib:
         self._logger.debug(f'Done. Getting its id...')
         job_id = client.deployments.get_job_uid(job_details)
         return job_id
-
-    def _upload_if_necessary(self, path):
-        """Upload the specified name on Cloud Object Storage
-
-        The file is uploaded in the bucket that the WS connection refers to. The
-        name of the object is the name of the file (without the path)."""
-        _, bucket_id, endpoint_url = self._find_connection_to_use()
-        cos_client = ibm_boto3.resource("s3",
-                                        config=Config(signature_version="oauth"),
-                                        endpoint_url=endpoint_url,
-                                        )
-        files = cos_client.Bucket(bucket_id).objects.all()
-        basename = os.path.basename(path)
-        file_size = -1
-        self._logger.debug(f'Checking files already in bucket {bucket_id} through endpoint {endpoint_url}')
-        try:
-            for file in files:
-                if file.key == basename:
-                    file_size = file.size
-        except ClientError as be:
-            self._logger.error(f'CLIENT ERROR: {be}')
-        except Exception as e:
-            self._logger.error(f'Unable to retrieve contents: {e}')
-        if file_size >= 0:
-            self._logger.debug(f'Found {bucket_id}/{basename} ({file_size} bytes).')
-        else:
-            self._logger.info(f'Uploading {path} to {bucket_id}/{basename}...')
-            cos_client.Object(bucket_id, basename).upload_file(path)
-            self._logger.info(f'Done.')
 
     def _get_deployment_id(self):
         """Create deployment if doesn't exist already, return its id"""
@@ -710,14 +680,50 @@ class DOWMLLib:
         asset_details = client.data_assets.store(meta_props=metadata)
         return asset_details['metadata']['guid']
 
-    def _create_data_asset_if_necessary(self, basename):
-        """Create a data asset if it doesn't exist already"""
+    def _upload_if_necessary(self, path):
+        """Upload the specified name on Cloud Object Storage
+
+        The file is uploaded in the bucket that the WS connection refers to. The
+        name of the object is the name of the file (without the path)."""
+        _, bucket_id, endpoint_url = self._find_connection_to_use()
+        cos_client = ibm_boto3.resource("s3",
+                                        config=Config(signature_version="oauth"),
+                                        endpoint_url=endpoint_url,
+                                        )
+        files = cos_client.Bucket(bucket_id).objects.all()
+        basename = os.path.basename(path)
+        file_size = -1
+        self._logger.debug(f'Checking files already in bucket \'{bucket_id}\' through endpoint {endpoint_url}')
+        try:
+            for file in files:
+                if file.key == basename:
+                    file_size = file.size
+        except ClientError as be:
+            self._logger.error(f'CLIENT ERROR: {be}')
+        except Exception as e:
+            self._logger.error(f'Unable to retrieve contents: {e}')
+        if file_size >= 0:
+            self._logger.debug(f'Found {bucket_id}/{basename} ({file_size} bytes).')
+        else:
+            self._logger.info(f'Uploading {path} to {bucket_id}/{basename}...')
+            cos_client.Object(bucket_id, basename).upload_file(path)
+            self._logger.info(f'Done.')
+
+    def _create_data_asset_and_upload_if_necessary(self, path):
+        """Create a data asset and upload file if they don't both exist already"""
+        basename = os.path.basename(path)
         self._logger.debug(f'Checking whether a connected data asset named "{basename}" already exists.')
         data_asset_id = self._find_asset_id_by_name(basename)
-        if not data_asset_id:
-            self._logger.debug(f'Not found any. Creating one...')
-            data_asset_id = self.create_asset(basename)
-            self._logger.debug(f'Done.')
-        else:
+        if data_asset_id:
             self._logger.debug(f'Yes, with id {data_asset_id}.')
+            return data_asset_id
+        self._logger.debug(f'Not found any. Uploading the file.')
+        # Uploading the file is more likely to fail than creating the data asset
+        # (misspelled file name, file not where expected, network issue, etc.).
+        # So we upload the file first, and only then create the data asset that
+        # refers to it.  This minimizes the risk of stale data assets.
+        self._upload_if_necessary(path)
+        self._logger.debug(f'Creating the data asset.')
+        data_asset_id = self.create_asset(basename)
+        self._logger.debug(f'Done.')
         return data_asset_id

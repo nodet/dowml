@@ -15,6 +15,7 @@ class TestSolve(TestCase):
         lib._logger = Mock(spec=Logger)
         lib._client = Mock(spec=APIClient)
         lib._client.deployments = Mock(spec=Deployments)
+        lib.inline = True
         domn = Mock()
         domn.SOLVE_PARAMETERS = 'solve-parameters'
         domn.INPUT_DATA = 'input-data'
