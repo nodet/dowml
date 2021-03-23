@@ -107,6 +107,7 @@ class DOWMLLib:
         self.tshirt_size = self.TSHIRT_SIZES[0]
         self.timelimit = None
         self.inline = False
+        self._data_connection = None
 
     def _create_connexion(self):
         """Create the Python APIClient instance"""
@@ -599,6 +600,8 @@ class DOWMLLib:
 
         This function returns a named tuple: 'connection_id', 'bucket_name',
         'endpoint_url'. """
+        if self._data_connection:
+            return self._data_connection
         client = self._get_or_make_client()
         connection_id = self._wml_credentials.get('connection_id', '')
         if connection_id:
@@ -616,12 +619,11 @@ class DOWMLLib:
         self._logger.debug(f'Found one: {connection_id}')
         connection = client.connections.get_details(connection_id)
         DataConnection = namedtuple('DataConnection', ['connection_id', 'bucket_name', 'endpoint_url'])
-        dc = DataConnection(connection_id,
-                            connection['entity']['properties']['bucket'],
-                            connection['entity']['properties']['url'],
-                            )
+        self._data_connection = DataConnection(connection_id,
+                                               connection['entity']['properties']['bucket'],
+                                               connection['entity']['properties']['url'])
         self._logger.debug(f'Fetched its details.')
-        return dc
+        return self._data_connection
 
     def _get_asset_details(self):
         """This function returns the list of all the data assets in the space
