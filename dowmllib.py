@@ -108,10 +108,7 @@ class DOWMLLib:
 
     def _create_connexion(self):
         """Create the Python APIClient instance"""
-        # FIXME: should assert the condition itself
-        if self._client is not None:
-            assert "This should never be true"
-            return
+        assert self._client is None
         self._logger.debug(f'Creating the connexion...')
         client = APIClient(self._wml_credentials)
         self._logger.info(f'Creating the connexion succeeded.  Client version is {client.version}')
