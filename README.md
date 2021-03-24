@@ -75,8 +75,8 @@ dowml> help
 
 Documented commands (type help <topic>):
 ========================================
-cancel  details  help  log     size   time  wait
-delete  exit     jobs  output  solve  type
+cancel  details  help    jobs  output  solve  type
+delete  exit     inline  log   size    time   wait
 
 dowml> type
 Current model type: cplex. Known types: cplex, cpo, opl, docplex
@@ -84,6 +84,10 @@ dowml> size
 Current size: S. Known sizes: S, M, XL
 dowml> solve examples/afiro.mps
 Job id: d8645223-41ef-4d53-a227-b223ea311c3c
+dowml> jobs
+     #   status     id                                    creation date             inputs
+=>   1:     queued  d8645223-41ef-4d53-a227-b223ea311c3c  2021-03-12T10:07:47.367Z  afiro.mps
+dowml> wait
 dowml> jobs
      #   status     id                                    creation date             inputs
 =>   1:  completed  d8645223-41ef-4d53-a227-b223ea311c3c  2021-03-12T10:07:47.367Z  afiro.mps
@@ -225,7 +229,7 @@ To create a Connection object, follow these steps:
   use a different name, you will have to add the id for this connection to the
   credentials available to DOWML.  See below for more details.
 
-- Fill in the required information for the 'Access key', 'API key', 'Bucket',
+- Fill in the required information for the 'Access key', 'Bucket',
   'Secret key' and 'Login URL' using the documentation in the (i) tooltips to find
   the relevant piece of information from the Cloud Object Storage service you
   want to use.
