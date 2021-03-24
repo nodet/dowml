@@ -108,7 +108,7 @@ class DOWMLLib:
         self.timelimit = None
         self.inline = False
         self._data_connection = None
-        self._store_in_wml = False
+        self._store_in_wml = True
 
     def _create_connexion(self):
         """Create the Python APIClient instance"""
@@ -367,16 +367,17 @@ class DOWMLLib:
         client = self._get_or_make_client()
         cdd = client.deployments.DecisionOptimizationMetaNames
 
-        # Let's check whether we indeed have the necessary information
-        # to use Cloud Object Storage, and fallback to inline if that's not
-        # the case
-        try:
-            # This call will cache the connection information if it
-            # actually succeeds, so it's not wasted.
-            self._find_connection_to_use()
-        except ConnectionIdNotFound:
-            self._logger.error(f'Switching to inline mode instead.')
-            self.inline = True
+        if not self._store_in_wml:
+            # Let's check whether we indeed have the necessary information
+            # to use Cloud Object Storage, and fallback to inline if that's not
+            # the case
+            try:
+                # This call will cache the connection information if it
+                # actually succeeds, so it's not wasted.
+                self._find_connection_to_use()
+            except ConnectionIdNotFound:
+                self._logger.error(f'Switching to inline mode instead.')
+                self.inline = True
 
         cdd_inputdata = cdd.INPUT_DATA
         cdd_outputdata = cdd.OUTPUT_DATA
@@ -685,14 +686,13 @@ class DOWMLLib:
         Cloud Object Storage.  The connection gives us the information about
         the bucket to use and the endpoint to contact to read the object."""
         basename = os.path.basename(path)
-        connection_id, bucket_id, _ = self._find_connection_to_use()
-        if not connection_id:
-            raise ConnectionIdNotFound
         client = self._get_or_make_client()
         if self._store_in_wml:
-            # FIXME: implement this
-            raise NotImplementedError
+            asset_details = client.data_assets.create(basename, path)
         else:
+            connection_id, bucket_id, _ = self._find_connection_to_use()
+            if not connection_id:
+                raise ConnectionIdNotFound
             cda_cmn = client.data_assets.ConfigurationMetaNames
             metadata = {
                 cda_cmn.NAME: basename,
