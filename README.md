@@ -251,5 +251,22 @@ to find out the id for this connection and add it to the WML credentials:
   variable) with the name `connection_id`, as in the example in the Introduction
   section above.
 
-### Connecting to data outside COS
+### Data assets, and connecting to data outside COS
 
+A job in Watson Studio doesn't directly refer to the files on Cloud Object Storage.
+Rather, it refers to 'connected-data' assets, that themselves refer to the objects
+on COS. If you have data or files that exist outside Cloud Object Storage, you can
+create data assets to refer to these.
+
+Indeed, when it creates a job in `inline no` mode, DOWML first checks whether a
+data asset of the given name exists.  The name here refers to the base name of the
+file specified in the _solve_ command, that is, the name without the path.  If a
+data asset with this name already exists, the job will refer to it.  If one such
+asset doesn't exist, DOWML first uploads the file to COS if it doesn't exist there
+yet, and creates the data asset to refer to this uploaded file.
+
+As DOWML first checks whether a data asset exists before trying to upload a file,
+it is possible to refer in your _solve_ commands to files that don't exist on your
+disk, but are data assets in your deployment space.
+
+Creating these is left as an exercise to the reader...
