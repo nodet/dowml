@@ -6,10 +6,7 @@ import tempfile
 from collections import namedtuple
 from time import sleep
 
-import ibm_boto3
 import requests
-from ibm_botocore.config import Config
-from ibm_botocore.exceptions import ClientError
 from ibm_watson_machine_learning import APIClient
 
 
@@ -108,7 +105,6 @@ class DOWMLLib:
         self.timelimit = None
         self.inline = False
         self._data_connection = None
-        self._store_in_wml = True
 
     def _create_connexion(self):
         """Create the Python APIClient instance"""
@@ -366,19 +362,6 @@ class DOWMLLib:
         """Create a deployment job (aka a run) and return its id"""
         client = self._get_or_make_client()
         cdd = client.deployments.DecisionOptimizationMetaNames
-
-        if not self._store_in_wml:
-            # Let's check whether we indeed have the necessary information
-            # to use Cloud Object Storage, and fallback to inline if that's not
-            # the case
-            try:
-                # This call will cache the connection information if it
-                # actually succeeds, so it's not wasted.
-                self._find_connection_to_use()
-            except ConnectionIdNotFound:
-                self._logger.error(f'Switching to inline mode instead.')
-                self.inline = True
-
         cdd_inputdata = cdd.INPUT_DATA
         cdd_outputdata = cdd.OUTPUT_DATA
         if not self.inline:
@@ -423,7 +406,7 @@ class DOWMLLib:
             solve_payload[cdd_inputdata].append(input_data)
         self._logger.debug(f'Creating the job...')
         if self.inline:
-            self._logger.debug(f'Data is inline. Let\'s not print the payload...' )
+            self._logger.debug(f'Data is inline. Let\'s not print the payload...')
         else:
             self._logger.debug(repr(solve_payload))
         job_details = client.deployments.create_job(deployment_id, solve_payload)
@@ -687,69 +670,17 @@ class DOWMLLib:
         the bucket to use and the endpoint to contact to read the object."""
         basename = os.path.basename(path)
         client = self._get_or_make_client()
-        if self._store_in_wml:
-            asset_details = client.data_assets.create(basename, path)
-        else:
-            connection_id, bucket_id, _ = self._find_connection_to_use()
-            if not connection_id:
-                raise ConnectionIdNotFound
-            cda_cmn = client.data_assets.ConfigurationMetaNames
-            metadata = {
-                cda_cmn.NAME: basename,
-                cda_cmn.DESCRIPTION: 'Created by DOWMLClient',
-                cda_cmn.CONNECTION_ID: connection_id,
-                cda_cmn.DATA_CONTENT_NAME: f'/{bucket_id}/{basename}',
-            }
-            asset_details = client.data_assets.store(meta_props=metadata)
+        asset_details = client.data_assets.create(basename, path)
         return asset_details['metadata']['guid']
 
-    def _upload_if_necessary(self, path):
-        """Upload the specified name on Cloud Object Storage
-
-        The file is uploaded in the bucket that the WS connection refers to. The
-        name of the object is the name of the file (without the path)."""
-        _, bucket_id, endpoint_url = self._find_connection_to_use()
-        cos_client = ibm_boto3.resource("s3",
-                                        config=Config(signature_version="oauth"),
-                                        endpoint_url=endpoint_url,
-                                        )
-        files = cos_client.Bucket(bucket_id).objects.all()
-        basename = os.path.basename(path)
-        file_size = -1
-        self._logger.debug(f'Checking files already in bucket \'{bucket_id}\' through endpoint {endpoint_url}')
-        try:
-            for file in files:
-                if file.key == basename:
-                    file_size = file.size
-        except ClientError as be:
-            self._logger.error(f'CLIENT ERROR: {be}')
-        except Exception as e:
-            self._logger.error(f'Unable to retrieve contents: {e}')
-        if file_size >= 0:
-            self._logger.debug(f'Found {bucket_id}/{basename} ({file_size} bytes).')
-        else:
-            self._logger.info(f'Uploading {path} to {bucket_id}/{basename}...')
-            cos_client.Object(bucket_id, basename).upload_file(path)
-            self._logger.info(f'Done.')
-
     def _create_data_asset_and_upload_if_necessary(self, path):
-        """Create a data asset and upload file if they don't both exist already"""
+        """Create a data asset (and upload file) if it doesn't exist already"""
         basename = os.path.basename(path)
         self._logger.debug(f'Checking whether a connected data asset named \'{basename}\' already exists.')
         data_asset_id = self._find_asset_id_by_name(basename)
         if data_asset_id:
             self._logger.debug(f'Yes, with id {data_asset_id}.')
             return data_asset_id
-        if not self._store_in_wml:
-            self._logger.debug(f'Not found any. Uploading the file.')
-            # Uploading the file is more likely to fail than creating the data asset
-            # (misspelled file name, file not where expected, network issue, etc.).
-            # So we upload the file first, and only then create the data asset that
-            # refers to it.  This minimizes the risk of stale data assets.
-            self._upload_if_necessary(path)
-        else:
-            # When storing in WML, creating the asset is all that's required
-            pass
         self._logger.debug(f'Creating the data asset.')
         data_asset_id = self.create_asset(path)
         self._logger.debug(f'Done.')

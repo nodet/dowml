@@ -36,7 +36,6 @@ In order to use either of them, you need to provide IBM Cloud credentials.
        'url': 'https://us-south.ml.cloud.ibm.com',
        'cos_resource_crn' = 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9...',
        'ml_instance_crn': 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f...',
-       'connection_id': 'e2c52ca4-ec61-4472-a79f-3874a...'
    }
    ```
    See below for how/where to get these credentials.
@@ -167,11 +166,6 @@ There are four pieces of information that are required in order to submit jobs o
    on the corresponding line anywhere except on the name, and copy the CRN displayed
    in the pane that open on the right.
 
-5. The `connection_id` is an optional part that's not required when you only use
-   inline data.  Refer to the section 'Using Cloud Object Storage' below to
-   understand its usage.
-
-
 ## Using Cloud Object Storage
 
 The DOWML library has two modes of operation with respect to sending the models
@@ -191,76 +185,24 @@ needs to request this information, and it comes with the content of the files
 - Sending a large model may take a long time, because of network throughput.  Sending
 a very large REST request is not at all guaranteed to succeed.
 
-Using Cloud Object Storage as an intermediate step alleviate all these issues:
+Using data assets in Watson Studio as an intermediate step alleviate all these issues:
 
-- Once the model has been uploaded to Cloud Object Storage, it will be reused for
+- Once the model has been uploaded to WS, it will be reused for
 subsequent jobs without the need to upload it again.
 
 - The job requests refer to the files indirectly, via URLs.  Therefore, they don't
 take much space, and listing the jobs doesn't imply to download the content of the
   files.
 
-- Uploading to COS is done through specialized code that doesn't just send a single
+- Uploading to WS is done through specialized code that doesn't just send a single
 request.  Rather, it divides the upload in multiple reasonably sized chunks that each
   are uploaded individually, with restart if necessary.  Uploading big files is
   therefore much less prone to failure.
 
-### Setting up a connection
-
-In order to upload the files to Cloud Object Storage, the DOWML library needs to
-know the credentials to use on COS, in which bucket to store the files, etc.  Rather
-than storing this information as configuration information in the DOWML client,
-we store this in Watson Studio itself, as a Connection object in the deployment
-space.
-
-To create a Connection object, follow these steps:
-
-- Navigate to the space for the DOWML library (the space named `DOWMLClient-space`
-  that was created for you when you first used the library or the client).
-
-- Click the blue 'Add to space' button in the top-right.  In the dialog that opens,
-  click on 'Connection'.
-
-- Among the 'IBM' section of the types of data sources, click on 'Cloud Object
-  Storage'.  Don't click on 'Cloud Object Storage (infrastructure)'.
-
-- Name the connection `DOWMLClient-connection`.  This way, the DOWML library and
-  client will be able to find it automatically.  Alternatively, if you want to
-  use a different name, you will have to add the id for this connection to the
-  credentials available to DOWML.  See below for more details.
-
-- Fill in the required information for the 'Access key', 'Bucket',
-  'Secret key' and 'Login URL' using the documentation in the (i) tooltips to find
-  the relevant piece of information from the Cloud Object Storage service you
-  want to use.
-  Note that the URL should be a public one, as it will be used by the DOWML code
-  directly, and that one resides outside IBM Cloud. It _must_ start with
-  'https://', even if the test will be sucessful without this. If it doesn't,
-  you'll get an error when DOWML tries to upload a file.
-
-- Test the connection to make sure that everything is setup properly by using the
-  'Test' button in the lower right, before clicking 'Create'.
-
-If you chose to use a different name than the one that DOWML would find, you need
-to find out the id for this connection and add it to the WML credentials:
-
-- In your `DOWMLClient-space`, expand the 'Data assets' section and locate the
-  Connection that you want DOWML to use.
-
-- Right-click on its name, and use the 'Copy link' feature of your browser (or
-  its equivalent) to copy the URL that opens this connection's configuration page.
-  The id of the connection is the string of letters, numbers and dashes between
-  `connections/` and `?space-id=`.  It should look similar to
-  `e2c52ca4-ec61-4472-a79f-3874a0947d88`
-
-- Include this id in your WML credential file (or the value of the environment
-  variable) with the name `connection_id`, as in the example in the Introduction
-  section above.
-
 ### Data assets, and connecting to data outside COS
 
-A job in Watson Studio doesn't directly refer to the files on Cloud Object Storage.
-Rather, it refers to 'connected-data' assets, that themselves refer to the objects
+A job in Watson Studio, unless you use inline mode, refers to 'connected-data' 
+assets, that themselves refer to the objects
 on COS. If you have data or files that exist outside Cloud Object Storage, you can
 create data assets to refer to these.
 
@@ -268,10 +210,9 @@ Indeed, when it creates a job in `inline no` mode, DOWML first checks whether a
 data asset of the given name exists.  The name here refers to the base name of the
 file specified in the _solve_ command, that is, the name without the path.  If a
 data asset with this name already exists, the job will refer to it.  If one such
-asset doesn't exist, DOWML first uploads the file to COS if it doesn't exist there
-yet, and creates the data asset to refer to this uploaded file.
+asset doesn't exist, DOWML creates one and uploads the file.
 
-As DOWML first checks whether a data asset exists before trying to upload a file,
+As DOWML first checks whether a data asset exists before trying to create one,
 it is possible to refer in your _solve_ commands to files that don't exist on your
 disk, but are data assets in your deployment space.
 
