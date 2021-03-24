@@ -166,10 +166,10 @@ There are four pieces of information that are required in order to submit jobs o
    on the corresponding line anywhere except on the name, and copy the CRN displayed
    in the pane that open on the right.
 
-## Using Cloud Object Storage
+## Using data assets in Watson Studio
 
 The DOWML library has two modes of operation with respect to sending the models
-to the WML service: inline data, or using Cloud Object Storage.
+to the WML service: inline data, or using data assets in Watson Studio.
 
 With inline data, the model is sent directly to the WML service in the _solve_
 request itself.  This is the simplest, but it has a number of drawbacks:
@@ -199,12 +199,12 @@ request.  Rather, it divides the upload in multiple reasonably sized chunks that
   are uploaded individually, with restart if necessary.  Uploading big files is
   therefore much less prone to failure.
 
-### Data assets, and connecting to data outside COS
+### Connecting to data outside COS
 
-A job in Watson Studio, unless you use inline mode, refers to 'connected-data' 
-assets, that themselves refer to the objects
-on COS. If you have data or files that exist outside Cloud Object Storage, you can
-create data assets to refer to these.
+A job in Watson Studio, unless you use inline mode, refers to 'connected-data'
+assets, that themselves refer to objects created in the Cloud Object Storage
+(COS) service. If you have data or files that exist either in COS or in any other
+cloud service, you can create data assets to refer to these.
 
 Indeed, when it creates a job in `inline no` mode, DOWML first checks whether a
 data asset of the given name exists.  The name here refers to the base name of the
@@ -213,7 +213,7 @@ data asset with this name already exists, the job will refer to it.  If one such
 asset doesn't exist, DOWML creates one and uploads the file.
 
 As DOWML first checks whether a data asset exists before trying to create one,
-it is possible to refer in your _solve_ commands to files that don't exist on your
+it is possible to refer in your _solve_ commands to 'files' that don't exist on your
 disk, but are data assets in your deployment space.
 
 Creating these is left as an exercise to the reader...
