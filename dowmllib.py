@@ -108,6 +108,7 @@ class DOWMLLib:
         self.timelimit = None
         self.inline = False
         self._data_connection = None
+        self._store_in_wml = False
 
     def _create_connexion(self):
         """Create the Python APIClient instance"""
@@ -675,7 +676,7 @@ class DOWMLLib:
                 return metadata['asset_id']
         return None
 
-    def create_asset(self, name):
+    def create_asset(self, path):
         """Create a data asset with the given name
 
         A Watson Studio data asset is an entity that mimicks a file.  It actually
@@ -683,18 +684,23 @@ class DOWMLLib:
         a Connection.  In this case, we create an asset that reads the object in
         Cloud Object Storage.  The connection gives us the information about
         the bucket to use and the endpoint to contact to read the object."""
+        basename = os.path.basename(path)
         connection_id, bucket_id, _ = self._find_connection_to_use()
         if not connection_id:
             raise ConnectionIdNotFound
         client = self._get_or_make_client()
-        cda_cmn = client.data_assets.ConfigurationMetaNames
-        metadata = {
-            cda_cmn.NAME: name,
-            cda_cmn.DESCRIPTION: 'Created by DOWMLClient',
-            cda_cmn.CONNECTION_ID: connection_id,
-            cda_cmn.DATA_CONTENT_NAME: f'/{bucket_id}/{name}',
-        }
-        asset_details = client.data_assets.store(meta_props=metadata)
+        if self._store_in_wml:
+            # FIXME: implement this
+            raise NotImplementedError
+        else:
+            cda_cmn = client.data_assets.ConfigurationMetaNames
+            metadata = {
+                cda_cmn.NAME: basename,
+                cda_cmn.DESCRIPTION: 'Created by DOWMLClient',
+                cda_cmn.CONNECTION_ID: connection_id,
+                cda_cmn.DATA_CONTENT_NAME: f'/{bucket_id}/{basename}',
+            }
+            asset_details = client.data_assets.store(meta_props=metadata)
         return asset_details['metadata']['guid']
 
     def _upload_if_necessary(self, path):
@@ -734,13 +740,17 @@ class DOWMLLib:
         if data_asset_id:
             self._logger.debug(f'Yes, with id {data_asset_id}.')
             return data_asset_id
-        self._logger.debug(f'Not found any. Uploading the file.')
-        # Uploading the file is more likely to fail than creating the data asset
-        # (misspelled file name, file not where expected, network issue, etc.).
-        # So we upload the file first, and only then create the data asset that
-        # refers to it.  This minimizes the risk of stale data assets.
-        self._upload_if_necessary(path)
+        if not self._store_in_wml:
+            self._logger.debug(f'Not found any. Uploading the file.')
+            # Uploading the file is more likely to fail than creating the data asset
+            # (misspelled file name, file not where expected, network issue, etc.).
+            # So we upload the file first, and only then create the data asset that
+            # refers to it.  This minimizes the risk of stale data assets.
+            self._upload_if_necessary(path)
+        else:
+            # When storing in WML, creating the asset is all that's required
+            pass
         self._logger.debug(f'Creating the data asset.')
-        data_asset_id = self.create_asset(basename)
+        data_asset_id = self.create_asset(path)
         self._logger.debug(f'Done.')
         return data_asset_id
