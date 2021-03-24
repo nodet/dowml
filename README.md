@@ -234,7 +234,9 @@ To create a Connection object, follow these steps:
   the relevant piece of information from the Cloud Object Storage service you
   want to use.
   Note that the URL should be a public one, as it will be used by the DOWML code
-  directly, and that one resides outside IBM Cloud.
+  directly, and that one resides outside IBM Cloud. It _must_ start with
+  'https://', even if the test will be sucessful without this. If it doesn't,
+  you'll get an error when DOWML tries to upload a file.
 
 - Test the connection to make sure that everything is setup properly by using the
   'Test' button in the lower right, before clicking 'Create'.
