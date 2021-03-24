@@ -409,7 +409,10 @@ class DOWMLLib:
                 }
             solve_payload[cdd_inputdata].append(input_data)
         self._logger.debug(f'Creating the job...')
-        self._logger.debug(repr(solve_payload))
+        if self.inline:
+            self._logger.debug(f'Data is inline. Let\'s not print the payload...' )
+        else:
+            self._logger.debug(repr(solve_payload))
         job_details = client.deployments.create_job(deployment_id, solve_payload)
         self._logger.debug(f'Done. Getting its id...')
         job_id = client.deployments.get_job_uid(job_details)
