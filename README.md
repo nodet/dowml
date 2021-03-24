@@ -29,16 +29,17 @@ dowml> exit
 The class `DOWMLLib` provides an API to upload Decision Optimization models (CPLEX, CP Optimizer, OPL or docplex) to WML, check their status, and download results.  The script `dowml.py` is an interactive program on top of that library.
 
 In order to use either of them, you need to provide IBM Cloud credentials.
-1. By default, `DOWMLLib` (and therefore the Interactive) look for these credentials in an environment variable named `DOWML_CREDENTIALS`. This variable shoud have a value looking like 
+1. By default, `DOWMLLib` (and therefore the Interactive) look for these credentials in an environment variable named `DOWML_CREDENTIALS`. This variable shoud have a value looking like
    ```
    {
-       'apikey': '<apikey>', 
-       'url': 'https://us-south.ml.cloud.ibm.com', 
-       'cos_resource_crn' = 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9...', 
-       'ml_instance_crn': 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f...'
+       'apikey': '<apikey>',
+       'url': 'https://us-south.ml.cloud.ibm.com',
+       'cos_resource_crn' = 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9...',
+       'ml_instance_crn': 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f...',
+       'connection_id': 'e2c52ca4-ec61-4472-a79f-3874a...'
    }
    ```
-   See below for how/where to get these credentials. 
+   See below for how/where to get these credentials.
 2. As an alternative, you can specify a file name as argument to `DOWMLLib.__init__`. The credentials will then be read from that file instead of the environment variable. Accordingly, the Interactive has a command line option `-w` (or `--wml-cred-file`) that must be followed by the path of the file.
 
 Here's a sample session:
@@ -51,11 +52,11 @@ Interactive program for DO on WML
 optional arguments:
   -h, --help            show this help message and exit
   -w WML_CRED_FILE, --wml-cred-file WML_CRED_FILE
-                        Name of the file from which to read WML credentials. If 
-                        not specified, credentials are read from environment 
+                        Name of the file from which to read WML credentials. If
+                        not specified, credentials are read from environment
                         variable $DOWML_CREDENTIALS.
-  --verbose, -v         Verbose mode. Causes the program to print debugging 
-                        messages about its progress. Multiple -v options increase 
+  --verbose, -v         Verbose mode. Causes the program to print debugging
+                        messages about its progress. Multiple -v options increase
                         the verbosity. The maximum is 3.
 $
 $
@@ -141,23 +142,114 @@ There are four pieces of information that are required in order to submit jobs o
 1. The `apikey` is a secret that identifies the IBM Cloud user. You typically create
    one key per application or service, in order to be able to revoke them individually
    if needed.
-   To generate such a key, open https://cloud.ibm.com/iam/apikeys, and click the blue 
-   'Create an IBM Cloud API key' on the right.  
-   
+   To generate such a key, open https://cloud.ibm.com/iam/apikeys, and click the blue
+   'Create an IBM Cloud API key' on the right.
+
 2. The `url` is the base URL for the REST calls to WML.  The possible values are
    found in https://cloud.ibm.com/apidocs/machine-learning, and depend on which
    region you want to use.
-   
-3. WML needs to store some data in a Cloud Object Storage instance.  Open 
+
+3. WML needs to store some data in a Cloud Object Storage instance.  Open
    https://cloud.ibm.com/resources and locate the 'Storage' section.  Create an
    instance of the Cloud Object Storage service if needed. Once it's listed on
-   the resource page, click anywhere on the line for that service, except on its 
+   the resource page, click anywhere on the line for that service, except on its
    name.  This will open a pane on the right which lists the CRN.  Click on the
    symbol at the right to copy this information.
-   
+
 4. Similarly, you need to identify an instance of Machine Learning service to use
    to solve your jobs.  In the same page https://cloud.ibm.com/resources, open the
    'Services' section.  The 'Product' columns tells you the type of service.  If
    you don't have a 'Machine Learning' instance already, create one.  Then click
    on the corresponding line anywhere except on the name, and copy the CRN displayed
    in the pane that open on the right.
+
+5. The `connection_id` is an optional part that's not required when you only use
+   inline data.  Refer to the section 'Using Cloud Object Storage' below to
+   understand its usage.
+
+
+## Using Cloud Object Storage
+
+The DOWML library has two modes of operation with respect to sending the models
+to the WML service: inline data, or using Cloud Object Storage.
+
+With inline data, the model is sent directly to the WML service in the _solve_
+request itself.  This is the simplest, but it has a number of drawbacks:
+
+- When solving several times the same model (e.g. to evaluate different parameters),
+the model has to be sent each time.
+
+- In order to display the names of the files that were sent, the _jobs_ command
+needs to request this information, and it comes with the content of the files
+  themselves.  In other words, every _jobs_ command requires downloading the content
+  of all the files for all the jobs that exist in the space.
+
+- Sending a large model may take a long time, because of network throughput.  Sending
+a very large REST request is not at all guaranteed to succeed.
+
+Using Cloud Object Storage as an intermediate step alleviate all these issues:
+
+- Once the model has been uploaded to Cloud Object Storage, it will be reused for
+subsequent jobs without the need to upload it again.
+
+- The job requests refer to the files indirectly, via URLs.  Therefore, they don't
+take much space, and listing the jobs doesn't imply to download the content of the
+  files.
+
+- Uploading to COS is done through specialized code that doesn't just send a single
+request.  Rather, it divides the upload in multiple reasonably sized chunks that each
+  are uploaded individually, with restart if necessary.  Uploading big files is
+  therefore much less prone to failure.
+
+### Setting up a connection
+
+In order to upload the files to Cloud Object Storage, the DOWML library needs to
+know the credentials to use on COS, in which bucket to store the files, etc.  Rather
+than storing this information as configuration information in the DOWML client,
+we store this in Watson Studio itself, as a Connection object in the deployment
+space.
+
+To create a Connection object, follow these steps:
+
+- Navigate to the space for the DOWML library (the space named `DOWMLClient-space`
+  that was created for you when you first used the library or the client).
+
+- Click the blue 'Add to space' button in the top-right.  In the dialog that opens,
+  click on 'Connection'.
+
+- Among the 'IBM' section of the types of data sources, click on 'Cloud Object
+  Storage'.  Don't click on 'Cloud Object Storage (infrastructure)'.
+
+- Name the connection `DOWMLClient-connection`.  This way, the DOWML library and
+  client will be able to find it automatically.  Alternatively, if you want to
+  use a different name, you will have to add the id for this connection to the
+  credentials available to DOWML.  See below for more details.
+
+- Fill in the required information for the 'Access key', 'API key', 'Bucket',
+  'Secret key' and 'Login URL' using the documentation in the (i) tooltips to find
+  the relevant piece of information from the Cloud Object Storage service you
+  want to use.
+  Note that the URL should be a public one, as it will be used by the DOWML code
+  directly, and that one resides outside IBM Cloud.
+
+- Test the connection to make sure that everything is setup properly by using the
+  'Test' button in the lower right, before clicking 'Create'.
+
+If you chose to use a different name than the one that DOWML would find, you need
+to find out the id for this connection and add it to the WML credentials:
+
+- In your `DOWMLClient-space`, expand the 'Data assets' section and locate the
+  Connection that you want DOWML to use.
+
+- Right-click on its name, and use the 'Copy link' feature of your browser (or
+  its equivalent) to copy the URL that opens this connection's configuration page.
+  The id of the connection is the string of letters, numbers and dashes between
+  `connections/` and `?space-id=`.  It should look similar to
+  `e2c52ca4-ec61-4472-a79f-3874a0947d88`
+
+- Include this id in your WML credential file (or the value of the environment
+  variable) with the name `connection_id`, as in the example in the Introduction
+  section above.
+
+### Connecting to data outside COS
+
