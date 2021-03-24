@@ -366,6 +366,17 @@ class DOWMLLib:
         client = self._get_or_make_client()
         cdd = client.deployments.DecisionOptimizationMetaNames
 
+        # Let's check whether we indeed have the necessary information
+        # to use Cloud Object Storage, and fallback to inline if that's not
+        # the case
+        try:
+            # This call will cache the connection information if it
+            # actually succeeds, so it's not wasted.
+            self._find_connection_to_use()
+        except ConnectionIdNotFound:
+            self._logger.error(f'Switching to inline mode instead.')
+            self.inline = True
+
         cdd_inputdata = cdd.INPUT_DATA
         cdd_outputdata = cdd.OUTPUT_DATA
         if not self.inline:
