@@ -619,7 +619,7 @@ class DOWMLLib:
         client = self._get_or_make_client()
         connection_id = self._wml_credentials.get('connection_id', '')
         if connection_id:
-            self._logger.debug(f'Found the connection id to use in the WML credentials: {connection_id}')
+            self._logger.debug(f'Found the connection id to use in the WML credentials.')
         else:
             name = 'DOWMLClient-connection'
             self._logger.debug(f'Looking for a connection named "{name}"...')
@@ -627,10 +627,11 @@ class DOWMLLib:
             for c in connections:
                 if c['entity']['name'] == name:
                     connection_id = c['metadata']['asset_id']
+                    self._logger.debug(f'Found one.')
         if not connection_id:
             self._logger.error(f'Could not find a Connection to get the data!')
             raise ConnectionIdNotFound
-        self._logger.debug(f'Found one: {connection_id}')
+        self._logger.debug(f'Connection id: {connection_id}')
         connection = client.connections.get_details(connection_id)
         DataConnection = namedtuple('DataConnection', ['connection_id', 'bucket_name', 'endpoint_url'])
         self._data_connection = DataConnection(connection_id,
@@ -728,7 +729,7 @@ class DOWMLLib:
     def _create_data_asset_and_upload_if_necessary(self, path):
         """Create a data asset and upload file if they don't both exist already"""
         basename = os.path.basename(path)
-        self._logger.debug(f'Checking whether a connected data asset named "{basename}" already exists.')
+        self._logger.debug(f'Checking whether a connected data asset named \'{basename}\' already exists.')
         data_asset_id = self._find_asset_id_by_name(basename)
         if data_asset_id:
             self._logger.debug(f'Yes, with id {data_asset_id}.')
