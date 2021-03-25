@@ -110,7 +110,7 @@ class DOWMLLib:
         self._type_from_deployment = {}
         self._size_from_deployment = {}
 
-    def _create_connexion(self):
+    def _create_client(self):
         """Create the Python APIClient instance"""
         assert self._client is None
         self._logger.debug(f'Creating the connexion...')
@@ -121,7 +121,7 @@ class DOWMLLib:
     def _get_or_make_client(self):
         if self._client is not None:
             return self._client
-        self._client = self._create_connexion()
+        self._client = self._create_client()
         assert self._client is not None
         self._get_space_id()
         return self._client
@@ -153,7 +153,8 @@ class DOWMLLib:
 
         The model is sent as online data to WML.
 
-        :param paths: one or more pathname to the files to send
+        :param paths: one or more pathname to the files to send, as a single
+                      string, separated by space
         """
         self._get_or_make_client()
 
@@ -222,10 +223,10 @@ class DOWMLLib:
             self.filter_large_chunks_from_details(job_details)
         return job_details
 
-    def client_get_job_details(self, client, job_id, filter=None):
+    def client_get_job_details(self, client, job_id, with_filter=None):
         global the_filter
         global the_old_params
-        the_filter = filter
+        the_filter = with_filter
         the_old_params = client._params
         client._params = new_params
         try:
@@ -316,7 +317,7 @@ class DOWMLLib:
         """Wait for the job to finish, return its status and details as a tuple"""
         client = self._get_or_make_client()
         while True:
-            job_details = self.client_get_job_details(client, job_id, filter='solve_state,status')
+            job_details = self.client_get_job_details(client, job_id, with_filter='solve_state,status')
             do = job_details['entity']['decision_optimization']
             status = self._get_job_status_from_details(job_details)
             self._logger.info(f'Job status: {status}')
