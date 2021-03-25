@@ -158,7 +158,7 @@ job is either a job number or a job id. Uses current job if not specified."""
 Lists all the jobs in the space.
 Current job, if any, is indicated with an arrow."""
         jobs = self._cache_jobs()
-        print('     #   status     id                                    creation date             inputs')
+        print('     #  type  size status      id                                    creation date             inputs')
         for i, j in enumerate(jobs, start=1):
             # Prepare list of input files
             names = ', '.join(j.names)
@@ -166,7 +166,7 @@ Current job, if any, is indicated with an arrow."""
             mark = '   '
             if j.id == self.last_job_id:
                 mark = '=> '
-            print(f'{mark}{i:>3}: {j.status:>10}  {j.id}  {j.created}  {names}')
+            print(f'{mark}{i:>3}: {j.type:<5} {j.size:<4} {j.status:<10}  {j.id}  {j.created}  {names}')
 
     def do_log(self, job_id):
         """log [job]

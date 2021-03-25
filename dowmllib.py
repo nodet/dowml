@@ -341,6 +341,12 @@ class DOWMLLib:
         data = data.decode('UTF-8')
         return data
 
+    def _get_type_from_details(self, job):
+        return '?????'
+
+    def _get_size_from_details(self, job):
+        return '?'
+
     def get_jobs(self):
         """Return the list of tuples (id, status) for all jobs in the deployment"""
         client = self._get_or_make_client()
@@ -353,8 +359,10 @@ class DOWMLLib:
             job_id = self._get_job_id_from_details(job)
             created = self._get_creation_time_from_details(job)
             names = self._get_input_names_from_details(job)
-            JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names'])
-            j = JobTuple(status=status, id=job_id, created=created, names=names)
+            type = self._get_type_from_details(job)
+            size = self._get_size_from_details(job)
+            JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names', 'type', 'size'])
+            j = JobTuple(status=status, id=job_id, created=created, names=names, type=type, size=size)
             result.append(j)
         return result
 

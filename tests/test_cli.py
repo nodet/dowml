@@ -178,9 +178,9 @@ class TestOneJobShouldBeCurrent(TestCase):
 
     def test_only_one_job(self):
         cli = self.cli
-        JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names'])
+        JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names', 'type', 'size'])
         jobs = [
-            JobTuple(status='', id='a', created='', names=''),
+            JobTuple(status='', id='a', created='', names='', type='', size=''),
         ]
         cli.lib.get_jobs.return_value = jobs
         assert cli.last_job_id is None
