@@ -2,6 +2,7 @@ import base64
 import logging
 import os
 import pprint
+import re
 import tempfile
 from collections import namedtuple
 from time import sleep
@@ -105,6 +106,8 @@ class DOWMLLib:
         self.timelimit = None
         self.inline = False
         self._data_connection = None
+        self._type_from_deployment = {}
+        self._size_from_deployment = {}
 
     def _create_connexion(self):
         """Create the Python APIClient instance"""
@@ -342,10 +345,30 @@ class DOWMLLib:
         return data
 
     def _get_type_from_details(self, job):
-        return '?????'
+        deployment_id = job['entity']['deployment']['id']
+        if deployment_id in self._type_from_deployment:
+            return self._type_from_deployment[deployment_id]
+        client = self._get_or_make_client()
+        deployment = client.deployments.get_details(deployment_id)
+        model_id = deployment['entity']['asset']['id']
+        model = client.model_definitions.get_details(model_id)
+        pprint.pprint(model)
+        type = model['entity']['wml_model']['type']
+        match = re.fullmatch(r"do-(....*)_[0-9.]*", type)
+        if match:
+            type = match.group(1)
+        self._type_from_deployment[deployment_id] = type
+        return type
 
     def _get_size_from_details(self, job):
-        return '?'
+        deployment_id = job['entity']['deployment']['id']
+        if deployment_id in self._size_from_deployment:
+            return self._size_from_deployment[deployment_id]
+        client = self._get_or_make_client()
+        deployment = client.deployments.get_details(deployment_id)
+        size = deployment['entity']['hardware_spec']['name']
+        self._size_from_deployment[deployment_id] = size
+        return size
 
     def get_jobs(self):
         """Return the list of tuples (id, status) for all jobs in the deployment"""
