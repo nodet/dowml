@@ -222,6 +222,8 @@ job is either a job number or a job id. Uses current job if not specified."""
 Deletes the job specified. Use '*' to delete all the jobs.
 job is either a job number or a job id. Uses current job if not specified."""
         if job_id == '*':
+            # Update the list of jobs before trying to delete them
+            self._cache_jobs()
             while self.jobs:
                 job = self.jobs[0]
                 self.delete_one_job(job)

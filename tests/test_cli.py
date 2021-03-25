@@ -83,6 +83,8 @@ class TestJobs(TestCase):
     def setUp(self) -> None:
         self.cli = DOWMLInteractive('test_credentials.txt')
         self.cli.lib = Mock(spec=DOWMLLib)
+        JobTuple = namedtuple('Job', ['id'])
+        self.cli.lib.get_jobs = Mock(return_value=[JobTuple(id='a'), JobTuple(id='b'), JobTuple(id='c')])
         self.cli.jobs = ['a', 'b', 'c']
 
     def test_delete_first(self):
@@ -97,6 +99,7 @@ class TestJobs(TestCase):
 
     def test_delete_all(self):
         self.cli.do_delete('*')
+        self.cli.lib.get_jobs.assert_called_once()
         self.cli.lib.delete_job.assert_has_calls([
             call('a', True),
             call('b', True),
