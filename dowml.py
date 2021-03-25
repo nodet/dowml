@@ -146,25 +146,24 @@ job is either a job number or a job id. Uses current job if not specified."""
             pass
         self.last_job_id = job_id
 
+    def _cache_jobs(self):
+        jobs = self.lib.get_jobs()
+        self.jobs = [j.id for j in jobs]
+        if len(jobs) == 1:
+            self.last_job_id = self.jobs[0]
+        return jobs
+
     def do_jobs(self, _):
         """jobs
 Lists all the jobs in the space.
 Current job, if any, is indicated with an arrow."""
-        jobs = self.lib.get_jobs()
-        jobs_len = len(jobs)
-        self.jobs = []
+        jobs = self._cache_jobs()
         print('     #   status     id                                    creation date             inputs')
         for i, j in enumerate(jobs, start=1):
             # Prepare list of input files
             names = ', '.join(j.names)
-            # Add this job id in the list, to allow for translation from job number
-            self.jobs.append(j.id)
             # Mark the job used if none specified
             mark = '   '
-            if jobs_len == 1:
-                assert i == 1
-                # This is the only job. Let's make it current
-                self.last_job_id = j.id
             if j.id == self.last_job_id:
                 mark = '=> '
             print(f'{mark}{i:>3}: {j.status:>10}  {j.id}  {j.created}  {names}')
