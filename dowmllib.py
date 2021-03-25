@@ -5,6 +5,7 @@ import pprint
 import re
 import tempfile
 from collections import namedtuple
+from datetime import datetime
 from time import sleep
 
 import requests
@@ -292,7 +293,11 @@ class DOWMLLib:
 
     @staticmethod
     def _get_creation_time_from_details(job_details):
-        return job_details['metadata']['created_at']
+        created = job_details['metadata']['created_at']
+        if created[-1] == 'Z':
+            dt = datetime.fromisoformat(created[:-1])
+            created = dt.isoformat(sep=' ', timespec='seconds')
+        return created
 
     @staticmethod
     def _get_input_names_from_details(job_details):
