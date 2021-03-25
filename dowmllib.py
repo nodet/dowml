@@ -350,30 +350,39 @@ class DOWMLLib:
         return data
 
     def _get_type_from_details(self, job):
-        deployment_id = job['entity']['deployment']['id']
-        if deployment_id in self._type_from_deployment:
-            return self._type_from_deployment[deployment_id]
-        client = self._get_or_make_client()
-        deployment = client.deployments.get_details(deployment_id)
-        model_id = deployment['entity']['asset']['id']
-        model = client.model_definitions.get_details(model_id)
-        pprint.pprint(model)
-        type = model['entity']['wml_model']['type']
-        match = re.fullmatch(r"do-(....*)_[0-9.]*", type)
-        if match:
-            type = match.group(1)
-        self._type_from_deployment[deployment_id] = type
-        return type
+        try:
+            deployment_id = job['entity']['deployment']['id']
+            if deployment_id in self._type_from_deployment:
+                return self._type_from_deployment[deployment_id]
+            client = self._get_or_make_client()
+            deployment = client.deployments.get_details(deployment_id)
+            model_id = deployment['entity']['asset']['id']
+            model = client.model_definitions.get_details(model_id)
+            deployment_type = model['entity']['wml_model']['type']
+            match = re.fullmatch(r"do-(....*)_[0-9.]*", deployment_type)
+            if match:
+                deployment_type = match.group(1)
+            self._type_from_deployment[deployment_id] = deployment_type
+            return deployment_type
+        except KeyError:
+            # Something changed. But let's not fail just for that
+            self._logger.warning(f'Error while fetching type of a job!')
+            return '?????'
 
     def _get_size_from_details(self, job):
-        deployment_id = job['entity']['deployment']['id']
-        if deployment_id in self._size_from_deployment:
-            return self._size_from_deployment[deployment_id]
-        client = self._get_or_make_client()
-        deployment = client.deployments.get_details(deployment_id)
-        size = deployment['entity']['hardware_spec']['name']
-        self._size_from_deployment[deployment_id] = size
-        return size
+        try:
+            deployment_id = job['entity']['deployment']['id']
+            if deployment_id in self._size_from_deployment:
+                return self._size_from_deployment[deployment_id]
+            client = self._get_or_make_client()
+            deployment = client.deployments.get_details(deployment_id)
+            size = deployment['entity']['hardware_spec']['name']
+            self._size_from_deployment[deployment_id] = size
+            return size
+        except KeyError:
+            # Something changed. But let's not fail just for that
+            self._logger.warning(f'Error while fetching size of a job!')
+            return '?'
 
     def get_jobs(self):
         """Return the list of tuples (id, status) for all jobs in the deployment"""
@@ -387,10 +396,10 @@ class DOWMLLib:
             job_id = self._get_job_id_from_details(job)
             created = self._get_creation_time_from_details(job)
             names = self._get_input_names_from_details(job)
-            type = self._get_type_from_details(job)
+            deployment_type = self._get_type_from_details(job)
             size = self._get_size_from_details(job)
             JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names', 'type', 'size'])
-            j = JobTuple(status=status, id=job_id, created=created, names=names, type=type, size=size)
+            j = JobTuple(status=status, id=job_id, created=created, names=names, type=deployment_type, size=size)
             result.append(j)
         return result
 
