@@ -45,7 +45,7 @@ Here's a sample session:
 ```
 $ python3 dowml.py -h
 usage: dowml.py [-h] [-w WML_CRED_FILE] [--verbose]
-                [--commands [COMMANDS [COMMANDS ...]]] [--input]
+                [--commands [COMMANDS [COMMANDS ...]]] [--input] [-s SPACE]
 
 Interactive program for DO on WML
 
@@ -64,6 +64,10 @@ optional arguments:
                         The program stops after last command.
   --input, -i           Prompts for new input commands even if some commands
                         have been specified as arguments using --commands.
+  -s SPACE, --space SPACE
+                        Id of the space to connect to. Takes precedence over
+                        the one specified in the credentials under the
+                        'space_id' key, if any.
 $
 $
 $ python3 dowml.py -c help type size 'inline yes' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output
