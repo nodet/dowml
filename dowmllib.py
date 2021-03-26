@@ -61,6 +61,13 @@ class DOWMLLib:
     DEPLOYMENT_NAME = 'DOWMLClient-deployment'
     JOB_END_SLEEP_DELAY = 2
 
+    # The keys in the credentials
+    APIKEY = 'apikey'
+    SPACE_ID = 'space_id'
+    URL = 'url'
+    COS_CRN = 'cos_resource_crn'
+    ML_CRN = 'ml_instance_crn'
+
     def __init__(self, wml_credentials_file=None):
         """Read and validate the WML credentials
 
@@ -77,19 +84,22 @@ class DOWMLLib:
 
         wml_credentials = eval(wml_cred_str)
         assert type(wml_credentials) is dict
-        assert 'apikey' in wml_credentials
-        assert type(wml_credentials['apikey']) is str
-        assert 'url' in wml_credentials
-        assert type(wml_credentials['url']) is str
+        assert self.APIKEY in wml_credentials
+        assert type(wml_credentials[self.APIKEY]) is str
+        assert self.URL in wml_credentials
+        assert type(wml_credentials[self.URL]) is str
         # This string is the 'resource_instance_id' in the cos_credentials file
-        assert 'cos_resource_crn' in wml_credentials
-        assert type(wml_credentials['cos_resource_crn']) is str
+        assert self.COS_CRN in wml_credentials
+        assert type(wml_credentials[self.COS_CRN]) is str
         # This one is the CRN for the ML service to use. Open
         # https://cloud.ibm.com/resources, find the service you want to use,
         # click anywhere on the line except the name, and copy the CRN
-        assert 'ml_instance_crn' in wml_credentials
-        assert type(wml_credentials['ml_instance_crn']) is str
+        assert self.ML_CRN in wml_credentials
+        assert type(wml_credentials[self.ML_CRN]) is str
         self._logger.debug(f'Credentials have the expected structure.')
+
+        if self.SPACE_ID in wml_credentials:
+            self._logger.debug(f'And they contain a space id.')
 
         self._wml_credentials = wml_credentials
 
@@ -129,7 +139,7 @@ class DOWMLLib:
         except KeyError:
             print(f'Environment variable ${var_name} not found.')
             print(f'It should contain credentials as a Python dict of the form:')
-            print("'{'apikey': '<apikey>', 'url': 'https://us-south.ml.cloud.ibm.com'}")
+            print(f'{{\'{self.APIKEY}\': \'<apikey>\', \'{self.URL}\': \'https://us-south.ml.cloud.ibm.com\'}}')
             raise InvalidCredentials
 
         return wml_cred_str
@@ -559,10 +569,24 @@ class DOWMLLib:
         return model_id
 
     def _get_space_id(self):
-        """Find the Space to use, create it if it doesn't exist"""
         if self._space_id:
             return self._space_id
 
+        if self.SPACE_ID in self._wml_credentials:
+            space_id = self._wml_credentials[self.SPACE_ID]
+            self._logger.debug(f'Using specified space \'{space_id}\'.')
+        else:
+            space_id = self._find_or_create_space()
+
+        self._logger.debug(f'Setting default space...')
+        self._client.set.default_space(space_id)
+        self._logger.debug(f'Done.')
+
+        self._space_id = space_id
+        return space_id
+
+    def _find_or_create_space(self):
+        """Find the Space to use, create it if it doesn't exist"""
         client = self._get_or_make_client()
         self._logger.debug(f'Fetching existing spaces...')
         space_name = self.SPACE_NAME
@@ -572,14 +596,13 @@ class DOWMLLib:
             csc.DESCRIPTION: space_name + ' description',
             csc.STORAGE: {
                 "type": "bmcos_object_storage",
-                "resource_crn": self._wml_credentials['cos_resource_crn']
+                "resource_crn": self._wml_credentials[self.COS_CRN]
             },
             csc.COMPUTE: {
                 "name": "existing_instance_id",
-                "crn": self._wml_credentials['ml_instance_crn']
+                "crn": self._wml_credentials[self.ML_CRN]
             }
         }
-
         space_details = client.spaces.get_details()
         resources = space_details['resources']
         self._logger.debug(f'Got the list. Looking for space named \'{space_name}\'')
@@ -596,12 +619,6 @@ class DOWMLLib:
             self._logger.debug(f'Space created')
             space_id = client.spaces.get_id(space)
         self._logger.info(f'Space id: {space_id}')
-
-        self._logger.debug(f'Setting default space...')
-        self._client.set.default_space(space_id)
-        self._logger.debug(f'Done.')
-
-        self._space_id = space_id
         return space_id
 
     def _get_connection_details(self):
