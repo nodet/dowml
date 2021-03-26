@@ -6,6 +6,7 @@ import re
 import tempfile
 from collections import namedtuple
 from datetime import datetime
+from functools import lru_cache
 from time import sleep
 
 import requests
@@ -107,8 +108,6 @@ class DOWMLLib:
         self.timelimit = None
         self.inline = False
         self._data_connection = None
-        self._type_from_deployment = {}
-        self._size_from_deployment = {}
 
     def _create_client(self):
         """Create the Python APIClient instance"""
@@ -353,32 +352,38 @@ class DOWMLLib:
     def _get_type_from_details(self, job):
         try:
             deployment_id = job['entity']['deployment']['id']
-            if deployment_id in self._type_from_deployment:
-                return self._type_from_deployment[deployment_id]
             client = self._get_or_make_client()
-            deployment = client.deployments.get_details(deployment_id)
+            deployment = self._get_deployment_from_id(deployment_id)
             model_id = deployment['entity']['asset']['id']
-            model = client.model_definitions.get_details(model_id)
+            model = self._get_model_definition_from_id(model_id)
             deployment_type = model['entity']['wml_model']['type']
             match = re.fullmatch(r"do-(....*)_[0-9.]*", deployment_type)
             if match:
                 deployment_type = match.group(1)
-            self._type_from_deployment[deployment_id] = deployment_type
             return deployment_type
         except KeyError:
             # Something changed. But let's not fail just for that
             self._logger.warning(f'Error while fetching type of a job!')
             return '?????'
 
+    @lru_cache
+    def _get_model_definition_from_id(self, model_id):
+        client = self._get_or_make_client()
+        model = client.model_definitions.get_details(model_id)
+        return model
+
+    @lru_cache
+    def _get_deployment_from_id(self, deployment_id):
+        client = self._get_or_make_client()
+        deployment = client.deployments.get_details(deployment_id)
+        return deployment
+
     def _get_size_from_details(self, job):
         try:
             deployment_id = job['entity']['deployment']['id']
-            if deployment_id in self._size_from_deployment:
-                return self._size_from_deployment[deployment_id]
             client = self._get_or_make_client()
-            deployment = client.deployments.get_details(deployment_id)
+            deployment = self._get_deployment_from_id(deployment_id)
             size = deployment['entity']['hardware_spec']['name']
-            self._size_from_deployment[deployment_id] = size
             return size
         except KeyError:
             # Something changed. But let's not fail just for that
@@ -391,6 +396,7 @@ class DOWMLLib:
         self._logger.debug(f'Getting job details...')
         job_details = client.deployments.get_job_details()
         self._logger.debug(f'Done.')
+        self._logger.debug(f'Getting information about deployments and models...')
         result = []
         for job in job_details['resources']:
             status = self._get_job_status_from_details(job)
@@ -402,6 +408,7 @@ class DOWMLLib:
             JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names', 'type', 'size'])
             j = JobTuple(status=status, id=job_id, created=created, names=names, type=deployment_type, size=size)
             result.append(j)
+        self._logger.debug(f'Done.')
         return result
 
     def create_job(self, paths, deployment_id):
