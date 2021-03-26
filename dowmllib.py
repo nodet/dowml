@@ -91,12 +91,6 @@ class DOWMLLib:
         assert type(wml_credentials['ml_instance_crn']) is str
         self._logger.debug(f'Credentials have the expected structure.')
 
-        # This one is not required to create the APIClient, but can be used
-        # to get data through Cloud Object Storage or any other type of
-        # external storage.
-        if 'connection_id' in wml_credentials:
-            self._logger.debug(f'And they contain a connection id.')
-
         self._wml_credentials = wml_credentials
 
         # We don't initialize the client at this time, because this is an
@@ -632,51 +626,6 @@ class DOWMLLib:
         client.connections._handle_response(200, u'list datasource type', response)
         datasource_details = client.connections._handle_response(200, u'list datasource types', response)['resources']
         return datasource_details
-
-    def _find_connection_to_use(self):
-        """Returns information about the connection to use
-
-        A Watson Studio data asset doesn't (or doesn't necessarily) contain the
-        information necessary to actually get the data from the external service.
-        It actually has the id of a 'connection'. That connection holds all the
-        information (API key, secret key, etc).
-
-        This function looks for a suitable connection in the WS space.  It can be
-        either a connection the id of which was given in the DOWML credentials,
-        or one that simply exists in the space and is named
-        'DOWMLClient-connection'.
-
-        The information from this connection is also used to check whether the
-        model to solve already exists on Cloud Object Storage, and upload it there
-        if that's not the case.
-
-        This function returns a named tuple: 'connection_id', 'bucket_name',
-        'endpoint_url'. """
-        if self._data_connection:
-            return self._data_connection
-        client = self._get_or_make_client()
-        connection_id = self._wml_credentials.get('connection_id', '')
-        if connection_id:
-            self._logger.debug(f'Found the connection id to use in the WML credentials.')
-        else:
-            name = 'DOWMLClient-connection'
-            self._logger.debug(f'Looking for a connection named "{name}"...')
-            connections = self._get_connection_details()
-            for c in connections:
-                if c['entity']['name'] == name:
-                    connection_id = c['metadata']['asset_id']
-                    self._logger.debug(f'Found one.')
-        if not connection_id:
-            self._logger.error(f'Could not find a Connection to get the data!')
-            raise ConnectionIdNotFound
-        self._logger.debug(f'Connection id: {connection_id}')
-        connection = client.connections.get_details(connection_id)
-        DataConnection = namedtuple('DataConnection', ['connection_id', 'bucket_name', 'endpoint_url'])
-        self._data_connection = DataConnection(connection_id,
-                                               connection['entity']['properties']['bucket'],
-                                               connection['entity']['properties']['url'])
-        self._logger.debug(f'Fetched its details.')
-        return self._data_connection
 
     def _get_asset_details(self):
         """This function returns the list of all the data assets in the space
