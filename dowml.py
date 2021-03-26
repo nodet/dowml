@@ -250,29 +250,41 @@ job is either a job number or a job id. Uses current job if not specified."""
         self.last_job_id = job_id
 
 
-def main_loop():
+def main_loop(commands):
     try:
         dowml = DOWMLInteractive(args.wml_cred_file)
-        while True:
-            again = False
+        # By default, we want to run the command loop
+        loop = True
+        for c in commands:
+            if loop:
+                # This is the first command we carry out. Let's print intro
+                print(dowml.intro)
+                # And make sure we won't print it again
+                dowml.intro = ''
+            # We don't want to ask for other commands if commands were specified
+            loop = False
+            print(f'{dowml.prompt} {c}')
+            dowml.onecmd(c)
+        while loop:
+            # Generally speaking, one command loop is all we need, and we
+            # should not run another, except in case of errors
+            loop = False
             try:
                 dowml.cmdloop()
             except ApiRequestFailure:
                 # This happens when an invalid job id is specified. We want
                 # to keep running.
-                again = True
+                loop = True
             except requests.exceptions.ConnectionError as e:
                 print(e)
-                again = True
+                loop = True
             except CommandNeedsJobID:
                 print(f'This command requires a jod id or number, but you '
                       f'didn\'t specify one.  And there is no current job either.')
-                again = True
+                loop = True
             finally:
                 # But let's not print again the starting banner
                 dowml.intro = ''
-            if not again:
-                break
     except InvalidCredentials:
         print(f'\nERROR: credentials not found!\n')
         parser.print_help()
@@ -306,6 +318,9 @@ if __name__ == '__main__':
                         help=f'Verbose mode.  Causes the program to print debugging '
                              f'messages about its progress.  Multiple -v options '
                              f'increase the verbosity.  The maximum is 4.')
+    parser.add_argument('--commands', '-c', nargs='*', default=[],
+                        help=f'Carries out the specified commands.  Each command '
+                             f'is executed as if it had been specified at the prompt.')
     args = parser.parse_args()
 
     # Last logging level repeated as many times as necessary to accommodate
@@ -329,4 +344,4 @@ if __name__ == '__main__':
         # logging.getLogger('ibm_botocore').setLevel(logging.DEBUG)
         # logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
 
-    main_loop()
+    main_loop(args.commands)
