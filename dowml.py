@@ -30,9 +30,9 @@ of the job, as displayed by the 'jobs' command.  If a command requires a
 job id, but none is specified, the last one is used.
 ''')
 
-    def __init__(self, wml_cred_file):
+    def __init__(self, wml_cred_file, space_id=None):
         super().__init__()
-        self.lib = DOWMLLib(wml_cred_file)
+        self.lib = DOWMLLib(wml_cred_file, space_id)
         self.jobs = []
         self.last_job_id = None
 
@@ -250,9 +250,9 @@ job is either a job number or a job id. Uses current job if not specified."""
         self.last_job_id = job_id
 
 
-def main_loop(commands, input):
+def main_loop(commands, input, space):
     try:
-        dowml = DOWMLInteractive(args.wml_cred_file)
+        dowml = DOWMLInteractive(args.wml_cred_file, args.space)
         # By default, we want to run the command loop
         loop = True
         for c in commands:
@@ -325,6 +325,10 @@ if __name__ == '__main__':
     parser.add_argument('--input', '-i', action='store_true',
                         help=f'Prompts for new input commands even if some commands '
                              f'have been specified as arguments using --commands.')
+    parser.add_argument('-s', '--space', default=None,
+                        help=f'Id of the space to connect to. Takes precedence over '
+                             f'the one specified in the credentials under the '
+                             f'\'{DOWMLLib.SPACE_ID}\' key, if any.')
     args = parser.parse_args()
 
     # Last logging level repeated as many times as necessary to accommodate
@@ -348,4 +352,4 @@ if __name__ == '__main__':
         # logging.getLogger('ibm_botocore').setLevel(logging.DEBUG)
         # logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
 
-    main_loop(args.commands, args.input)
+    main_loop(args.commands, args.input, args.space)

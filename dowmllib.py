@@ -68,7 +68,7 @@ class DOWMLLib:
     COS_CRN = 'cos_resource_crn'
     ML_CRN = 'ml_instance_crn'
 
-    def __init__(self, wml_credentials_file=None):
+    def __init__(self, wml_credentials_file=None, space_id=None):
         """Read and validate the WML credentials
 
         Args:
@@ -100,6 +100,11 @@ class DOWMLLib:
 
         if self.SPACE_ID in wml_credentials:
             self._logger.debug(f'And they contain a space id.')
+
+        # The space_id specified here takes precedence
+        # over the one, if any, defined in the credentials
+        if space_id:
+            wml_credentials[self.SPACE_ID] = space_id
 
         self._wml_credentials = wml_credentials
 
