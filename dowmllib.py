@@ -106,9 +106,9 @@ class DOWMLLib:
     def _create_client(self):
         """Create the Python APIClient instance"""
         assert self._client is None
-        self._logger.debug(f'Creating the connexion...')
+        self._logger.debug(f'Creating the WML client...')
         client = APIClient(self._wml_credentials)
-        self._logger.info(f'Creating the connexion succeeded.  Client version is {client.version}')
+        self._logger.info(f'Creating the client succeeded.  Client version is {client.version}')
         return client
 
     def _get_or_make_client(self):
