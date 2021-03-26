@@ -263,7 +263,7 @@ def main_loop(commands, input):
                 dowml.intro = ''
             # We run the command loop iff this was asked for
             loop = input
-            print(f'{dowml.prompt} {c}')
+            print(f'{dowml.prompt}{c}')
             dowml.onecmd(c)
         while loop:
             # Generally speaking, one command loop is all we need, and we
