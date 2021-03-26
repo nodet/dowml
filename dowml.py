@@ -250,7 +250,7 @@ job is either a job number or a job id. Uses current job if not specified."""
         self.last_job_id = job_id
 
 
-def main_loop(commands):
+def main_loop(commands, input):
     try:
         dowml = DOWMLInteractive(args.wml_cred_file)
         # By default, we want to run the command loop
@@ -261,8 +261,8 @@ def main_loop(commands):
                 print(dowml.intro)
                 # And make sure we won't print it again
                 dowml.intro = ''
-            # We don't want to ask for other commands if commands were specified
-            loop = False
+            # We run the command loop iff this was asked for
+            loop = input
             print(f'{dowml.prompt} {c}')
             dowml.onecmd(c)
         while loop:
@@ -320,7 +320,11 @@ if __name__ == '__main__':
                              f'increase the verbosity.  The maximum is 4.')
     parser.add_argument('--commands', '-c', nargs='*', default=[],
                         help=f'Carries out the specified commands.  Each command '
-                             f'is executed as if it had been specified at the prompt.')
+                             f'is executed as if it had been specified at the prompt. '
+                             f'The program stops after last command.')
+    parser.add_argument('--input', '-i', action='store_true',
+                        help=f'Prompts for new input commands even if some commands '
+                             f'have been specified as arguments using --commands.')
     args = parser.parse_args()
 
     # Last logging level repeated as many times as necessary to accommodate
@@ -344,4 +348,4 @@ if __name__ == '__main__':
         # logging.getLogger('ibm_botocore').setLevel(logging.DEBUG)
         # logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
 
-    main_loop(args.commands)
+    main_loop(args.commands, args.input)
