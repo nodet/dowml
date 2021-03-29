@@ -11,8 +11,12 @@ from dowmllib import DOWMLLib, InvalidCredentials, NoCredentialsToCreateSpace
 
 class CommandNeedsJobID(Exception):
     pass
+
+
 class CommandNeedsNonNullInteger(Exception):
     pass
+
+
 class CommandNeedsBool(Exception):
     pass
 
