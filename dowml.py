@@ -252,7 +252,7 @@ job is either a job number or a job id. Uses current job if not specified."""
         self.last_job_id = job_id
 
 
-def main_loop(commands, input, space):
+def main_loop(commands, input):
     try:
         dowml = DOWMLInteractive(args.wml_cred_file, args.space)
         # By default, we want to run the command loop
@@ -357,4 +357,4 @@ if __name__ == '__main__':
         # logging.getLogger('ibm_botocore').setLevel(logging.DEBUG)
         # logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
 
-    main_loop(args.commands, args.input, args.space)
+    main_loop(args.commands, args.input)
