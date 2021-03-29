@@ -252,7 +252,7 @@ job is either a job number or a job id. Uses current job if not specified."""
         self.last_job_id = job_id
 
 
-def main_loop(wml_cred_file, space_id, commands, input):
+def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
     try:
         dowml = DOWMLInteractive(wml_cred_file, space_id)
         # By default, we want to run the command loop
@@ -264,7 +264,7 @@ def main_loop(wml_cred_file, space_id, commands, input):
                 # And make sure we won't print it again
                 dowml.intro = ''
             # We run the command loop iff this was asked for
-            loop = input
+            loop = prompt_at_the_end
             print(f'{dowml.prompt}{c}')
             dowml.onecmd(c)
         while loop:
