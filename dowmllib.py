@@ -124,11 +124,10 @@ class DOWMLLib:
         return client
 
     def _get_or_make_client(self):
-        if self._client is not None:
-            return self._client
-        self._client = self._create_client()
-        assert self._client is not None
-        self._get_space_id()
+        if self._client is None:
+            self._client = self._create_client()
+        if self._space_id is None:
+            self._space_id = self._get_space_id()
         return self._client
 
     def _read_wml_credentials_from_env(self, var_name):
@@ -589,13 +588,12 @@ class DOWMLLib:
         self._logger.debug(f'Setting default space...')
         self._client.set.default_space(space_id)
         self._logger.debug(f'Done.')
-
-        self._space_id = space_id
         return space_id
 
     def _find_or_create_space(self):
         """Find the Space to use, create it if it doesn't exist"""
-        client = self._get_or_make_client()
+        assert self._client
+        client = self._client
         self._logger.debug(f'Fetching existing spaces...')
         space_details = client.spaces.get_details()
         resources = space_details['resources']
