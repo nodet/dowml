@@ -442,7 +442,7 @@ class DOWMLLib:
         # There may be more than one input file
         names = []
         for path in paths.split():
-            basename = os.path.basename(path)
+            path, basename, force = self._get_file_spec(path)
             if basename in names:
                 raise SimilarNamesInJob(basename)
             names.append(basename)
@@ -452,7 +452,7 @@ class DOWMLLib:
                     'content': self.get_file_as_data(path)
                 }
             else:
-                data_asset_id = self._create_data_asset_if_necessary(path)
+                data_asset_id = self._create_data_asset_if_necessary(path, basename, force)
                 input_data = {
                     'id': basename,
                     "type": "data_asset",
@@ -470,6 +470,14 @@ class DOWMLLib:
         self._logger.debug(f'Done. Getting its id...')
         job_id = client.deployments.get_job_uid(job_details)
         return job_id
+
+    def _get_file_spec(self, path):
+        force = False
+        if path[0] == '+':
+            force = True
+            path = path[1:]
+        basename = os.path.basename(path)
+        return path, basename, force
 
     def _get_deployment_id(self):
         """Create deployment if doesn't exist already, return its id"""
@@ -688,7 +696,7 @@ class DOWMLLib:
                 return metadata['asset_id']
         return None
 
-    def create_asset(self, path):
+    def create_asset(self, path, basename):
         """Create a data asset with the given name
 
         A Watson Studio data asset is an entity that mimicks a file.  It actually
@@ -696,20 +704,21 @@ class DOWMLLib:
         a Connection.  In this case, we create an asset that reads the object in
         Cloud Object Storage.  The connection gives us the information about
         the bucket to use and the endpoint to contact to read the object."""
-        basename = os.path.basename(path)
         client = self._get_or_make_client()
         asset_details = client.data_assets.create(basename, path)
         return asset_details['metadata']['guid']
 
-    def _create_data_asset_if_necessary(self, path):
-        """Create a data asset (and upload file) if it doesn't exist already"""
-        basename = os.path.basename(path)
-        self._logger.debug(f'Checking whether a connected data asset named \'{basename}\' already exists.')
-        data_asset_id = self._find_asset_id_by_name(basename)
-        if data_asset_id:
-            self._logger.debug(f'Yes, with id {data_asset_id}.')
-            return data_asset_id
-        self._logger.debug(f'Creating the data asset.')
-        data_asset_id = self.create_asset(path)
+    def _create_data_asset_if_necessary(self, path, basename, force):
+        """Create a data asset (and upload file) if it doesn't exist already."""
+        if force:
+            self._logger.info(f'Creating or updating the data asset named \'{basename}\'.')
+        else:
+            self._logger.info(f'Checking whether a connected data asset named \'{basename}\' already exists.')
+            data_asset_id = self._find_asset_id_by_name(basename)
+            if data_asset_id:
+                self._logger.debug(f'Yes, with id {data_asset_id}.')
+                return data_asset_id
+            self._logger.debug(f'Creating the data asset.')
+        data_asset_id = self.create_asset(path, basename)
         self._logger.debug(f'Done.')
         return data_asset_id
