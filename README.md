@@ -152,9 +152,13 @@ Storing a1c5057b-a49f-48ef-836e-e5890a75fa9f_details.json
 
 ## WML credentials
 
-There are four pieces of information that are required in order to submit jobs on WML.
+The DOWML client requires some information in order to connect to the Watson
+Machine Learning service.  Two pieces of information are required, and the others
+are optional.
 
-1. The `apikey` is a secret that identifies the IBM Cloud user. You typically create
+### Required items
+
+1. The `apikey` is a secret that identifies the IBM Cloud user. One typically creates
    one key per application or service, in order to be able to revoke them individually
    if needed.
    To generate such a key, open https://cloud.ibm.com/iam/apikeys, and click the blue
@@ -164,19 +168,44 @@ There are four pieces of information that are required in order to submit jobs o
    found in https://cloud.ibm.com/apidocs/machine-learning, and depend on which
    region you want to use.
 
-3. WML needs to store some data in a Cloud Object Storage instance.  Open
+### Optional items
+
+Watson Studio and Watson Machine Learning use _spaces_ to group together, and
+isolate from each other, the assets that belong to a single project.  These assets 
+include the data files submitted, the results of the jobs, and the _deployments_
+(software and hardware configurations) that run these jobs.
+
+The DOWML client will connect to the space specified by the user using
+either the `--space` command-line argument or the `space_id` item in the credentials.
+If neither of these are specified, the client will look for a space named 
+_DOWMLClient-space_, and will try to create such a space if one doesn't exist.
+To create a new space, the DOWML client will need both `cos_resource_crn` and
+`ml_instance_crn` to have been specified in the credentials.
+
+3. `space_id`: identifier of an existing space to connect to.  Navigate to the 
+   'Spaces' tab of your Watson Studio site (e.g. 
+   https://eu-de.dataplatform.cloud.ibm.com/ml-runtime/spaces if you are using
+   the instance in Germany), right-click on the name of an existing space to
+   copy the link. The id of the space is the string of numbers, letters and dashes
+   between the last `/` and the `?`.
+
+3. `cos_resource_crn`: WML needs to store some data in a Cloud Object Storage 
+   instance.  Open
    https://cloud.ibm.com/resources and locate the 'Storage' section.  Create an
    instance of the Cloud Object Storage service if needed. Once it's listed on
    the resource page, click anywhere on the line for that service, except on its
    name.  This will open a pane on the right which lists the CRN.  Click on the
-   symbol at the right to copy this information.
-
-4. Similarly, you need to identify an instance of Machine Learning service to use
+   symbol at the right to copy this information.  This item is required for the
+   DOWML client to be able to create a space.
+   
+4. `ml_instance_crn`: similarly, you need to identify an instance of Machine 
+   Learning service to use
    to solve your jobs.  In the same page https://cloud.ibm.com/resources, open the
    'Services' section.  The 'Product' columns tells you the type of service.  If
    you don't have a 'Machine Learning' instance already, create one.  Then click
    on the corresponding line anywhere except on the name, and copy the CRN displayed
-   in the pane that open on the right.
+   in the pane that open on the right.  This item is required for the
+   DOWML client to be able to create a space.
 
 ## Using data assets in Watson Studio
 

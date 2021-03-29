@@ -33,6 +33,11 @@ class ConnectionIdNotFound(Error):
     pass
 
 
+class NoCredentialsToCreateSpace(Error):
+    """Need to create a space, but credentials are incomplete to allow that"""
+    pass
+
+
 #
 # We patch APIClient._params with this function instead
 #
@@ -88,14 +93,6 @@ class DOWMLLib:
         assert type(wml_credentials[self.APIKEY]) is str
         assert self.URL in wml_credentials
         assert type(wml_credentials[self.URL]) is str
-        # This string is the 'resource_instance_id' in the cos_credentials file
-        assert self.COS_CRN in wml_credentials
-        assert type(wml_credentials[self.COS_CRN]) is str
-        # This one is the CRN for the ML service to use. Open
-        # https://cloud.ibm.com/resources, find the service you want to use,
-        # click anywhere on the line except the name, and copy the CRN
-        assert self.ML_CRN in wml_credentials
-        assert type(wml_credentials[self.ML_CRN]) is str
         self._logger.debug(f'Credentials have the expected structure.')
 
         if self.SPACE_ID in wml_credentials:
@@ -361,7 +358,6 @@ class DOWMLLib:
     def _get_type_from_details(self, job):
         try:
             deployment_id = job['entity']['deployment']['id']
-            client = self._get_or_make_client()
             deployment = self._get_deployment_from_id(deployment_id)
             model_id = deployment['entity']['asset']['id']
             model = self._get_model_definition_from_id(model_id)
@@ -390,7 +386,6 @@ class DOWMLLib:
     def _get_size_from_details(self, job):
         try:
             deployment_id = job['entity']['deployment']['id']
-            client = self._get_or_make_client()
             deployment = self._get_deployment_from_id(deployment_id)
             size = deployment['entity']['hardware_spec']['name']
             return size
@@ -594,31 +589,40 @@ class DOWMLLib:
         """Find the Space to use, create it if it doesn't exist"""
         client = self._get_or_make_client()
         self._logger.debug(f'Fetching existing spaces...')
-        space_name = self.SPACE_NAME
-        csc = client.spaces.ConfigurationMetaNames
-        metadata = {
-            csc.NAME: space_name,
-            csc.DESCRIPTION: space_name + ' description',
-            csc.STORAGE: {
-                "type": "bmcos_object_storage",
-                "resource_crn": self._wml_credentials[self.COS_CRN]
-            },
-            csc.COMPUTE: {
-                "name": "existing_instance_id",
-                "crn": self._wml_credentials[self.ML_CRN]
-            }
-        }
         space_details = client.spaces.get_details()
         resources = space_details['resources']
-        self._logger.debug(f'Got the list. Looking for space named \'{space_name}\'')
+        self._logger.debug(f'Got the list. Looking for space named \'{self.SPACE_NAME}\'')
         space_id = None
         for r in resources:
-            if r['entity']['name'] == space_name:
+            if r['entity']['name'] == self.SPACE_NAME:
                 space_id = r['metadata']['id']
                 self._logger.debug(f'Found it.')
                 break
         if space_id is None:
             self._logger.debug(f'This space doesn\'t exist yet. Creating it...')
+            # Prepare necessary information
+
+            wml_credentials = self._wml_credentials
+            if self.COS_CRN not in wml_credentials or self.ML_CRN not in wml_credentials:
+                raise NoCredentialsToCreateSpace(f'WML credentials do not contain the information necessary '
+                                                 f'to create a deployment space. \nMissing \'{self.COS_CRN}\' '
+                                                 f'and/or \'{self.ML_CRN}\'.')
+            assert type(wml_credentials[self.COS_CRN]) is str
+            assert type(wml_credentials[self.ML_CRN]) is str
+
+            csc = client.spaces.ConfigurationMetaNames
+            metadata = {
+                csc.NAME: self.SPACE_NAME,
+                csc.DESCRIPTION: self.SPACE_NAME + ' description',
+                csc.STORAGE: {
+                    "type": "bmcos_object_storage",
+                    "resource_crn": self._wml_credentials[self.COS_CRN]
+                },
+                csc.COMPUTE: {
+                    "name": "existing_instance_id",
+                    "crn": self._wml_credentials[self.ML_CRN]
+                }
+            }
             # Create the space
             space = client.spaces.store(meta_props=metadata)
             self._logger.debug(f'Space created')

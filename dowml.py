@@ -6,7 +6,7 @@ import requests
 from cmd import Cmd
 from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
 
-from dowmllib import DOWMLLib, InvalidCredentials
+from dowmllib import DOWMLLib, InvalidCredentials, NoCredentialsToCreateSpace
 
 
 class CommandNeedsJobID(Exception):
@@ -282,6 +282,9 @@ def main_loop(commands, input, space):
                 print(f'This command requires a jod id or number, but you '
                       f'didn\'t specify one.  And there is no current job either.')
                 loop = True
+            except NoCredentialsToCreateSpace as e:
+                print(e)
+                # There's nothing the user could do at this point: no need to loop
             finally:
                 # But let's not print again the starting banner
                 dowml.intro = ''
