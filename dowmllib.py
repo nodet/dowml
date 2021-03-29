@@ -452,7 +452,7 @@ class DOWMLLib:
                     'content': self.get_file_as_data(path)
                 }
             else:
-                data_asset_id = self._create_data_asset_and_upload_if_necessary(path)
+                data_asset_id = self._create_data_asset_if_necessary(path)
                 input_data = {
                     'id': basename,
                     "type": "data_asset",
@@ -701,7 +701,7 @@ class DOWMLLib:
         asset_details = client.data_assets.create(basename, path)
         return asset_details['metadata']['guid']
 
-    def _create_data_asset_and_upload_if_necessary(self, path):
+    def _create_data_asset_if_necessary(self, path):
         """Create a data asset (and upload file) if it doesn't exist already"""
         basename = os.path.basename(path)
         self._logger.debug(f'Checking whether a connected data asset named \'{basename}\' already exists.')
