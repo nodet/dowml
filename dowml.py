@@ -145,8 +145,8 @@ uploaded even if using data assets and an asset with that name already exists.""
 Waits until the job is finished, printing activity. Hit Ctrl-C to interrupt.
 job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._number_to_id(job_id)
-        self.lib.wait_for_job_end(job_id, True)
         self.last_job_id = job_id
+        self.lib.wait_for_job_end(job_id, True)
 
     def _cache_jobs(self):
         jobs = self.lib.get_jobs()
