@@ -44,6 +44,10 @@ job id, but none is specified, the last one is used.
         # Just hitting enter should _not_ repeat a command
         return False
 
+    def _get_and_remember_job_id(self, number):
+        self.last_job_id = self._number_to_id(number)
+        return self.last_job_id
+
     def _number_to_id(self, number):
         if not number:
             # If nothing specified, use the last job id
@@ -144,8 +148,7 @@ uploaded even if using data assets and an asset with that name already exists.""
         """wait [job]
 Waits until the job is finished, printing activity. Hit Ctrl-C to interrupt.
 job is either a job number or a job id. Uses current job if not specified."""
-        job_id = self._number_to_id(job_id)
-        self.last_job_id = job_id
+        job_id = self._get_and_remember_job_id(job_id)
         self.lib.wait_for_job_end(job_id, True)
 
     def _cache_jobs(self):
@@ -174,21 +177,19 @@ Current job, if any, is indicated with an arrow."""
         """log [job]
 Prints the engine log for the given job.
 job is either a job number or a job id. Uses current job if not specified."""
-        job_id = self._number_to_id(job_id)
+        job_id = self._get_and_remember_job_id(job_id)
         log = self.lib.get_log(job_id)
         print(log)
-        self.last_job_id = job_id
 
     def do_output(self, job_id):
         """output [job]
 Downloads all the outputs of a job, as well as the details/status of the job.
 job is either a job number or a job id. Uses current job if not specified."""
-        job_id = self._number_to_id(job_id)
+        job_id = self._get_and_remember_job_id(job_id)
         details = self.lib.get_job_details(job_id, with_contents='full')
         outputs = self.lib.get_output(details)
         for name, content in outputs:
             self.save_content(job_id, name, content)
-        self.last_job_id = job_id
         # We don't want to store all the outputs in the details themselves
         self.lib.filter_large_chunks_from_details(details)
         details = pprint.pformat(details)
@@ -213,11 +214,10 @@ job is either a job number or a job id. Uses current job if not specified."""
             if arg == 'full' or arg == 'names':
                 with_contents = arg
             else:
-                job_id = self._number_to_id(arg)
-        job_id = self._number_to_id(job_id)
+                job_id = self._get_and_remember_job_id(arg)
+        job_id = self._get_and_remember_job_id(job_id)
         details = self.lib.get_job_details(job_id, with_contents=with_contents)
         printer(details, indent=4, width=120)
-        self.last_job_id = job_id
 
     def do_delete(self, job_id):
         """delete [job|*]
@@ -233,23 +233,30 @@ job is either a job number or a job id. Uses current job if not specified."""
             self.delete_one_job(job_id)
 
     def delete_one_job(self, job_id):
-        job_id = self._number_to_id(job_id)
+        previous_job = self.last_job_id
+        job_id = self._get_and_remember_job_id(job_id)
         self.lib.delete_job(job_id, True)
         if job_id in self.jobs:
             self.jobs.remove(job_id)
         assert job_id not in self.jobs  # Because a job appears only once
-        if self.last_job_id == job_id:
+        if previous_job != job_id:
+            # The current job was a job that's still there.
+            # Let's keep that one as current job
+            self.last_job_id = previous_job
+        else:
+            # The job that was deleted was the current one
+            # Generally speaking, we can't decide of a new current job...
             self.last_job_id = None
         if len(self.jobs) == 1:
+            # ... except if there's only one!
             self.last_job_id = self.jobs[0]
 
     def do_cancel(self, job_id):
         """cancel [job]
 Stops the job specified.
 job is either a job number or a job id. Uses current job if not specified."""
-        job_id = self._number_to_id(job_id)
+        job_id = self._get_and_remember_job_id(job_id)
         self.lib.delete_job(job_id, False)
-        self.last_job_id = job_id
 
 
 def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
