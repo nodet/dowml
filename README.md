@@ -195,8 +195,9 @@ To create a new space, the DOWML client will need both `cos_resource_crn` and
    instance of the Cloud Object Storage service if needed. Once it's listed on
    the resource page, click anywhere on the line for that service, except on its
    name.  This will open a pane on the right which lists the CRN.  Click on the
-   symbol at the right to copy this information.  This item is required for the
-   DOWML client to be able to create a space.
+   symbol at the right to copy this information.  This item is required only for 
+   the DOWML client to be able to create a space.  If you specified a `space_id`,
+   it is not required.
    
 4. `ml_instance_crn`: similarly, you need to identify an instance of Machine 
    Learning service to use
@@ -204,8 +205,9 @@ To create a new space, the DOWML client will need both `cos_resource_crn` and
    'Services' section.  The 'Product' columns tells you the type of service.  If
    you don't have a 'Machine Learning' instance already, create one.  Then click
    on the corresponding line anywhere except on the name, and copy the CRN displayed
-   in the pane that open on the right.  This item is required for the
-   DOWML client to be able to create a space.
+   in the pane that open on the right.  This item is required only for 
+   the DOWML client to be able to create a space.  If you specified a `space_id`,
+   it is not required.
 
 ## Using data assets in Watson Studio
 
