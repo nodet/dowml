@@ -183,6 +183,9 @@ class DOWMLLib:
             return None
         for output_data in outputs:
             if output_data['id'] == 'log.txt':
+                if 'content' not in output_data:
+                    self._logger.error(f'Log without content for job {job_id}')
+                    continue
                 output = output_data['content']
                 output = self.decode_log(output)
                 output = self.remove_empty_lines(output)
