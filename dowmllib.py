@@ -119,6 +119,7 @@ class DOWMLLib:
         """Create the Python APIClient instance"""
         assert self._client is None
         self._logger.debug(f'Creating the WML client...')
+        # http://ibm-wml-api-pyclient.mybluemix.net/#api-for-ibm-cloud
         client = APIClient(self._wml_credentials)
         self._logger.info(f'Creating the client succeeded.  Client version is {client.version}')
         return client
@@ -418,11 +419,14 @@ class DOWMLLib:
         """Create a deployment job (aka a run) and return its id"""
         client = self._get_or_make_client()
         cdd = client.deployments.DecisionOptimizationMetaNames
-        cdd_inputdata = cdd.INPUT_DATA
+        # We always use inline output
         cdd_outputdata = cdd.OUTPUT_DATA
+        # Assume we use inline data (i.e. content in the job request)
+        cdd_inputdata = cdd.INPUT_DATA
         if not self.inline:
+            # But if we don't want inline data, we have to submit
+            # input references instead
             cdd_inputdata = cdd.INPUT_DATA_REFERENCES
-            # cdd_outputdata = cdd.OUTPUT_DATA_REFERENCES
         solve_payload = {
             cdd.SOLVE_PARAMETERS: {
                 'oaas.logAttachmentName': 'log.txt',
