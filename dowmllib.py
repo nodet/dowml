@@ -209,10 +209,20 @@ class DOWMLLib:
         result = []
         for output_data in outputs:
             name = output_data['id']
-            content = output_data['content']
-            content = content.encode('UTF-8')
-            content = base64.b64decode(content)
-            result.append((name, content))
+            if 'content' in output_data:
+                # What we have here is a regular file, encoded
+                self._logger.debug(f'Found a regular file named {name}')
+                content = output_data['content']
+                content = content.encode('UTF-8')
+                content = base64.b64decode(content)
+                result.append((name, content))
+            elif ('values' in output_data and
+                  'fields' in output_data and
+                  name.lower().endswith('.csv')):
+                self._logger.debug(f'Found a CSV file named {name}')
+                self._logger.error(f'Extraction of CSV files not yet implemented')
+            else:
+                self._logger.warning(f'Found an unknown file named {name}')
         return result
 
     def get_job_details(self, job_id, with_contents=None):
