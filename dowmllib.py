@@ -1,4 +1,6 @@
 import base64
+import csv
+import io
 import logging
 import os
 import pprint
@@ -220,7 +222,12 @@ class DOWMLLib:
                   'fields' in output_data and
                   name.lower().endswith('.csv')):
                 self._logger.debug(f'Found a CSV file named {name}')
-                self._logger.error(f'Extraction of CSV files not yet implemented')
+                content = io.StringIO()
+                writer = csv.writer(content)
+                writer.writerow(output_data['fields'])
+                for r in output_data['values']:
+                    writer.writerow(r)
+                result.append((name, content.getvalue().encode()))
             else:
                 self._logger.warning(f'Found an unknown file named {name}')
         return result

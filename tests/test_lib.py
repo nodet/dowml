@@ -94,5 +94,33 @@ class TestSolve(TestCase):
         self.assertNotIn('oaas.timeLimit', self.get_params(create_job_mock))
 
 
+    def test_get_csv_file(self):
+        details = {
+            'entity': {
+                'decision_optimization': {
+                    'output_data': [
+                       {
+                          'fields': ['i', 'f'],
+                          'id': 'results.csv',
+                          'values': [
+                             [0, 0],
+                             ['a,b', 'c d']
+                          ]
+                       }
+                    ]
+                }
+            }
+        }
+        output = self.lib.get_output(details)
+        output_data = details['entity']['decision_optimization']['output_data']
+        self.assertEqual(len(output), 1)
+        self.assertEqual(output[0][0], 'results.csv')
+        lines = output[0][1].decode().split('\r\n')
+        # There is one empty line at the end
+        self.assertEqual(len(lines), 4)
+        self.assertEqual(lines[0], 'i,f')
+        self.assertEqual(lines[1], '0,0')
+        self.assertEqual(lines[2], '"a,b",c d')
+
 if __name__ == '__main__':
     main()
