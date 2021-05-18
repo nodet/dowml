@@ -273,10 +273,12 @@ class DOWMLLib:
             for data in do.get('output_data', []):
                 if 'content' in data:
                     data['content'] = '[not shown]'
+                elif 'values' in data:
+                    data['values'] = ['[not shown]']
             for data in do.get('input_data', []):
                 if 'content' in data:
                     data['content'] = '[not shown]'
-            if 'latest_engine_activity' in do['solve_state']:
+            if 'solve_state' in do and 'latest_engine_activity' in do['solve_state']:
                 do['solve_state']['latest_engine_activity'] = ['[not shown]']
         except KeyError:
             # GH-1: This happens when the job failed
