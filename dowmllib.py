@@ -176,7 +176,12 @@ class DOWMLLib:
         :return: The decoded log, or None
         """
         job_details = self.get_job_details(job_id, with_contents='log')
-        for output_data in job_details['entity']['decision_optimization']['output_data']:
+        try:
+            outputs = job_details['entity']['decision_optimization']['output_data']
+        except KeyError:
+            self._logger.warning(f'No output structure available for this job')
+            return None
+        for output_data in outputs:
             if output_data['id'] == 'log.txt':
                 output = output_data['content']
                 output = self.decode_log(output)
