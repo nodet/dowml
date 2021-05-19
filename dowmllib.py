@@ -118,6 +118,7 @@ class DOWMLLib:
         self._space_id = None
         self.model_type = self.MODEL_TYPES[0]
         self.tshirt_size = self.TSHIRT_SIZES[0]
+        self.do_version = self.DO_VERSION
         self.timelimit = None
         self.inline = False
         self._data_connection = None
@@ -525,7 +526,7 @@ class DOWMLLib:
         deployment_details = client.deployments.get_details()
         self._logger.debug(f'Done.')
         resources = deployment_details['resources']
-        deployment_name = f'{self.DEPLOYMENT_NAME}-{self.model_type}-{self.tshirt_size}'
+        deployment_name = f'{self.DEPLOYMENT_NAME}-{self.model_type}-{self.do_version}-{self.tshirt_size}'
         self._logger.debug(f'Got the list. Looking for deployment named \'{deployment_name}\'')
         deployment_id = None
         for r in resources:
@@ -566,7 +567,7 @@ class DOWMLLib:
         details = client.repository.get_details()
         self._logger.debug(f'Done.')
         resources = details['models']['resources']
-        model_name = f'{self.MODEL_NAME}-{self.model_type}-{self.DO_VERSION}'
+        model_name = f'{self.MODEL_NAME}-{self.model_type}-{self.do_version}'
         self._logger.debug(f'Got the list. Looking for model named \'{model_name}\'')
         model_id = None
         for r in resources:
@@ -587,9 +588,9 @@ class DOWMLLib:
         model_metadata = {
             crm.NAME: model_name,
             crm.DESCRIPTION: "Model for the solve-on-wml script",
-            crm.TYPE: f'do-{self.model_type}_{self.DO_VERSION}',
+            crm.TYPE: f'do-{self.model_type}_{self.do_version}',
             crm.SOFTWARE_SPEC_UID:
-                client.software_specifications.get_id_by_name(f'do_{self.DO_VERSION}')
+                client.software_specifications.get_id_by_name(f'do_{self.do_version}')
         }
         # We need an empty.zip file, because APIClient doesn't know better
         handle, path = tempfile.mkstemp(suffix='.zip', text=False)

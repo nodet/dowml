@@ -114,6 +114,14 @@ Prints current time limit (if no argument), or sets the time limit (in seconds).
             limit = None
         self.lib.timelimit = limit
 
+    def do_version(self, version):
+        """version [string]
+Prints default DO version (if no argument), or sets the DO version to the specified string."""
+        if not version:
+            print(f'Decision Optimization version: {self.lib.do_version}')
+            return
+        self.lib.do_version = version
+
     def do_inline(self, arg):
         """inline [yes|no]
 Prints whether jobs are created with inline data (if no argument), or sets the flag ('yes' or 'no')."""
