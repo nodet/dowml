@@ -677,29 +677,6 @@ class DOWMLLib:
         self._logger.info(f'Space id: {space_id}')
         return space_id
 
-    def _get_connection_details(self):
-        """This function returns the list of all the connections in the space
-
-        This function should have been in the wml Python client, but unfortunately,
-        it's not.  At least, not as of version 1.0.53.
-        C.f. https://github.ibm.com/NGP-TWC/ml-planning/issues/21577#issuecomment-28950762"""
-        client = self._get_or_make_client()
-        if client.WSD:
-            header_param = client._get_headers(wsdconnection_api_req=True)
-        else:
-            header_param = client._get_headers()
-        if not client.ICP_30 and not client.ICP and not client.WSD:
-            response = requests.get(client.connections._href_definitions.get_connections_href(),
-                                    params=client._params(),
-                                    headers=header_param)
-        else:
-            response = requests.get(client.connections._href_definitions.get_connections_href(),
-                                    params=client._params(),
-                                    headers=header_param, verify=False)
-        client.connections._handle_response(200, u'list datasource type', response)
-        datasource_details = client.connections._handle_response(200, u'list datasource types', response)['resources']
-        return datasource_details
-
     def _get_asset_details(self):
         """This function returns the list of all the data assets in the space
 
@@ -738,11 +715,7 @@ class DOWMLLib:
     def create_asset(self, path, basename):
         """Create a data asset with the given name
 
-        A Watson Studio data asset is an entity that mimicks a file.  It actually
-        connects to some external service to fetch the data.  It does so using
-        a Connection.  In this case, we create an asset that reads the object in
-        Cloud Object Storage.  The connection gives us the information about
-        the bucket to use and the endpoint to contact to read the object."""
+        A Watson Studio data asset is an entity that mimicks a file."""
         client = self._get_or_make_client()
         asset_details = client.data_assets.create(basename, path)
         return asset_details['metadata']['guid']
