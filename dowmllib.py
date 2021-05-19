@@ -60,13 +60,14 @@ def new_params():
 class DOWMLLib:
     """A Python client to run DO models on WML"""
 
+    DOWML_PREFIX = 'dowml'
     ENVIRONMENT_VARIABLE_NAME = 'DOWML_CREDENTIALS'
-    SPACE_NAME = 'DOWMLClient-space'
-    MODEL_NAME = 'DOWMLClient-model'
+    SPACE_NAME = f'{DOWML_PREFIX}-space'
+    MODEL_NAME = f'{DOWML_PREFIX}-model'
     MODEL_TYPES = ['cplex', 'cpo', 'opl', 'docplex']
     DO_VERSION = '12.10'
     TSHIRT_SIZES = ['S', 'M', 'XL']
-    DEPLOYMENT_NAME = 'DOWMLClient-deployment'
+    DEPLOYMENT_NAME = f'{DOWML_PREFIX}-deployment'
     JOB_END_SLEEP_DELAY = 2
 
     # The keys in the credentials
