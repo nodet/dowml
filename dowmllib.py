@@ -70,6 +70,7 @@ class DOWMLLib:
 
     # The keys in the credentials
     APIKEY = 'apikey'
+    TOKEN = 'token'
     SPACE_ID = 'space_id'
     URL = 'url'
     COS_CRN = 'cos_resource_crn'
@@ -91,8 +92,11 @@ class DOWMLLib:
 
         wml_credentials = eval(wml_cred_str)
         assert type(wml_credentials) is dict
-        assert self.APIKEY in wml_credentials
-        assert type(wml_credentials[self.APIKEY]) is str
+        assert (self.APIKEY in wml_credentials or self.TOKEN in wml_credentials)
+        if self.APIKEY in wml_credentials:
+            assert type(wml_credentials[self.APIKEY]) is str
+        else:
+            assert type(wml_credentials[self.TOKEN]) is str
         assert self.URL in wml_credentials
         assert type(wml_credentials[self.URL]) is str
         self._logger.debug(f'Credentials have the expected structure.')
