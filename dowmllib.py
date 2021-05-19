@@ -463,7 +463,7 @@ class DOWMLLib:
                 'oaas.logAttachmentName': 'log.txt',
                 'oaas.logTailEnabled': 'true',
                 'oaas.includeInputData': 'false',
-                'oaas.resultFormat': 'JSON'
+                'oaas.resultsFormat': 'JSON'
             },
             cdd_inputdata: [],
             cdd_outputdata: [
