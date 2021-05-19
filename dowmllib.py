@@ -566,7 +566,7 @@ class DOWMLLib:
         details = client.repository.get_details()
         self._logger.debug(f'Done.')
         resources = details['models']['resources']
-        model_name = f'{self.MODEL_NAME}-{self.model_type}'
+        model_name = f'{self.MODEL_NAME}-{self.model_type}-{self.DO_VERSION}'
         self._logger.debug(f'Got the list. Looking for model named \'{model_name}\'')
         model_id = None
         for r in resources:
