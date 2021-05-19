@@ -65,7 +65,7 @@ class DOWMLLib:
     SPACE_NAME = f'{DOWML_PREFIX}-space'
     MODEL_NAME = f'{DOWML_PREFIX}-model'
     MODEL_TYPES = ['cplex', 'cpo', 'opl', 'docplex']
-    DO_VERSION = '12.10'
+    DO_VERSION = '20.1'
     TSHIRT_SIZES = ['S', 'M', 'XL']
     DEPLOYMENT_NAME = f'{DOWML_PREFIX}-deployment'
     JOB_END_SLEEP_DELAY = 2
