@@ -212,7 +212,7 @@ job is either a job number or a job id. Uses current job if not specified."""
             f.write(content)
 
     def do_details(self, arguments, printer=pprint.pprint):
-        """details [job] [names|full]
+        """details [job] [names|full|log]
 Prints most of the details for the given job. Add 'names' to get the names of the
 input and output file names. Add 'full' to get the actual contents of inputs and outputs.
 job is either a job number or a job id. Uses current job if not specified."""

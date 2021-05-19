@@ -165,7 +165,8 @@ class DOWMLLib:
     def solve(self, paths):
         """Solve the model, return the job id
 
-        The model is sent as online data to WML.
+        The model is sent as online data to WML (if 'inline yes') or is uploaded as a data asset
+        to be reused later (default).
 
         :param paths: one or more pathname to the files to send, as a single
                       string, separated by space
@@ -179,7 +180,7 @@ class DOWMLLib:
         return job_id
 
     def get_log(self, job_id):
-        """Extracts the CPLEX log from the job
+        """Extracts the engine log from the job
 
         :param job_id: The id of the job to get the log from
         :return: The decoded log, or None
@@ -279,8 +280,10 @@ class DOWMLLib:
             do = job_details['entity']['decision_optimization']
             for data in do.get('output_data', []):
                 if 'content' in data:
+                    # This is the case for regular files, such as the log
                     data['content'] = '[not shown]'
                 elif 'values' in data:
+                    # This is the case for CSV files
                     data['values'] = ['[not shown]']
             for data in do.get('input_data', []):
                 if 'content' in data:
