@@ -64,6 +64,7 @@ class DOWMLLib:
     SPACE_NAME = 'DOWMLClient-space'
     MODEL_NAME = 'DOWMLClient-model'
     MODEL_TYPES = ['cplex', 'cpo', 'opl', 'docplex']
+    DO_VERSION = '12.10'
     TSHIRT_SIZES = ['S', 'M', 'XL']
     DEPLOYMENT_NAME = 'DOWMLClient-deployment'
     JOB_END_SLEEP_DELAY = 2
@@ -586,9 +587,9 @@ class DOWMLLib:
         model_metadata = {
             crm.NAME: model_name,
             crm.DESCRIPTION: "Model for the solve-on-wml script",
-            crm.TYPE: f'do-{self.model_type}_12.10',
+            crm.TYPE: f'do-{self.model_type}_{self.DO_VERSION}',
             crm.SOFTWARE_SPEC_UID:
-                client.software_specifications.get_id_by_name("do_12.10")
+                client.software_specifications.get_id_by_name(f'do_{self.DO_VERSION}')
         }
         # We need an empty.zip file, because APIClient doesn't know better
         handle, path = tempfile.mkstemp(suffix='.zip', text=False)
