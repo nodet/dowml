@@ -744,17 +744,32 @@ class DOWMLLib:
         asset_details = client.data_assets.create(basename, path)
         return asset_details['metadata']['guid']
 
+    def delete_asset(self, id):
+        """Delete an existing asset. Return True if ok, False if not"""
+        client = self._get_or_make_client()
+        status = client.data_assets.delete(id)
+        return status == "SUCCESS"
+
+
     def _create_data_asset_if_necessary(self, path, basename, force):
-        """Create a data asset (and upload file) if it doesn't exist already."""
-        if force:
-            self._logger.info(f'Creating or updating the data asset named \'{basename}\'.')
-        else:
-            self._logger.info(f'Checking whether a connected data asset named \'{basename}\' already exists.')
-            data_asset_id = self._find_asset_id_by_name(basename)
-            if data_asset_id:
-                self._logger.debug(f'Yes, with id {data_asset_id}.')
+        """Create a data asset (and upload file) if it doesn't exist already (or force is True)."""
+        asset_to_delete = None
+        self._logger.info(f'Checking whether a data asset named \'{basename}\' already exists.')
+        data_asset_id = self._find_asset_id_by_name(basename)
+        if data_asset_id:
+            self._logger.debug(f'Yes, with id {data_asset_id}.')
+            if not force:
                 return data_asset_id
-            self._logger.debug(f'Creating the data asset.')
+            self._logger.debug(f'Creating new asset with local content.')
+            asset_to_delete = data_asset_id
+        else:
+            self._logger.debug(f'No, creating the data asset.')
         data_asset_id = self.create_asset(path, basename)
         self._logger.debug(f'Done.')
+        if asset_to_delete:
+            self._logger.debug(f'Deleting the old data asset.')
+            if self.delete_asset(asset_to_delete):
+                self._logger.debug(f'Done.')
+            else:
+                self._logger.warning(f'Could not delete pre-existing asset')
         return data_asset_id
