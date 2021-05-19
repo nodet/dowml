@@ -750,7 +750,6 @@ class DOWMLLib:
         status = client.data_assets.delete(id)
         return status == "SUCCESS"
 
-
     def _create_data_asset_if_necessary(self, path, basename, force):
         """Create a data asset (and upload file) if it doesn't exist already (or force is True)."""
         asset_to_delete = None
