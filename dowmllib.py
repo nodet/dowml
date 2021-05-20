@@ -408,6 +408,23 @@ class DOWMLLib:
             self._logger.warning(f'Error while fetching type of a job!')
             return '?????'
 
+    def _get_version_from_details(self, job):
+        try:
+            deployment_id = job['entity']['deployment']['id']
+            deployment = self._get_deployment_from_id(deployment_id)
+            model_id = deployment['entity']['asset']['id']
+            model = self._get_model_definition_from_id(model_id)
+            deployment_type = model['entity']['wml_model']['type']
+            match = re.fullmatch(r"do-....*_([0-9.]*)", deployment_type)
+            version = '?????'
+            if match:
+                version = match.group(1)
+            return version
+        except KeyError:
+            # Something changed. But let's not fail just for that
+            self._logger.warning(f'Error while fetching version of a job!')
+            return '?????'
+
     @lru_cache
     def _get_model_definition_from_id(self, model_id):
         client = self._get_or_make_client()
@@ -445,9 +462,10 @@ class DOWMLLib:
             created = self._get_creation_time_from_details(job)
             names = self._get_input_names_from_details(job)
             deployment_type = self._get_type_from_details(job)
+            version = self._get_version_from_details(job)
             size = self._get_size_from_details(job)
-            JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names', 'type', 'size'])
-            j = JobTuple(status=status, id=job_id, created=created, names=names, type=deployment_type, size=size)
+            JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names', 'type', 'version', 'size'])
+            j = JobTuple(status=status, id=job_id, created=created, names=names, type=deployment_type, version=version, size=size)
             result.append(j)
         self._logger.debug(f'Done.')
         return result

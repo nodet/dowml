@@ -85,8 +85,8 @@ dowml> help
 
 Documented commands (type help <topic>):
 ========================================
-cancel  details  help    jobs  output  solve  type
-delete  exit     inline  log   size    time   wait
+cancel  details  help    jobs  output  solve  type     wait
+delete  exit     inline  log   size    time   version
 
 dowml> type
 Current model type: cplex. Known types: cplex, cpo, opl, docplex
@@ -94,59 +94,63 @@ dowml> size
 Current size: S. Known sizes: S, M, XL
 dowml> inline yes
 dowml> solve examples/afiro.mps
-Job id: 7c4a13ac-63a0-44fa-ba78-88d7ae040b14
+Job id: 3f18394b-1b2e-4e86-94aa-470471e8c57e
 dowml> jobs
-     #  status      id                                    creation date        type     size  inputs
-=>   1: running     7c4a13ac-63a0-44fa-ba78-88d7ae040b14  2021-03-26 12:26:15  cplex    S     afiro.mps
+     #  status      id                                    creation date        type     ver.   size  inputs
+=>   1: running     3f18394b-1b2e-4e86-94aa-470471e8c57e  2021-05-20 15:03:07  cplex    20.1   S     afiro.mps
 dowml> wait
 dowml> jobs
-     #  status      id                                    creation date        type     size  inputs
-=>   1: completed   7c4a13ac-63a0-44fa-ba78-88d7ae040b14  2021-03-26 12:26:15  cplex    S     afiro.mps
+     #  status      id                                    creation date        type     ver.   size  inputs
+=>   1: completed   3f18394b-1b2e-4e86-94aa-470471e8c57e  2021-05-20 15:03:07  cplex    20.1   S     afiro.mps
 dowml> log
-[2021-03-26T12:26:16Z, INFO] CPLEX version 12100000
-[2021-03-26T12:26:16Z, WARNING] Changed parameter CPX_PARAM_THREADS from 0 to 1
-[2021-03-26T12:26:16Z, INFO] Param[1,067] = 1
-[2021-03-26T12:26:16Z, INFO] Param[1,130] = UTF-8
-[2021-03-26T12:26:16Z, INFO] Param[1,132] = -1
-[2021-03-26T12:26:16Z, INFO]
-[2021-03-26T12:26:16Z, INFO] Selected objective sense:  MINIMIZE
-[2021-03-26T12:26:16Z, INFO] Selected objective  name:  obj
-[2021-03-26T12:26:16Z, INFO] Selected RHS        name:  rhs
-[2021-03-26T12:26:16Z, INFO] Version identifier: 12.10.0.0 | 2020-01-09 | 0d94640
-[2021-03-26T12:26:16Z, INFO] CPXPARAM_Threads                                 1
-[2021-03-26T12:26:16Z, INFO] CPXPARAM_Output_CloneLog                         -1
-[2021-03-26T12:26:16Z, INFO] CPXPARAM_Read_APIEncoding                        "UTF-8"
-[2021-03-26T12:26:16Z, INFO] Tried aggregator 1 time.
-[2021-03-26T12:26:16Z, INFO] LP Presolve eliminated 9 rows and 10 columns.
-[2021-03-26T12:26:16Z, INFO] Aggregator did 7 substitutions.
-[2021-03-26T12:26:16Z, INFO] Reduced LP has 11 rows, 15 columns, and 37 nonzeros.
-[2021-03-26T12:26:16Z, INFO] Presolve time = 0.01 sec. (0.03 ticks)
-[2021-03-26T12:26:16Z, INFO]
-[2021-03-26T12:26:16Z, INFO] Iteration log . . .
-[2021-03-26T12:26:16Z, INFO] Iteration:     1   Scaled dual infeas =             1.200000
-[2021-03-26T12:26:16Z, INFO] Iteration:     5   Dual objective     =          -464.753143
-[2021-03-26T12:26:17Z, INFO] There are no bound infeasibilities.
-[2021-03-26T12:26:17Z, INFO] There are no reduced-cost infeasibilities.
-[2021-03-26T12:26:17Z, INFO] Max. unscaled (scaled) Ax-b resid.          = 1.77636e-14 (1.77636e-14)
-[2021-03-26T12:26:17Z, INFO] Max. unscaled (scaled) c-B'pi resid.        = 5.55112e-17 (5.55112e-17)
-[2021-03-26T12:26:17Z, INFO] Max. unscaled (scaled) |x|                  = 500 (500)
-[2021-03-26T12:26:17Z, INFO] Max. unscaled (scaled) |slack|              = 500 (500)
-[2021-03-26T12:26:17Z, INFO] Max. unscaled (scaled) |pi|                 = 0.942857 (1.88571)
-[2021-03-26T12:26:17Z, INFO] Max. unscaled (scaled) |red-cost|           = 10 (10)
-[2021-03-26T12:26:17Z, INFO] Condition number of scaled basis            = 1.5e+01
-[2021-03-26T12:26:17Z, INFO] optimal (1)
+[2021-05-20T15:03:08Z, INFO] CPLEX version 20010000
+[2021-05-20T15:03:08Z, WARNING] Changed parameter CPX_PARAM_THREADS from 0 to 1
+[2021-05-20T15:03:08Z, INFO] Param[1,067] = 1
+[2021-05-20T15:03:08Z, INFO] Param[1,130] = UTF-8
+[2021-05-20T15:03:08Z, INFO] Param[1,132] = -1
+[2021-05-20T15:03:08Z, INFO]
+[2021-05-20T15:03:08Z, INFO] Selected objective sense:  MINIMIZE
+[2021-05-20T15:03:08Z, INFO] Selected objective  name:  obj
+[2021-05-20T15:03:08Z, INFO] Selected RHS        name:  rhs
+[2021-05-20T15:03:08Z, INFO] Version identifier: 20.1.0.0 | 2020-11-10 | 9bedb6d68
+[2021-05-20T15:03:08Z, INFO] CPXPARAM_Threads                                 1
+[2021-05-20T15:03:08Z, INFO] CPXPARAM_Output_CloneLog                         -1
+[2021-05-20T15:03:08Z, INFO] CPXPARAM_Read_APIEncoding                        "UTF-8"
+[2021-05-20T15:03:08Z, INFO] Tried aggregator 1 time.
+[2021-05-20T15:03:08Z, INFO] LP Presolve eliminated 9 rows and 10 columns.
+[2021-05-20T15:03:08Z, INFO] Aggregator did 7 substitutions.
+[2021-05-20T15:03:08Z, INFO] Reduced LP has 11 rows, 15 columns, and 37 nonzeros.
+[2021-05-20T15:03:08Z, INFO] Presolve time = 0.00 sec. (0.03 ticks)
+[2021-05-20T15:03:08Z, INFO]
+[2021-05-20T15:03:08Z, INFO] Iteration log . . .
+[2021-05-20T15:03:08Z, INFO] Iteration:     1   Scaled dual infeas =             1.200000
+[2021-05-20T15:03:08Z, INFO] Iteration:     5   Dual objective     =          -464.753143
+[2021-05-20T15:03:08Z, INFO] There are no bound infeasibilities.
+[2021-05-20T15:03:08Z, INFO] There are no reduced-cost infeasibilities.
+[2021-05-20T15:03:08Z, INFO] Max. unscaled (scaled) Ax-b resid.          = 1.77636e-14 (1.77636e-14)
+[2021-05-20T15:03:08Z, INFO] Max. unscaled (scaled) c-B'pi resid.        = 5.55112e-17 (5.55112e-17)
+[2021-05-20T15:03:08Z, INFO] Max. unscaled (scaled) |x|                  = 500 (500)
+[2021-05-20T15:03:08Z, INFO] Max. unscaled (scaled) |slack|              = 500 (500)
+[2021-05-20T15:03:08Z, INFO] Max. unscaled (scaled) |pi|                 = 0.942857 (1.88571)
+[2021-05-20T15:03:08Z, INFO] Max. unscaled (scaled) |red-cost|           = 10 (10)
+[2021-05-20T15:03:08Z, INFO] Condition number of scaled basis            = 1.5e+01
+[2021-05-20T15:03:08Z, INFO] optimal (1)
 dowml> type docplex
 dowml> solve examples/markshare.py examples/markshare1.mps.gz
-Job id: a1c5057b-a49f-48ef-836e-e5890a75fa9f
+Job id: d5e86486-4cd0-4a13-b006-066431a6d70f
 dowml> wait
+[2021-05-20T15:03:20Z, WARNING] Support for Python 3.7 is now enabled and used as the default.
+[2021-05-20T15:03:20Z, INFO] Reading markshare1.mps.gz...
 dowml> jobs
-     #  status      id                                    creation date        type     size  inputs
-     1: completed   7c4a13ac-63a0-44fa-ba78-88d7ae040b14  2021-03-26 12:26:15  cplex    S     afiro.mps
-=>   2: completed   a1c5057b-a49f-48ef-836e-e5890a75fa9f  2021-03-26 12:26:25  docplex  S     markshare.py, markshare1.mps.gz
+     #  status      id                                    creation date        type     ver.   size  inputs
+     1: completed   3f18394b-1b2e-4e86-94aa-470471e8c57e  2021-05-20 15:03:07  cplex    20.1   S     afiro.mps
+=>   2: completed   d5e86486-4cd0-4a13-b006-066431a6d70f  2021-05-20 15:03:20  docplex  20.1   S     markshare.py, markshare1.mps.gz
 dowml> output
-Storing a1c5057b-a49f-48ef-836e-e5890a75fa9f_solution.json
-Storing a1c5057b-a49f-48ef-836e-e5890a75fa9f_log.txt
-Storing a1c5057b-a49f-48ef-836e-e5890a75fa9f_details.json
+Storing d5e86486-4cd0-4a13-b006-066431a6d70f_solution.json
+Storing d5e86486-4cd0-4a13-b006-066431a6d70f_kpis.csv
+Storing d5e86486-4cd0-4a13-b006-066431a6d70f_stats.csv
+Storing d5e86486-4cd0-4a13-b006-066431a6d70f_log.txt
+Storing d5e86486-4cd0-4a13-b006-066431a6d70f_details.json
 ```
 
 
