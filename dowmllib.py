@@ -1,5 +1,6 @@
 import base64
 import csv
+import glob
 import io
 import logging
 import os
@@ -509,9 +510,11 @@ class DOWMLLib:
         return job_id
 
     def create_inputs(self, paths, cdd_inputdata, solve_payload):
-        # There may be more than one input file
+        # First deal with wildcards
+        globbed = self.parse_paths(paths)
+        # And let's now create the inputs from these files
         names = []
-        for path in paths.split():
+        for path in globbed:
             path, basename, force = self._get_file_spec(path)
             if basename in names:
                 raise SimilarNamesInJob(basename)
@@ -531,6 +534,27 @@ class DOWMLLib:
                     }
                 }
             solve_payload[cdd_inputdata].append(input_data)
+
+    def parse_paths(self, paths):
+        self._logger.debug(f'Parsing input list: {paths}')
+        # There may be wildcards, so let's deal with them first
+        globbed = []
+        for path in paths.split():
+            # Let's first get rid of the 'force' flag that glob
+            # would not understand
+            path, _, force = self._get_file_spec(path)
+            files = glob.glob(path)
+            if not files:
+                # If the path doesn't actually match an existing file, this is
+                # not necessarily an error: this name can refer to a data
+                # asset that exists already. So let's keep it.
+                files = [path]
+            if force:
+                # Put back the '+' in front
+                files = [f'+{file}' for file in files]
+            globbed += files
+        self._logger.debug(f'Actual input list: {globbed}')
+        return globbed
 
     def _get_file_spec(self, path):
         force = False
