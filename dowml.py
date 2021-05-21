@@ -137,9 +137,11 @@ Prints whether jobs are created with inline data (if no argument), or sets the f
 
     def do_solve(self, paths):
         """solve file1 [file2 ... [filen]]
-Starts a job to solve a CPLEX model. At least one file of the correct type must
-be specified as argument.  If the file name is prefixed with '+', the file is
-uploaded even if using data assets and an asset with that name already exists."""
+Starts a job to solve a DO model. At least one file with the correct extension
+for the current job type must be specified as argument.  In 'inline no' mode,
+if the file name is prefixed with '+', the file is uploaded even if an asset
+with that name already exists.  In 'inline yes' mode, a '+' prefix has no effect.
+Wildcards (* and ?) are accepted (but no ~)."""
         if not paths:
             print('This command requires at least one file name as argument.')
             return
