@@ -497,6 +497,18 @@ class DOWMLLib:
         if self.timelimit:
             params = solve_payload[cdd.SOLVE_PARAMETERS]
             params['oaas.timeLimit'] = 1000 * self.timelimit
+        self.create_inputs(paths, cdd_inputdata, solve_payload)
+        self._logger.debug(f'Creating the job...')
+        if self.inline:
+            self._logger.debug(f'Data is inline. Let\'s not print the payload...')
+        else:
+            self._logger.debug(repr(solve_payload))
+        job_details = client.deployments.create_job(deployment_id, solve_payload)
+        self._logger.debug(f'Done. Getting its id...')
+        job_id = client.deployments.get_job_uid(job_details)
+        return job_id
+
+    def create_inputs(self, paths, cdd_inputdata, solve_payload):
         # There may be more than one input file
         names = []
         for path in paths.split():
@@ -519,15 +531,6 @@ class DOWMLLib:
                     }
                 }
             solve_payload[cdd_inputdata].append(input_data)
-        self._logger.debug(f'Creating the job...')
-        if self.inline:
-            self._logger.debug(f'Data is inline. Let\'s not print the payload...')
-        else:
-            self._logger.debug(repr(solve_payload))
-        job_details = client.deployments.create_job(deployment_id, solve_payload)
-        self._logger.debug(f'Done. Getting its id...')
-        job_id = client.deployments.get_job_uid(job_details)
-        return job_id
 
     def _get_file_spec(self, path):
         force = False
