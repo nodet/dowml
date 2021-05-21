@@ -124,7 +124,18 @@ Prints default DO version (if no argument), or sets the DO version to the specif
 
     def do_inline(self, arg):
         """inline [yes|no]
-Prints whether jobs are created with inline data (if no argument), or sets the flag ('yes' or 'no')."""
+Prints whether jobs are created with inline data (if no argument), or sets the
+flag ('yes' or 'no').
+
+In 'inline no' mode, which is the default, jobs use data assets stored on the
+platform for their inputs, rather than uploading the content of files as part of
+each job payload.  If a file name (stripped from its path) matches the name of
+an existing data asset, the content of the file is not uploaded (actually, the
+file may not even exist locally) and the content of that data asset is used
+instead.
+
+In 'inline yes' mode, the content of the specified files is always uploaded to
+the platform as part of the job payload, and not stored as a data asset."""
         if not arg:
             print(f'Current inline flag: {self.lib.inline}')
             return
