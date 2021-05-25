@@ -1,6 +1,8 @@
 import argparse
 import logging
 import pprint
+import re
+
 import requests
 
 from cmd import Cmd
@@ -116,9 +118,11 @@ Prints current time limit (if no argument), or sets the time limit (in seconds).
 
     def do_version(self, version):
         """version [string]
-Prints default DO version (if no argument), or sets the DO version to the specified string."""
+Prints default DO version (if no argument) and available ones, or sets the DO version to the specified string."""
         if not version:
             print(f'Decision Optimization version: {self.lib.do_version}')
+            str = ', '.join(self.lib.get_available_versions())
+            print(f'Available versions: {str}')
             return
         self.lib.do_version = version
 

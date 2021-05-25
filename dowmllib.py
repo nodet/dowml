@@ -630,6 +630,20 @@ class DOWMLLib:
             model_id = self._create_model(model_name)
         return model_id
 
+    def get_available_versions(self):
+        """Returns list of available DO versions on the platform"""
+        client = self._get_or_make_client()
+        target_version = "1.0.92"
+        if client.version < target_version:
+            return [f'Error: need WML client version {target_version} or better to retrieve available versions']
+        available_versions = []
+        for s in client.software_specifications.get_details()['resources']:
+            name = s['metadata']['name']
+            match = re.fullmatch(r"do_([0-9.]*)", name)
+            if match:
+                available_versions.append(match.group(1))
+        return available_versions
+
     def _create_model(self, model_name):
         client = self._get_or_make_client()
         cr = client.repository
