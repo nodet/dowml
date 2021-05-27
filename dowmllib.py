@@ -58,6 +58,15 @@ def new_params():
     return result
 
 
+def _get_file_spec(path):
+    force = False
+    if path[0] == '+':
+        force = True
+        path = path[1:]
+    basename = os.path.basename(path)
+    return path, basename, force
+
+
 class DOWMLLib:
     """A Python client to run DO models on WML"""
 
@@ -466,7 +475,8 @@ class DOWMLLib:
             version = self._get_version_from_details(job)
             size = self._get_size_from_details(job)
             JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names', 'type', 'version', 'size'])
-            j = JobTuple(status=status, id=job_id, created=created, names=names, type=deployment_type, version=version, size=size)
+            j = JobTuple(status=status, id=job_id, created=created, names=names,
+                         type=deployment_type, version=version, size=size)
             result.append(j)
         self._logger.debug(f'Done.')
         return result
@@ -515,7 +525,7 @@ class DOWMLLib:
         # And let's now create the inputs from these files
         names = []
         for path in globbed:
-            path, basename, force = self._get_file_spec(path)
+            path, basename, force = _get_file_spec(path)
             if basename in names:
                 raise SimilarNamesInJob(basename)
             names.append(basename)
@@ -542,7 +552,7 @@ class DOWMLLib:
         for path in paths.split():
             # Let's first get rid of the 'force' flag that glob
             # would not understand
-            path, _, force = self._get_file_spec(path)
+            path, _, force = _get_file_spec(path)
             files = glob.glob(path)
             if not files:
                 # If the path doesn't actually match an existing file, this is
@@ -555,14 +565,6 @@ class DOWMLLib:
             globbed += files
         self._logger.debug(f'Actual input list: {globbed}')
         return globbed
-
-    def _get_file_spec(self, path):
-        force = False
-        if path[0] == '+':
-            force = True
-            path = path[1:]
-        basename = os.path.basename(path)
-        return path, basename, force
 
     def _get_deployment_id(self):
         """Create deployment if doesn't exist already, return its id"""
@@ -756,13 +758,13 @@ class DOWMLLib:
         }
         if not client.data_assets._ICP and not client.WSD:
             response = requests.post(href,
-                                     params=self._client._params(),
-                                     headers=self._client._get_headers(),
+                                     params=client._params(),
+                                     headers=client._get_headers(),
                                      json=data)
         else:
             response = requests.post(href,
-                                     params=self._client._params(),
-                                     headers=self._client._get_headers(),
+                                     params=client._params(),
+                                     headers=client._get_headers(),
                                      json=data,
                                      verify=False)
         client.data_assets._handle_response(200, u'list assets', response)
@@ -786,10 +788,10 @@ class DOWMLLib:
         asset_details = client.data_assets.create(basename, path)
         return asset_details['metadata']['guid']
 
-    def delete_asset(self, id):
+    def delete_asset(self, uid):
         """Delete an existing asset. Return True if ok, False if not"""
         client = self._get_or_make_client()
-        status = client.data_assets.delete(id)
+        status = client.data_assets.delete(uid)
         return status == "SUCCESS"
 
     def _create_data_asset_if_necessary(self, path, basename, force):
