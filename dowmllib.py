@@ -743,6 +743,10 @@ class DOWMLLib:
         it's not.  At least, not as of version 1.0.53.
         C.f. https://github.ibm.com/NGP-TWC/ml-planning/issues/21577#issuecomment-29056420"""
         client = self._get_or_make_client()
+        if client.version >= "1.0.95.1":
+            # This is the first version where data_assets.get_details() works
+            results = client.data_assets.get_details()['resources']
+            return results
         href_owner = client.data_assets
         if client.version >= "1.0.78":
             href_owner = client.service_instance
