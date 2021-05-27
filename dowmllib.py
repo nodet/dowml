@@ -729,7 +729,10 @@ class DOWMLLib:
         it's not.  At least, not as of version 1.0.53.
         C.f. https://github.ibm.com/NGP-TWC/ml-planning/issues/21577#issuecomment-29056420"""
         client = self._get_or_make_client()
-        href = client.data_assets._href_definitions.get_search_asset_href()
+        href_owner = client.data_assets
+        if client.version >= "1.0.78":
+            href_owner = client.service_instance
+        href = href_owner._href_definitions.get_search_asset_href()
         data = {
                 "query": "*:*"
         }
