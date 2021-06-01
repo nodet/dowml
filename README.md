@@ -246,21 +246,3 @@ request.  Rather, it divides the upload in multiple reasonably sized chunks that
   are uploaded individually, with restart if necessary.  Uploading big files is
   therefore much less prone to failure.
 
-### Connecting to data outside COS
-
-A job in Watson Studio, unless you use inline mode, refers to 'connected-data'
-assets, that themselves refer to objects created in the Cloud Object Storage
-(COS) service. If you have data or files that exist either in COS or in any other
-cloud service, you can create data assets to refer to these.
-
-Indeed, when it creates a job in `inline no` mode, DOWML first checks whether a
-data asset of the given name exists.  The name here refers to the base name of the
-file specified in the _solve_ command, that is, the name without the path.  If a
-data asset with this name already exists, the job will refer to it.  If one such
-asset doesn't exist, DOWML creates one and uploads the file.
-
-As DOWML first checks whether a data asset exists before trying to create one,
-it is possible to refer in your _solve_ commands to 'files' that don't exist on your
-disk, but are data assets in your deployment space.
-
-Creating these is left as an exercise to the reader...
