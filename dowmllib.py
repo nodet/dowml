@@ -67,19 +67,11 @@ def _get_file_spec(path):
     return path, basename, force
 
 
-class DOWMLLib:
-    """A Python client to run DO models on WML"""
+class CredentialsProvider:
+    """"Reads credentials for a DOWMLLib instance. Stores them as a
+    'credentials' attribute."""
 
-    DOWML_PREFIX = 'dowml'
     ENVIRONMENT_VARIABLE_NAME = 'DOWML_CREDENTIALS'
-    SPACE_NAME = f'{DOWML_PREFIX}-space'
-    MODEL_NAME = f'{DOWML_PREFIX}-model'
-    MODEL_TYPES = ['cplex', 'cpo', 'opl', 'docplex']
-    DO_VERSION = '20.1'
-    TSHIRT_SIZES = ['S', 'M', 'XL']
-    DEPLOYMENT_NAME = f'{DOWML_PREFIX}-deployment'
-    JOB_END_SLEEP_DELAY = 2
-
     # The keys in the credentials
     APIKEY = 'apikey'
     TOKEN = 'token'
@@ -88,12 +80,7 @@ class DOWMLLib:
     COS_CRN = 'cos_resource_crn'
     ML_CRN = 'ml_instance_crn'
 
-    def __init__(self, wml_credentials_file=None, space_id=None):
-        """Read and validate the WML credentials
-
-        Args:
-            wml_credentials_file: path to the file that contains the WML credentials.
-            If None, they are read from the environment."""
+    def __init__(self, wml_credentials_file=None):
         self._logger = logging.getLogger(self.__class__.__name__)
 
         if wml_credentials_file is not None:
@@ -112,14 +99,62 @@ class DOWMLLib:
         assert self.URL in wml_credentials
         assert type(wml_credentials[self.URL]) is str
         self._logger.debug(f'Credentials have the expected structure.')
+        self.credentials = wml_credentials
 
-        if self.SPACE_ID in wml_credentials:
+    def _read_wml_credentials_from_env(self, var_name):
+        """Return a string of credentials suitable for WML from the environment
+
+        Raises InvalidCredentials if anything is wrong."""
+        self._logger.debug(f'Looking for credentials in environment variable {var_name}...')
+        try:
+            wml_cred_str = os.environ[var_name]
+        except KeyError:
+            print(f'Environment variable ${var_name} not found.')
+            print(f'It should contain credentials as a Python dict of the form:')
+            print(f'{{\'{self.APIKEY}\': \'<apikey>\', \'{self.URL}\': \'https://us-south.ml.cloud.ibm.com\'}}')
+            raise InvalidCredentials
+
+        return wml_cred_str
+
+    def _read_wml_credentials_from_file(self, file):
+        """Return the content of the file, assumed to be WML credentials"""
+        self._logger.debug(f'Looking for credentials in file \'{file}\'...')
+        with open(file) as f:
+            wml_cred_str = f.read()
+        return wml_cred_str
+
+
+
+class DOWMLLib:
+    """A Python client to run DO models on WML"""
+
+    DOWML_PREFIX = 'dowml'
+    SPACE_NAME = f'{DOWML_PREFIX}-space'
+    MODEL_NAME = f'{DOWML_PREFIX}-model'
+    MODEL_TYPES = ['cplex', 'cpo', 'opl', 'docplex']
+    DO_VERSION = '20.1'
+    TSHIRT_SIZES = ['S', 'M', 'XL']
+    DEPLOYMENT_NAME = f'{DOWML_PREFIX}-deployment'
+    JOB_END_SLEEP_DELAY = 2
+
+    def __init__(self, wml_credentials_file=None, space_id=None):
+        """Read and validate the WML credentials
+
+        Args:
+            wml_credentials_file: path to the file that contains the WML credentials.
+            If None, they are read from the environment."""
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+        cred_provider = CredentialsProvider(wml_credentials_file)
+        wml_credentials = cred_provider.credentials
+
+        if cred_provider.SPACE_ID in wml_credentials:
             self._logger.debug(f'And they contain a space id.')
 
         # The space_id specified here takes precedence
         # over the one, if any, defined in the credentials
         if space_id:
-            wml_credentials[self.SPACE_ID] = space_id
+            wml_credentials[cred_provider.SPACE_ID] = space_id
 
         self._wml_credentials = wml_credentials
 
@@ -149,28 +184,6 @@ class DOWMLLib:
         if self._space_id is None:
             self._space_id = self._get_space_id()
         return self._client
-
-    def _read_wml_credentials_from_env(self, var_name):
-        """Return a string of credentials suitable for WML from the environment
-
-        Raises InvalidCredentials if anything is wrong."""
-        self._logger.debug(f'Looking for credentials in environment variable {var_name}...')
-        try:
-            wml_cred_str = os.environ[var_name]
-        except KeyError:
-            print(f'Environment variable ${var_name} not found.')
-            print(f'It should contain credentials as a Python dict of the form:')
-            print(f'{{\'{self.APIKEY}\': \'<apikey>\', \'{self.URL}\': \'https://us-south.ml.cloud.ibm.com\'}}')
-            raise InvalidCredentials
-
-        return wml_cred_str
-
-    def _read_wml_credentials_from_file(self, file):
-        """Return the content of the file, assumed to be WML credentials"""
-        self._logger.debug(f'Looking for credentials in file \'{file}\'...')
-        with open(file) as f:
-            wml_cred_str = f.read()
-        return wml_cred_str
 
     def solve(self, paths):
         """Solve the model, return the job id
@@ -681,8 +694,9 @@ class DOWMLLib:
         if self._space_id:
             return self._space_id
 
-        if self.SPACE_ID in self._wml_credentials:
-            space_id = self._wml_credentials[self.SPACE_ID]
+        SPACE_ID = CredentialsProvider.SPACE_ID
+        if SPACE_ID in self._wml_credentials:
+            space_id = self._wml_credentials[SPACE_ID]
             self._logger.debug(f'Using specified space \'{space_id}\'.')
         else:
             space_id = self._find_or_create_space()
@@ -711,12 +725,14 @@ class DOWMLLib:
             # Prepare necessary information
 
             wml_credentials = self._wml_credentials
-            if self.COS_CRN not in wml_credentials or self.ML_CRN not in wml_credentials:
+            cos_crn = CredentialsProvider.COS_CRN
+            ml_crn = CredentialsProvider.ML_CRN
+            if cos_crn not in wml_credentials or ml_crn not in wml_credentials:
                 raise NoCredentialsToCreateSpace(f'WML credentials do not contain the information necessary '
-                                                 f'to create a deployment space. \nMissing \'{self.COS_CRN}\' '
-                                                 f'and/or \'{self.ML_CRN}\'.')
-            assert type(wml_credentials[self.COS_CRN]) is str
-            assert type(wml_credentials[self.ML_CRN]) is str
+                                                 f'to create a deployment space. \nMissing \'{cos_crn}\' '
+                                                 f'and/or \'{ml_crn}\'.')
+            assert type(wml_credentials[cos_crn]) is str
+            assert type(wml_credentials[ml_crn]) is str
 
             csc = client.spaces.ConfigurationMetaNames
             metadata = {
@@ -724,11 +740,11 @@ class DOWMLLib:
                 csc.DESCRIPTION: self.SPACE_NAME + ' description',
                 csc.STORAGE: {
                     "type": "bmcos_object_storage",
-                    "resource_crn": self._wml_credentials[self.COS_CRN]
+                    "resource_crn": self._wml_credentials[cos_crn]
                 },
                 csc.COMPUTE: {
                     "name": "existing_instance_id",
-                    "crn": self._wml_credentials[self.ML_CRN]
+                    "crn": self._wml_credentials[ml_crn]
                 }
             }
             # Create the space
