@@ -1,14 +1,16 @@
+import pprint
 from logging import Logger
 from unittest.mock import Mock
 
 from ibm_watson_machine_learning import APIClient
 from ibm_watson_machine_learning.deployments import Deployments
+from ibm_watson_machine_learning.assets import Assets
 
 from dowmllib import DOWMLLib, SimilarNamesInJob
 from unittest import TestCase, main
 
 
-class TestSolve(TestCase):
+class TestSolveInline(TestCase):
 
     def setUp(self) -> None:
         lib = DOWMLLib('test_credentials.txt')
@@ -93,7 +95,6 @@ class TestSolve(TestCase):
         create_job_mock.assert_called_once()
         self.assertNotIn('oaas.timeLimit', self.get_params(create_job_mock))
 
-
     def test_get_csv_file(self):
         details = {
             'entity': {
@@ -121,6 +122,49 @@ class TestSolve(TestCase):
         self.assertEqual(lines[0], 'i,f')
         self.assertEqual(lines[1], '0,0')
         self.assertEqual(lines[2], '"a,b",c d')
+
+
+class TestSolveUsingDataAssets(TestCase):
+
+    def setUp(self) -> None:
+        lib = DOWMLLib('test_credentials.txt')
+        lib._logger = Mock(spec=Logger)
+        lib._client = Mock(spec=APIClient)
+        lib._client.deployments = Mock(spec=Deployments)
+        # We assume having a recent WML client version, because that one
+        # has 'get_details()' and I don't want to test the internals of
+        # the client that I copied for older versions
+        lib._client.version = "1.0.95.1"
+        lib._client.data_assets = Mock(spec=Assets)
+        lib._client.data_assets.create.return_value = {'metadata': {'guid': 'uid_for_created_asset'}}
+        lib.inline = False
+        domn = Mock()
+        domn.SOLVE_PARAMETERS = 'solve-parameters'
+        domn.INPUT_DATA_REFERENCES = 'input_data_references'
+        domn.OUTPUT_DATA = 'output-data'
+        lib._client.deployments.DecisionOptimizationMetaNames = domn
+        lib.get_file_as_data = lambda path: 'base-64-content'
+        lib._space_id = 'space-id'
+        lib._get_deployment_id = Mock(spec=DOWMLLib._get_deployment_id)
+        lib._get_deployment_id.return_value = 'deployment-id'
+        self.lib = lib
+
+    def test_solve_with_no_existing_data_asset_uploads_the_file(self):
+        # Let's assume no existing asset
+        self.lib._client.data_assets.get_details.return_value = {'resources': []}
+        # and solve
+        self.lib.solve('afiro.mps')
+        # Check we've created the data asset
+        data_asset_mock = self.lib._client.data_assets.create
+        data_asset_mock.assert_called_once()
+        # And we've used it
+        create_job_mock = self.lib._client.deployments.create_job
+        create_job_mock.assert_called_once()
+        kall = create_job_mock.call_args
+        self.assertEqual(len(kall.args[1]['input_data_references']), 1)
+        i = kall.args[1]['input_data_references'][0]
+        self.assertEqual(i['location']['href'], '/v2/assets/uid_for_created_asset?space_id=space-id')
+
 
 if __name__ == '__main__':
     main()
