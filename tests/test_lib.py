@@ -259,6 +259,31 @@ class TestGetJobs(TestCase):
         result = self.lib.get_jobs()
         self.assertListEqual(result, [])
 
+    def test_get_jobs_parses_one_job_correctly(self):
+        self.lib._client.deployments.get_job_details.return_value = {'resources': [
+            # One job
+            {
+                'entity': {'decision_optimization': {'status': {'state': 'state'}}},
+                'metadata': {
+                    'id': 'id',
+                    'created_at': 'created_at'
+                }
+            }
+        ]}
+        result = self.lib.get_jobs()
+        # [Job(status='state', id='id', created='created_at', names=[], type='?????', version='?????', size='?')]
+        self.assertEqual(len(result), 1)
+        job = result[0]
+        self.assertEqual(job.status, 'state')
+        self.assertEqual(job.id, 'id')
+        self.assertEqual(job.created, 'created_at')
+        # The other details of the job were not set, we can assert that their
+        # lacking has been dealt with correctly
+        self.assertListEqual(job.names, [])
+        self.assertEqual(job.type, '?????')
+        self.assertEqual(job.version, '?????')
+        self.assertEqual(job.size, '?')
+
 
 if __name__ == '__main__':
     main()
