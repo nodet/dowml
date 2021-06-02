@@ -207,7 +207,7 @@ class TestSolveUsingDataAssets(TestCase):
         self.assertEqual(i['location']['href'], '/v2/assets/id_for_afiro?space_id=space-id')
 
     def test_solve_with_forced_update_uploads_the_file(self):
-        # Let's assume no existing asset
+        # Let's assume an asset already exists
         self.lib._client.data_assets.get_details.return_value = {
             'resources': [
                 {
@@ -218,7 +218,9 @@ class TestSolveUsingDataAssets(TestCase):
                 }
             ]
         }
-        # and solve
+        # And we'll succeed at deleting the old asset
+        self.lib._client.data_assets.delete.return_value = "SUCCESS"
+        # Now, solve
         self.lib.solve('+afiro.mps')
         # Check we've created a new data asset
         create_data_asset_mock = self.lib._client.data_assets.create
