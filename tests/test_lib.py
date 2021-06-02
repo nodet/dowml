@@ -165,6 +165,47 @@ class TestSolveUsingDataAssets(TestCase):
         i = kall.args[1]['input_data_references'][0]
         self.assertEqual(i['location']['href'], '/v2/assets/uid_for_created_asset?space_id=space-id')
 
+    def test_solve_with_existing_but_different_data_asset_uploads_the_file(self):
+        # Let's assume no existing asset
+        self.lib._client.data_assets.get_details.return_value = {'resources': [{'metadata': {'name': 'not_afiro.mps'}}]}
+        # and solve
+        self.lib.solve('afiro.mps')
+        # Check we've created the data asset
+        data_asset_mock = self.lib._client.data_assets.create
+        data_asset_mock.assert_called_once()
+        # And we've used it
+        create_job_mock = self.lib._client.deployments.create_job
+        create_job_mock.assert_called_once()
+        kall = create_job_mock.call_args
+        self.assertEqual(len(kall.args[1]['input_data_references']), 1)
+        i = kall.args[1]['input_data_references'][0]
+        self.assertEqual(i['location']['href'], '/v2/assets/uid_for_created_asset?space_id=space-id')
+
+    def test_solve_with_already_existing_data_asset_uploads_the_file(self):
+        # Let's assume no existing asset
+        self.lib._client.data_assets.get_details.return_value = {
+            'resources': [
+                {
+                    'metadata': {
+                        'name': 'afiro.mps',
+                        'asset_id': 'id_for_afiro'
+                    }
+                }
+            ]
+        }
+        # and solve
+        self.lib.solve('afiro.mps')
+        # Check we've NOT created the data asset
+        data_asset_mock = self.lib._client.data_assets.create
+        data_asset_mock.assert_not_called()
+        # But we've used the existing one
+        create_job_mock = self.lib._client.deployments.create_job
+        create_job_mock.assert_called_once()
+        kall = create_job_mock.call_args
+        self.assertEqual(len(kall.args[1]['input_data_references']), 1)
+        i = kall.args[1]['input_data_references'][0]
+        self.assertEqual(i['location']['href'], '/v2/assets/id_for_afiro?space_id=space-id')
+
 
 if __name__ == '__main__':
     main()
