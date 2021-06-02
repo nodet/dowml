@@ -6,6 +6,7 @@ from ibm_watson_machine_learning import APIClient
 from ibm_watson_machine_learning.Set import Set
 from ibm_watson_machine_learning.deployments import Deployments
 from ibm_watson_machine_learning.assets import Assets
+from ibm_watson_machine_learning.model_definition import ModelDefinition
 from ibm_watson_machine_learning.spaces import Spaces
 
 from dowmllib import DOWMLLib, SimilarNamesInJob
@@ -259,7 +260,7 @@ class TestGetJobs(TestCase):
         result = self.lib.get_jobs()
         self.assertListEqual(result, [])
 
-    def test_get_jobs_parses_one_job_correctly(self):
+    def test_get_jobs_parses_one_job_correctly_with_details_lacking(self):
         self.lib._client.deployments.get_job_details.return_value = {'resources': [
             # One job
             {
@@ -283,6 +284,36 @@ class TestGetJobs(TestCase):
         self.assertEqual(job.type, '?????')
         self.assertEqual(job.version, '?????')
         self.assertEqual(job.size, '?')
+
+    def test_get_jobs_parses_job_type_and_version_correctly(self):
+        self.lib._client.deployments.get_details.return_value = {
+            'entity': {
+                'asset': {'id': 'model-id'},
+                'hardware_spec': {'name': 'N'}
+            }
+        }
+        self.lib._client.model_definitions = Mock(ModelDefinition)
+        self.lib._client.model_definitions.get_details.return_value = {'entity': {'wml_model': {'type': 'do-cplex_1.0'}}}
+        self.lib._client.deployments.get_job_details.return_value = {'resources': [
+            # One job with a known deployment
+            {
+                'entity': {
+                    'decision_optimization': {'status': {'state': 'state'}},
+                    'deployment': {'id': 'deployment-id'}
+                },
+                'metadata': {
+                    'id': 'id',
+                    'created_at': 'created_at'
+                }
+            }
+        ]}
+        result = self.lib.get_jobs()
+        self.lib._client.deployments.get_details.assert_called_once_with('deployment-id')
+        self.lib._client.model_definitions.get_details.assert_called_once_with('model-id')
+        j = result[0]
+        self.assertEqual(j.type, 'cplex')
+        self.assertEqual(j.version, '1.0')
+        self.assertEqual(j.size, 'N')
 
 
 if __name__ == '__main__':
