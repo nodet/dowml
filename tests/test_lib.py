@@ -315,6 +315,26 @@ class TestGetJobs(TestCase):
         self.assertEqual(j.version, '1.0')
         self.assertEqual(j.size, 'N')
 
+    def test_get_jobs_parses_input_names(self):
+        self.lib._client.deployments.get_job_details.return_value = {'resources': [
+            # One job
+            {
+                'entity': {'decision_optimization': {
+                    'status': {'state': 'state'},
+                    'input_data': [{'id': 'foo'}],
+                    'input_data_references': [
+                        {'id': 'bar'},
+                        {'unknown key': ''}
+                    ]
+                }},
+                'metadata': {'id': 'id', 'created_at': 'created_at'}
+            }
+        ]}
+        result = self.lib.get_jobs()
+        # [Job(status='state', id='id', created='created_at', names=[], type='?????', version='?????', size='?')]
+        self.assertEqual(len(result), 1)
+        self.assertListEqual(result[0].names, ['foo', '*bar', 'Unknown'])
+
 
 if __name__ == '__main__':
     main()
