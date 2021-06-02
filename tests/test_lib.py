@@ -267,7 +267,7 @@ class TestGetJobs(TestCase):
                 'entity': {'decision_optimization': {'status': {'state': 'state'}}},
                 'metadata': {
                     'id': 'id',
-                    'created_at': 'created_at'
+                    'created_at': '2021-05-02T15:58:02Z'
                 }
             }
         ]}
@@ -277,7 +277,7 @@ class TestGetJobs(TestCase):
         job = result[0]
         self.assertEqual(job.status, 'state')
         self.assertEqual(job.id, 'id')
-        self.assertEqual(job.created, 'created_at')
+        self.assertEqual(job.created, '2021-05-02 15:58:02')
         # The other details of the job were not set, we can assert that their
         # lacking has been dealt with correctly
         self.assertListEqual(job.names, [])
