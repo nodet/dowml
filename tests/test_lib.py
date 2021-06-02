@@ -3,8 +3,10 @@ from logging import Logger
 from unittest.mock import Mock
 
 from ibm_watson_machine_learning import APIClient
+from ibm_watson_machine_learning.Set import Set
 from ibm_watson_machine_learning.deployments import Deployments
 from ibm_watson_machine_learning.assets import Assets
+from ibm_watson_machine_learning.spaces import Spaces
 
 from dowmllib import DOWMLLib, SimilarNamesInJob
 from unittest import TestCase, main
@@ -237,6 +239,25 @@ class TestSolveUsingDataAssets(TestCase):
         self.assertEqual(len(kall.args[1]['input_data_references']), 1)
         i = kall.args[1]['input_data_references'][0]
         self.assertEqual(i['location']['href'], '/v2/assets/uid_for_created_asset?space_id=space-id')
+
+
+class TestGetJobs(TestCase):
+
+    def setUp(self) -> None:
+        lib = DOWMLLib('test_credentials.txt')
+        lib._logger = Mock(spec=Logger)
+        lib._client = Mock(spec=APIClient)
+        lib._client.set = Mock(spec=Set)
+        lib._client.deployments = Mock(spec=Deployments)
+        lib._client.deployments.get_job_details.return_value = {'resources': []}
+        lib._client.spaces = Mock(spec=Spaces)
+        lib._client.spaces.get_details.return_value = {'resources': []}
+        lib._client.spaces.get_uid.return_value = 'space_id'
+        self.lib = lib
+
+    def test_get_jobs_returns_empty_list_when_no_jobs(self):
+        result = self.lib.get_jobs()
+        self.assertListEqual(result, [])
 
 
 if __name__ == '__main__':

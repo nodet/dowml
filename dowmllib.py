@@ -750,7 +750,7 @@ class DOWMLLib:
             # Create the space
             space = client.spaces.store(meta_props=metadata)
             self._logger.debug(f'Space created')
-            space_id = client.spaces.get_id(space)
+            space_id = client.spaces.get_uid(space)
         self._logger.info(f'Space id: {space_id}')
         return space_id
 
