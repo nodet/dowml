@@ -34,6 +34,7 @@ Type ? for a list of commands.
 Most commands need an argument that can be either a job id, or the number
 of the job, as displayed by the 'jobs' command.  If a command requires a
 job id, but none is specified, the last one is used.
+
 ''')
 
     def __init__(self, wml_cred_file, space_id=None):
@@ -292,7 +293,7 @@ def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
         for c in commands:
             if loop:
                 # This is the first command we carry out. Let's print intro
-                print(dowml.intro)
+                print(dowml.intro, end='')
                 # And make sure we won't print it again
                 dowml.intro = ''
             # We run the command loop iff this was asked for
