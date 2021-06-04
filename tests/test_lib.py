@@ -1,3 +1,4 @@
+import datetime
 import pprint
 from logging import Logger
 from unittest.mock import Mock
@@ -249,6 +250,7 @@ class TestGetJobs(TestCase):
 
     def setUp(self) -> None:
         lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
+        lib.tz = datetime.timezone(datetime.timedelta(hours=2))
         lib._logger = Mock(spec=Logger)
         lib._client = Mock(spec=APIClient)
         lib._client.set = Mock(spec=Set)
@@ -280,7 +282,7 @@ class TestGetJobs(TestCase):
         job = result[0]
         self.assertEqual(job.status, 'state')
         self.assertEqual(job.id, 'id')
-        self.assertEqual(job.created, '2021-05-02 15:58:02')
+        self.assertEqual(job.created, '2021-05-02 17:58:02')
         # The other details of the job were not set, we can assert that their
         # lacking has been dealt with correctly
         self.assertListEqual(job.names, [])

@@ -1,9 +1,11 @@
+quick_tests = tests/test_*.py
+
 quick:
-	python -m unittest tests/test_lib.py tests/test_cli.py
+	python -m unittest $(quick_tests)
 	rm -rf a_details.json
 
 cover:
-	coverage run -m unittest tests/test_lib.py tests/test_cli.py
+	coverage run -m unittest $(quick_tests)
 	rm -rf a_details.json
 	coverage html
 	open htmlcov/dowmllib_py.html

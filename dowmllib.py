@@ -137,12 +137,17 @@ class DOWMLLib:
     DEPLOYMENT_NAME = f'{DOWML_PREFIX}-deployment'
     JOB_END_SLEEP_DELAY = 2
 
-    def __init__(self, wml_credentials_file=None, space_id=None):
+    def __init__(self, wml_credentials_file=None,
+                 space_id=None,
+                 tz=datetime.utcnow().astimezone().tzinfo):
         """Read and validate the WML credentials
 
         Args:
             wml_credentials_file: path to the file that contains the WML credentials.
-            If None, they are read from the environment."""
+            If None, they are read from the environment.
+            space_id: the id of the space that should be used. If specified, this
+            replaces the one in the credentials
+            tz: default timezone to use to display time"""
         self._logger = logging.getLogger(self.__class__.__name__)
 
         cred_provider = CredentialsProvider(wml_credentials_file)
@@ -168,6 +173,7 @@ class DOWMLLib:
         self.timelimit = None
         self.inline = False
         self._data_connection = None
+        self.tz = tz
 
     def _create_client(self):
         """Create the Python APIClient instance"""
@@ -358,11 +364,22 @@ class DOWMLLib:
         return job_details['metadata']['id']
 
     @staticmethod
-    def _get_creation_time_from_details(job_details):
+    def _get_creation_time_from_details(job_details, tz):
         created = job_details['metadata']['created_at']
         if created[-1] == 'Z':
-            dt = datetime.fromisoformat(created[:-1])
+            # A suffix of Z is not understood by isoformat. Let's replace
+            # it with one that's understood
+            created = created[:-1] + '+00:00'
+            dt = datetime.fromisoformat(created)
+            # Transform to local time
+            dt = dt.astimezone(tz)
+            # Remove timezone information so that ...
+            dt = dt.replace(tzinfo=None)
+            # ... just naively prints local time
             created = dt.isoformat(sep=' ', timespec='seconds')
+        else:
+            # Let's not mess with what we don't know
+            pass
         return created
 
     @staticmethod
@@ -482,7 +499,7 @@ class DOWMLLib:
         for job in job_details['resources']:
             status = self._get_job_status_from_details(job)
             job_id = self._get_job_id_from_details(job)
-            created = self._get_creation_time_from_details(job)
+            created = self._get_creation_time_from_details(job, self.tz)
             names = self._get_input_names_from_details(job)
             deployment_type = self._get_type_from_details(job)
             version = self._get_version_from_details(job)
