@@ -1,9 +1,9 @@
 tests:
-	PYTHONPATH=$PYTHONPATH:.. python -m unittest test_lib.py test_cli.py
+	PYTHONPATH=.. python -m unittest test_lib.py test_cli.py
 	rm -rf a_details.json
 
 cover:
-	PYTHONPATH=$PYTHONPATH:.. coverage run -m unittest test_lib.py test_cli.py
+	PYTHONPATH=.. coverage run -m unittest test_lib.py test_cli.py
 	rm -rf a_details.json
 	coverage html
 	open htmlcov/_Users_nodet_Documents_work_git_master_dowml_dowmllib_py.html
