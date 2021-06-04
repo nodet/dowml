@@ -1,4 +1,4 @@
 dowml/
-xavier-wml-cred.txt
-/cplex.log
-/xavier-wml-dev.txt
+xavier-*.txt
+tests/.coverage
+tests/htmlcov/
