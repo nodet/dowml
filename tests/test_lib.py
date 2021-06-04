@@ -13,10 +13,13 @@ from dowmllib import DOWMLLib, SimilarNamesInJob
 from unittest import TestCase, main
 
 
+TEST_CREDENTIALS_FILE_NAME = 'tests/test_credentials.txt'
+
+
 class TestSolveInline(TestCase):
 
     def setUp(self) -> None:
-        lib = DOWMLLib('test_credentials.txt')
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
         lib._logger = Mock(spec=Logger)
         lib._client = Mock(spec=APIClient)
         lib._client.deployments = Mock(spec=Deployments)
@@ -130,7 +133,7 @@ class TestSolveInline(TestCase):
 class TestSolveUsingDataAssets(TestCase):
 
     def setUp(self) -> None:
-        lib = DOWMLLib('test_credentials.txt')
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
         lib._logger = Mock(spec=Logger)
         lib._client = Mock(spec=APIClient)
         lib._client.deployments = Mock(spec=Deployments)
@@ -245,7 +248,7 @@ class TestSolveUsingDataAssets(TestCase):
 class TestGetJobs(TestCase):
 
     def setUp(self) -> None:
-        lib = DOWMLLib('test_credentials.txt')
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
         lib._logger = Mock(spec=Logger)
         lib._client = Mock(spec=APIClient)
         lib._client.set = Mock(spec=Set)

@@ -1,4 +1,4 @@
 dowml/
 xavier-*.txt
-tests/.coverage
-tests/htmlcov/
+.coverage
+htmlcov/

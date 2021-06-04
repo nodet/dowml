@@ -7,13 +7,14 @@ from dowml import DOWMLInteractive, \
     CommandNeedsJobID, CommandNeedsNonNullInteger, CommandNeedsBool
 from dowmllib import DOWMLLib
 
+TEST_CREDENTIALS_FILE_NAME = 'tests/test_credentials.txt'
 EXPECTED = 'expected'
 
 
 class TestNumberToId(TestCase):
 
     def setUp(self) -> None:
-        self.cli = DOWMLInteractive('test_credentials.txt')
+        self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
 
     def test_return_last_job_id(self):
         with self.assertRaises(CommandNeedsJobID):
@@ -42,7 +43,7 @@ class TestNumberToId(TestCase):
 class TestDetails(TestCase):
 
     def setUp(self) -> None:
-        self.cli = DOWMLInteractive('test_credentials.txt')
+        self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
         self.cli.lib = Mock(spec=DOWMLLib)
         self.cli.jobs = ['a']
         self.cli.last_job_id = 'a'
@@ -81,7 +82,7 @@ class TestDetails(TestCase):
 class TestJobs(TestCase):
 
     def setUp(self) -> None:
-        self.cli = DOWMLInteractive('test_credentials.txt')
+        self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
         self.cli.lib = Mock(spec=DOWMLLib)
         JobTuple = namedtuple('Job', ['id'])
         self.cli.lib.get_jobs = Mock(return_value=[JobTuple(id='a'), JobTuple(id='b'), JobTuple(id='c')])
@@ -123,7 +124,7 @@ class TestJobs(TestCase):
 class TestOutput(TestCase):
 
     def setUp(self) -> None:
-        self.cli = DOWMLInteractive('test_credentials.txt')
+        self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
         self.cli.lib = Mock(spec=DOWMLLib)
         self.cli.lib.get_job_details.return_value = {}
         self.cli.jobs = ['a', 'b', 'c']
@@ -160,7 +161,7 @@ class TestOutput(TestCase):
 class TestOneJobShouldBeCurrent(TestCase):
 
     def setUp(self) -> None:
-        self.cli = DOWMLInteractive('test_credentials.txt')
+        self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
         self.cli.lib = Mock(spec=DOWMLLib)
         self.cli.jobs = ['a', 'b']
 
@@ -191,7 +192,7 @@ class TestOneJobShouldBeCurrent(TestCase):
 class TestTimeLimit(TestCase):
 
     def setUp(self) -> None:
-        self.cli = DOWMLInteractive('test_credentials.txt')
+        self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
 
     def test_default_is_no_timelimit(self):
         cli = self.cli
@@ -221,7 +222,7 @@ class TestTimeLimit(TestCase):
 class TestInline(TestCase):
 
     def setUp(self) -> None:
-        self.cli = DOWMLInteractive('test_credentials.txt')
+        self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
 
     def test_default_is_not_inline(self):
         cli = self.cli
