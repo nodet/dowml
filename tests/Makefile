@@ -8,6 +8,16 @@ cover:
 	coverage html
 	open htmlcov/_Users_nodet_Documents_work_git_master_dowml_dowmllib_py.html
 
+#
+# A very basic test to confirm the client version number and that
+# credentials work
+#
+basic:
+	python3 ../dowml.py -vv -c jobs
+
+#
+# This really tests as much as possible
+#
 fulltests:
 	python3 ../dowml.py -c help type size 'inline yes' \
        'solve ../examples/afiro.mps' jobs wait log delete \
