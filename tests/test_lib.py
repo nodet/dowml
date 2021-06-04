@@ -341,5 +341,31 @@ class TestGetJobs(TestCase):
         self.assertListEqual(result[0].names, ['foo', '*bar', 'Unknown'])
 
 
+class TestWait(TestCase):
+
+    def setUp(self) -> None:
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
+        lib._logger = Mock(spec=Logger)
+        lib._client = Mock(spec=APIClient)
+        lib._client.set = Mock(spec=Set)
+        lib._client.deployments = Mock(spec=Deployments)
+        lib._client.spaces = Mock(spec=Spaces)
+        lib._client.spaces.get_details.return_value = {'resources': []}
+        self.lib = lib
+
+    def test_wait_returns_after_one_call_if_job_is_already_completed(self):
+        input_job_details = {
+            'entity': {'decision_optimization': {
+                'status': {'state': 'completed'}
+            }},
+            'metadata': {'id': 'job_id'}
+        }
+        self.lib._client.deployments.get_job_details.return_value = input_job_details
+        status, job_details = self.lib.wait_for_job_end('job_id')
+        self.lib._client.deployments.get_job_details.assert_called_once()
+        self.assertEqual('completed', status)
+        self.assertEqual(input_job_details, job_details)
+
+
 if __name__ == '__main__':
     main()
