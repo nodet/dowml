@@ -98,6 +98,9 @@ class _CredentialsProvider:
             assert type(wml_credentials[self.TOKEN]) is str
         assert self.URL in wml_credentials
         assert type(wml_credentials[self.URL]) is str
+        if wml_credentials[self.URL][-1] == '/':
+            self._logger.warning(f'URL should not have a \'/\' at the end.')
+            wml_credentials[self.URL] = wml_credentials[self.URL][:-1]
         self._logger.debug(f'Credentials have the expected structure.')
         self.credentials = wml_credentials
 
