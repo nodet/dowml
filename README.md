@@ -221,6 +221,9 @@ to the WML service: inline data, or using data assets in Watson Studio.
 With inline data, the model is sent directly to the WML service in the _solve_
 request itself.  This is the simplest, but it has a number of drawbacks:
 
+- Sending a large model may take a long time, because of network throughput.  Sending
+a very large REST request is not at all guaranteed to succeed.
+
 - When solving several times the same model (e.g. to evaluate different parameters),
 the model has to be sent each time.
 
@@ -228,9 +231,6 @@ the model has to be sent each time.
 needs to request this information, and it comes with the content of the files
   themselves.  In other words, every _jobs_ command requires downloading the content
   of all the files for all the jobs that exist in the space.
-
-- Sending a large model may take a long time, because of network throughput.  Sending
-a very large REST request is not at all guaranteed to succeed.
 
 Using data assets in Watson Studio as an intermediate step alleviate all these issues:
 
