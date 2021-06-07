@@ -8,7 +8,7 @@ import requests
 from cmd import Cmd
 from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
 
-from dowmllib import DOWMLLib, InvalidCredentials, NoCredentialsToCreateSpace, CredentialsProvider
+from dowmllib import DOWMLLib, InvalidCredentials, NoCredentialsToCreateSpace, _CredentialsProvider
 
 
 class CommandNeedsJobID(Exception):
@@ -354,7 +354,7 @@ if __name__ == '__main__':
                         help=f'Name of the file from which to read WML '
                              f'credentials. If not specified, credentials ' 
                              f'are read from environment variable '
-                             f'${CredentialsProvider.ENVIRONMENT_VARIABLE_NAME}.')
+                             f'${_CredentialsProvider.ENVIRONMENT_VARIABLE_NAME}.')
     parser.add_argument('--verbose', '-v', action='count', default=0,
                         help=f'Verbose mode.  Causes the program to print debugging '
                              f'messages about its progress.  Multiple -v options '
@@ -369,7 +369,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--space', default=None,
                         help=f'Id of the space to connect to. Takes precedence over '
                              f'the one specified in the credentials under the '
-                             f'\'{CredentialsProvider.SPACE_ID}\' key, if any.')
+                             f'\'{_CredentialsProvider.SPACE_ID}\' key, if any.')
     args = parser.parse_args()
 
     # Last logging level repeated as many times as necessary to accommodate
@@ -379,7 +379,7 @@ if __name__ == '__main__':
     # noinspection PyArgumentList
     logging.basicConfig(force=True, format='%(asctime)s %(message)s')
     logging.getLogger(DOWMLLib.__name__).setLevel(log_levels[args.verbose])
-    logging.getLogger(CredentialsProvider.__name__).setLevel(log_levels[args.verbose])
+    logging.getLogger(_CredentialsProvider.__name__).setLevel(log_levels[args.verbose])
 
     if args.verbose >= 3:
         # Let's report the sending of REST queries

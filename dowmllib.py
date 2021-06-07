@@ -67,7 +67,7 @@ def _get_file_spec(path):
     return path, basename, force
 
 
-class CredentialsProvider:
+class _CredentialsProvider:
     """"Reads credentials for a DOWMLLib instance. Stores them as a
     'credentials' attribute."""
 
@@ -147,10 +147,10 @@ class DOWMLLib:
             If None, they are read from the environment.
             space_id: the id of the space that should be used. If specified, this
             replaces the one in the credentials
-            tz: default timezone to use to display time"""
+            tz: timezone to use to display time, defaults to Python's default timezone"""
         self._logger = logging.getLogger(self.__class__.__name__)
 
-        cred_provider = CredentialsProvider(wml_credentials_file)
+        cred_provider = _CredentialsProvider(wml_credentials_file)
         wml_credentials = cred_provider.credentials
 
         if cred_provider.SPACE_ID in wml_credentials:
@@ -711,7 +711,7 @@ class DOWMLLib:
         if self._space_id:
             return self._space_id
 
-        SPACE_ID = CredentialsProvider.SPACE_ID
+        SPACE_ID = _CredentialsProvider.SPACE_ID
         if SPACE_ID in self._wml_credentials:
             space_id = self._wml_credentials[SPACE_ID]
             self._logger.debug(f'Using specified space \'{space_id}\'.')
@@ -742,8 +742,8 @@ class DOWMLLib:
             # Prepare necessary information
 
             wml_credentials = self._wml_credentials
-            cos_crn = CredentialsProvider.COS_CRN
-            ml_crn = CredentialsProvider.ML_CRN
+            cos_crn = _CredentialsProvider.COS_CRN
+            ml_crn = _CredentialsProvider.ML_CRN
             if cos_crn not in wml_credentials or ml_crn not in wml_credentials:
                 raise NoCredentialsToCreateSpace(f'WML credentials do not contain the information necessary '
                                                  f'to create a deployment space. \nMissing \'{cos_crn}\' '
