@@ -10,7 +10,7 @@ from ibm_watson_machine_learning.assets import Assets
 from ibm_watson_machine_learning.model_definition import ModelDefinition
 from ibm_watson_machine_learning.spaces import Spaces
 
-from dowmllib import DOWMLLib, SimilarNamesInJob
+from dowmllib import DOWMLLib, SimilarNamesInJob, version_is_greater
 from unittest import TestCase, main
 
 
@@ -365,6 +365,24 @@ class TestWait(TestCase):
         self.lib._client.deployments.get_job_details.assert_called_once()
         self.assertEqual('completed', status)
         self.assertEqual(input_job_details, job_details)
+
+
+class TestVersionComparison(TestCase):
+
+    def test_1_0_95_greater_than_1_0_95(self):
+        self.assertTrue(version_is_greater("1.0.95", "1.0.95"))
+
+    def test_1_0_95_greater_than_1_0_94(self):
+        self.assertTrue(version_is_greater("1.0.95", "1.0.94"))
+
+    def test_1_0_94_not_greater_than_1_0_95(self):
+        self.assertFalse(version_is_greater("1.0.94", "1.0.95"))
+
+    def test_1_0_100_greater_than_1_0_95(self):
+        self.assertTrue(version_is_greater("1.0.100", "1.0.95"))
+
+    def test_1_0_100_1_greater_than_1_0_100(self):
+        self.assertTrue(version_is_greater("1.0.100.1", "1.0.100"))
 
 
 if __name__ == '__main__':

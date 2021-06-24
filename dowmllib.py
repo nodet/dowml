@@ -10,6 +10,7 @@ import tempfile
 from collections import namedtuple
 from datetime import datetime
 from functools import lru_cache
+from packaging import version
 from time import sleep
 
 import requests
@@ -126,6 +127,12 @@ class _CredentialsProvider:
             wml_cred_str = f.read()
         return wml_cred_str
 
+
+def version_is_greater(current, minimum):
+    """returns True is the current version string is greater or equal to the
+minimum string.  Assumes that each string is of type vv.nn.pp, with vv, nn and
+pp being integers."""
+    return version.parse(current) >= version.parse(minimum)
 
 
 class DOWMLLib:
@@ -669,7 +676,7 @@ class DOWMLLib:
         """Returns list of available DO versions on the platform"""
         client = self._get_or_make_client()
         target_version = "1.0.92"
-        if client.version < target_version:
+        if not version_is_greater(client.version, target_version):
             return [f'Error: need WML client version {target_version} or better to retrieve available versions']
         available_versions = []
         for s in client.software_specifications.get_details()['resources']:
@@ -781,16 +788,16 @@ class DOWMLLib:
         it's not.  At least, not as of version 1.0.53.
         C.f. https://github.ibm.com/NGP-TWC/ml-planning/issues/21577#issuecomment-29056420"""
         client = self._get_or_make_client()
-        if client.version >= "1.0.95.1":
+        if version_is_greater(client.version, "1.0.95.1"):
             # This is the first version where data_assets.get_details() works
             results = client.data_assets.get_details()['resources']
             return results
         href_owner = client.data_assets
-        if client.version >= "1.0.78":
+        if version_is_greater(client.version, "1.0.78"):
             href_owner = client.service_instance
         href = href_owner._href_definitions.get_search_asset_href()
         data = {
-                "query": "*:*"
+            "query": "*:*"
         }
         if not client.data_assets._ICP and not client.WSD:
             response = requests.post(href,
