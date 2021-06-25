@@ -10,6 +10,7 @@ import tempfile
 from collections import namedtuple
 from datetime import datetime
 from functools import lru_cache
+from operator import attrgetter
 from packaging import version
 from time import sleep
 
@@ -499,7 +500,7 @@ class DOWMLLib:
             return '?'
 
     def get_jobs(self):
-        """Return the list of tuples (id, status) for all jobs in the deployment"""
+        """Return the list of tuples (status, id, ...) for all jobs in the deployment"""
         client = self._get_or_make_client()
         self._logger.debug(f'Getting job details...')
         job_details = client.deployments.get_job_details()
@@ -518,6 +519,7 @@ class DOWMLLib:
             j = JobTuple(status=status, id=job_id, created=created, names=names,
                          type=deployment_type, version=version, size=size)
             result.append(j)
+        result.sort(key=attrgetter('created'))
         self._logger.debug(f'Done.')
         return result
 
