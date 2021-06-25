@@ -554,8 +554,10 @@ class DOWMLLib:
             self._logger.debug(f'Data is inline. Let\'s not print the payload...')
         else:
             self._logger.debug(repr(solve_payload))
+        dt = datetime.now()
         job_details = client.deployments.create_job(deployment_id, solve_payload)
-        self._logger.debug(f'Done. Getting its id...')
+        submit_time = (datetime.now() - dt).total_seconds()
+        self._logger.debug(f'Done in {submit_time}. Getting its id...')
         job_id = client.deployments.get_job_uid(job_details)
         return job_id
 
