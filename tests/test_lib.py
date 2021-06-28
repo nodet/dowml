@@ -1,7 +1,7 @@
 import datetime
 import pprint
 from logging import Logger
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from ibm_watson_machine_learning import APIClient
 from ibm_watson_machine_learning.Set import Set
@@ -365,6 +365,28 @@ class TestWait(TestCase):
         self.lib._client.deployments.get_job_details.assert_called_once()
         self.assertEqual('completed', status)
         self.assertEqual(input_job_details, job_details)
+
+    def test_wait_sleeps_as_long_as_job_not_complete_yet(self):
+        not_complete_yet = {
+            'entity': {'decision_optimization': {
+                'status': {'state': 'running'}
+            }},
+            'metadata': {'id': 'job_id'}
+        }
+        # Number of times where the job will not yet be 'complete'
+        nb_not_complete_calls = 3
+        finished = {
+            'entity': {'decision_optimization': {
+                'status': {'state': 'completed'}
+            }},
+            'metadata': {'id': 'job_id'}
+        }
+        return_values = [not_complete_yet for i in range(nb_not_complete_calls)] + [finished]
+        self.lib._client.deployments.get_job_details.side_effect = return_values
+        with patch('time.sleep', return_value=None) as patched_time_sleep:
+            _, _ = self.lib.wait_for_job_end('job_id')
+        self.assertEqual(nb_not_complete_calls    , patched_time_sleep.call_count)
+        self.assertEqual(nb_not_complete_calls + 1, self.lib._client.deployments.get_job_details.call_count)
 
 
 class TestVersionComparison(TestCase):

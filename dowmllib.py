@@ -7,12 +7,12 @@ import os
 import pprint
 import re
 import tempfile
+import time
 from collections import namedtuple
 from datetime import datetime
 from functools import lru_cache
 from operator import attrgetter
 from packaging import version
-from time import sleep
 
 import requests
 from ibm_watson_machine_learning import APIClient
@@ -431,7 +431,7 @@ class DOWMLLib:
                     except KeyError:
                         # This must mean that no activity is available yet
                         pass
-            sleep(self.JOB_END_SLEEP_DELAY)
+            time.sleep(self.JOB_END_SLEEP_DELAY)
         return status, job_details
 
     @staticmethod
