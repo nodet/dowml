@@ -406,9 +406,22 @@ class DOWMLLib:
                 names.append('Unknown')
         return names
 
+    class ProgressiveDelay:
+        def __init__(self):
+            self.delays = [2, 2, 2, 2, 2, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+                           10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 30]
+
+        def wait(self):
+            delay = self.delays[0]
+            if len(self.delays) > 1:
+                self.delays.pop(0)
+            assert(2 <= delay <= 30)
+            time.sleep(delay)
+
     def wait_for_job_end(self, job_id, print_activity=False):
         """Wait for the job to finish, return its status and details as a tuple"""
         client = self._get_or_make_client()
+        delayer = DOWMLLib.ProgressiveDelay()
         while True:
             job_details = self.client_get_job_details(client, job_id, with_filter='solve_state,status')
             do = job_details['entity']['decision_optimization']
@@ -431,7 +444,7 @@ class DOWMLLib:
                     except KeyError:
                         # This must mean that no activity is available yet
                         pass
-            time.sleep(self.JOB_END_SLEEP_DELAY)
+            delayer.wait()
         return status, job_details
 
     @staticmethod
