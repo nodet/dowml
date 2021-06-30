@@ -142,7 +142,8 @@ instead.
 In 'inline yes' mode, the content of the specified files is always uploaded to
 the platform as part of the job payload, and not stored as a data asset."""
         if not arg:
-            print(f'Current inline flag: {self.lib.inline}')
+            flag = 'yes' if self.lib.inline else 'no'
+            print(f'inline: {flag}')
             return
         if arg == 'yes':
             self.lib.inline = True
