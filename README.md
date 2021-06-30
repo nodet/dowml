@@ -216,7 +216,8 @@ To create a new space, the DOWML client will need both `cos_resource_crn` and
 ## Using data assets in Watson Studio
 
 The DOWML library has two modes of operation with respect to sending the models
-to the WML service: inline data, or using data assets in Watson Studio.
+to the WML service: inline data, or using data assets in Watson Studio.  By default,
+data assets are used. This can be changed with the `inline` command.
 
 With inline data, the model is sent directly to the WML service in the _solve_
 request itself.  This is the simplest, but it has a number of drawbacks:
