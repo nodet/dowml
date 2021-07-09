@@ -40,6 +40,7 @@ class DOWMLInteractive(Cmd):
     intro = ('''
 Decision Optimization in WML Interactive.
 Submit and manage Decision Optimization models interactively.
+(c) Copyright IBM Corp. 2021
 
 Type ? for a list of commands.
 
