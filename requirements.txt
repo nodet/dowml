@@ -4,7 +4,7 @@ docutils==0.15.2
 ibm-cos-sdk==2.7.0
 ibm-cos-sdk-core==2.7.0
 ibm-cos-sdk-s3transfer==2.7.0
-ibm-watson-machine-learning==1.0.100
+ibm-watson-machine-learning==1.0.115
 idna==2.10
 jmespath==0.10.0
 lomond==0.3.3
