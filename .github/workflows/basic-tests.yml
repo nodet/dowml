@@ -33,5 +33,5 @@ jobs:
           WML_PROD_URL: '${{secrets.WML_PROD_URL}}'
           WML_SPACE_ID: '${{secrets.WML_PROD_URL}}'
         run: |
-          export WML_CREDENTIALS="{'apikey': '${WML_PROD_APIKEY}', 'url': '${WML_PROD_URL}', 'space_id': '${WML_PROD_URL}' }"
+          export DOWML_CREDENTIALS="{'apikey': '${WML_PROD_APIKEY}', 'url': '${WML_PROD_URL}', 'space_id': '${WML_PROD_URL}' }"
           make basic
