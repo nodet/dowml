@@ -1,6 +1,6 @@
 # A workflow to run a simple test that actually goes to WML
 
-name: CI
+name: CI-basic
 
 # Controls when the workflow will run
 on: [push, pull_request, workflow_dispatch]
