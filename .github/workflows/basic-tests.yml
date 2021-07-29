@@ -28,4 +28,6 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       # Runs a single command using the runners shell
       - name: Run unit tests
+        env:
+          WML_CREDENTIALS="{'apikey': ${{secrets.WML_PROD_APIKEY}}, 'url': ${{secrets.WML_PROD_URL}}, 'space_id': ${{secrets.WML_PROD_SPACE_ID}} }"
         run: make basic
