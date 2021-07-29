@@ -235,14 +235,14 @@ needs to request this information, and it comes with the content of the files
 
 Using data assets in Watson Studio as an intermediate step alleviate all these issues:
 
-- Once the model has been uploaded to WS, it will be reused for
+- Once the model has been uploaded to Watson Studio, it will be reused for
 subsequent jobs without the need to upload it again.
 
 - The job requests refer to the files indirectly, via URLs.  Therefore, they don't
 take much space, and listing the jobs doesn't imply to download the content of the
   files.
 
-- Uploading to WS is done through specialized code that doesn't just send a single
+- Uploading to Watson Studio is done through specialized code that doesn't just send a single
 request.  Rather, it divides the upload in multiple reasonably sized chunks that each
   are uploaded individually, with restart if necessary.  Uploading big files is
   therefore much less prone to failure.
