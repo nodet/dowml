@@ -407,11 +407,5 @@ class TestVersionComparison(TestCase):
         self.assertTrue(version_is_greater("1.0.100.1", "1.0.100"))
 
 
-class TestFailingToCheckCIWorkflow(TestCase):
-
-    def test_fails(self):
-        self.fail('Failing test, to check what happens in CI')
-
-
 if __name__ == '__main__':
     main()
