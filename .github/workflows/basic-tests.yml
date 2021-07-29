@@ -34,7 +34,7 @@ jobs:
           WML_PROD_URL: '${{secrets.WML_PROD_URL}}'
           WML_PROD_SPACE_ID: '${{secrets.WML_PROD_SPACE_ID}}'
         run: |
-          export DOWML_CREDENTIALS="{'apikey': ${WML_PROD_APIKEY}, 'url': ${WML_PROD_URL}, 'space_id': ${WML_PROD_SPACE_ID} }"
+          export DOWML_CREDENTIALS="{'apikey': '${WML_PROD_APIKEY}', 'url': '${WML_PROD_URL}', 'space_id': '${WML_PROD_SPACE_ID}' }"
           echo ${WML_PROD_APIKEY}
           echo ${WML_PROD_URL}
           echo ${WML_SPACE_ID}
