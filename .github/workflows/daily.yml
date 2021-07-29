@@ -29,4 +29,8 @@ jobs:
           pip install --upgrade ibm-watson-machine-learning
       # Runs a single command using the runners shell
       - name: Run fulltests with latest Python API
-        run: make fulltests
+        run: |
+          export DOWML_CREDENTIALS="{'apikey': '${WML_PROD_APIKEY}', 'url': '${WML_PROD_URL}', 'space_id': '${WML_PROD_SPACE_ID}' }"
+          make quick
+          make basic
+          make fulltests
