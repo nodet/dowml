@@ -14,6 +14,7 @@ import argparse
 import logging
 import pprint
 import re
+import sys
 
 import requests
 
@@ -343,6 +344,7 @@ def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
     except InvalidCredentials:
         print(f'\nERROR: credentials not found!\n')
         parser.print_help()
+        sys.exit(1)
 
 
 # We will mock the 'requests' function that's used by APIClient
