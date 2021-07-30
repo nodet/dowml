@@ -10,11 +10,22 @@ from ibm_watson_machine_learning.assets import Assets
 from ibm_watson_machine_learning.model_definition import ModelDefinition
 from ibm_watson_machine_learning.spaces import Spaces
 
-from dowmllib import DOWMLLib, SimilarNamesInJob, version_is_greater
+from dowmllib import DOWMLLib, SimilarNamesInJob, version_is_greater, _CredentialsProvider, InvalidCredentials
 from unittest import TestCase, main
 
 
 TEST_CREDENTIALS_FILE_NAME = 'tests/test_credentials.txt'
+
+
+class TestCredentials(TestCase):
+
+    def test_empty_credentials_raises_error(self):
+        with self.assertRaises(InvalidCredentials):
+            _ = _CredentialsProvider(wml_credentials_str='')
+
+    def test_empty_url_raises_error(self):
+        with self.assertRaises(InvalidCredentials):
+            _ = _CredentialsProvider(wml_credentials_str='{\'apikey\': \'<apikey>\', \'url\': \'\'}')
 
 
 class TestSolveInline(TestCase):

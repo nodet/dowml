@@ -94,15 +94,27 @@ class _CredentialsProvider:
     COS_CRN = 'cos_resource_crn'
     ML_CRN = 'ml_instance_crn'
 
-    def __init__(self, wml_credentials_file=None):
+    def __init__(self, wml_credentials_file=None, wml_credentials_str = None):
         self._logger = logging.getLogger(self.__class__.__name__)
 
-        if wml_credentials_file is not None:
-            wml_cred_str = self._read_wml_credentials_from_file(wml_credentials_file)
-        else:
-            wml_cred_str = self._read_wml_credentials_from_env(self.ENVIRONMENT_VARIABLE_NAME)
-        self._logger.debug(f'Found credential string.')
+        if wml_credentials_str is None:
+            if wml_credentials_file is not None:
+                wml_credentials_str = self._read_wml_credentials_from_file(wml_credentials_file)
+            else:
+                wml_credentials_str = self._read_wml_credentials_from_env(self.ENVIRONMENT_VARIABLE_NAME)
+            self._logger.debug(f'Found credential string.')
+        self.credentials = self.check_credentials(wml_credentials_str)
 
+    def usage(self):
+        print(f'It should contain credentials as a Python dict of the form:')
+        print(f'{{\'{self.APIKEY}\': \'<apikey>\', \'{self.URL}\': \'https://us-south.ml.cloud.ibm.com\'}}')
+
+    def check_credentials(self, wml_cred_str):
+        assert type(wml_cred_str) is str
+        if len(wml_cred_str) == 0:
+            self._logger.error(f'WML credentials must not be an empty string.')
+            self.usage()
+            raise InvalidCredentials
         wml_credentials = eval(wml_cred_str)
         assert type(wml_credentials) is dict
         assert (self.APIKEY in wml_credentials or self.TOKEN in wml_credentials)
@@ -112,11 +124,15 @@ class _CredentialsProvider:
             assert type(wml_credentials[self.TOKEN]) is str
         assert self.URL in wml_credentials
         assert type(wml_credentials[self.URL]) is str
-        if wml_credentials[self.URL][-1] == '/':
+        url = wml_credentials[self.URL]
+        if len(url) == 0:
+            self._logger.error(f'URL must not be an empty string.')
+            raise InvalidCredentials
+        if url[-1] == '/':
             self._logger.warning(f'URL should not have a \'/\' at the end.')
-            wml_credentials[self.URL] = wml_credentials[self.URL][:-1]
+            url = url[:-1]
         self._logger.debug(f'Credentials have the expected structure.')
-        self.credentials = wml_credentials
+        return wml_credentials
 
     def _read_wml_credentials_from_env(self, var_name):
         """Return a string of credentials suitable for WML from the environment
@@ -127,8 +143,7 @@ class _CredentialsProvider:
             wml_cred_str = os.environ[var_name]
         except KeyError:
             print(f'Environment variable ${var_name} not found.')
-            print(f'It should contain credentials as a Python dict of the form:')
-            print(f'{{\'{self.APIKEY}\': \'<apikey>\', \'{self.URL}\': \'https://us-south.ml.cloud.ibm.com\'}}')
+            self.usage()
             raise InvalidCredentials
 
         return wml_cred_str
