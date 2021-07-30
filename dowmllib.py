@@ -237,6 +237,7 @@ class DOWMLLib:
 
         :param paths: one or more pathname to the files to send, as a single
                       string, separated by space
+        :return: The id of the submitted job
         """
         self._get_or_make_client()
 
