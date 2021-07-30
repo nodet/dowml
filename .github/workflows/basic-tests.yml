@@ -42,4 +42,5 @@ jobs:
         run: |
           export DOWML_CREDENTIALS="{'apikey': '${WML_PROD_APIKEY}', 'url': '${WML_PROD_URL}', 'space_id': '${WML_PROD_SPACE_ID}' }"
           make basic
+          make slow
           make fulltests
