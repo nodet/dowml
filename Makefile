@@ -1,8 +1,19 @@
-quick_tests = tests/test_*.py
+quick_tests = tests/test_lib.py tests/test_cli.py
+slow_tests = tests/test_full.py
+all_tests = $(quick_tests) $(slow_tests)
 
 quick:
 	python -m unittest $(quick_tests)
 	rm -rf a_details.json
+
+# A very basic test to confirm the client version number and that
+# credentials work
+basic:
+	python3 dowml.py -vv -c jobs
+
+# Actual tests with checks
+slow:
+	python -m unittest $(slow_tests)
 
 cover:
 	coverage run -m unittest $(quick_tests)
@@ -10,16 +21,8 @@ cover:
 	coverage html
 	open htmlcov/dowmllib_py.html
 
-#
-# A very basic test to confirm the client version number and that
-# credentials work
-#
-basic:
-	python3 dowml.py -vv -c jobs
-
-#
-# This really tests as much as possible
-#
+# This really exercises as much as possible
+# but doesn't check the results
 fulltests:
 	python3 dowml.py -c help type size 'inline yes' \
        'solve examples/afiro.mps' jobs wait log delete \
