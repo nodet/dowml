@@ -151,7 +151,6 @@ class TestDetailsAndOutputs(TestCase):
         self.assertStatsAreMentionedButNoContent(details)
 
     # FIXME: check full details
-    # FIXME: check presence or absence of log
     # FIXME: check content of input data only if inline
     # FIXME: check engine activity only in full
 
