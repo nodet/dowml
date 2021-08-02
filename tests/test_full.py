@@ -42,12 +42,18 @@ class TestDetailsAndOutputs(TestCase):
     And it checks that the details and outputs are as expected"""
 
     def assertLogIsMentionedButNoContent(self, details):
+        self.assertOutputIsMentionedButNoContent(details, 'log.txt')
+
+    def assertSolutionIsMentionedButNoContent(self, details):
+        self.assertOutputIsMentionedButNoContent(details, 'solution.json')
+
+    def assertOutputIsMentionedButNoContent(self, details, name):
         output = details['entity']['decision_optimization']['output_data']
-        seen_log = False
+        seen_output = False
         for o in output:
-            if o['id'] == 'log.txt':
-                self.assertFalse(seen_log)
-                seen_log = True
+            if o['id'] == name:
+                self.assertFalse(seen_output)
+                seen_output = True
                 content = o['content']
                 self.assertEqual(content, '[not shown]')
 
@@ -95,6 +101,7 @@ class TestDetailsAndOutputs(TestCase):
         self.assertEqual(len(details['entity']['decision_optimization']['output_data_references']), 0)
         self.assertIn   ('output_data',            details['entity']['decision_optimization'], )
         self.assertLogIsMentionedButNoContent(details)
+        self.assertSolutionIsMentionedButNoContent(details)
 
     def test_non_inline_details_do_have_inputs_and_outputs_if_names(self):
         l = self.lib
@@ -107,6 +114,7 @@ class TestDetailsAndOutputs(TestCase):
         self.assertEqual(len(details['entity']['decision_optimization']['output_data_references']), 0)
         self.assertIn   ('output_data',            details['entity']['decision_optimization'], )
         self.assertLogIsMentionedButNoContent(details)
+        self.assertSolutionIsMentionedButNoContent(details)
 
     # FIXME: check full details
     # FIXME: check presence or absence of log
