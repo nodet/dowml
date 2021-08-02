@@ -41,12 +41,6 @@ class TestDetailsAndOutputs(TestCase):
     """"This class runs two CPLEX models, one inline, the other by reference.
     And it checks that the details and outputs are as expected"""
 
-    def assertLogIsMentionedButNoContent(self, details):
-        self.assertOutputIsMentionedButNoContent(details, 'log.txt')
-
-    def assertSolutionIsMentionedButNoContent(self, details):
-        self.assertOutputIsMentionedButNoContent(details, 'solution.json')
-
     def assertOutputIsMentionedButNoContent(self, details, name):
         output = details['entity']['decision_optimization']['output_data']
         seen_output = False
@@ -56,6 +50,18 @@ class TestDetailsAndOutputs(TestCase):
                 seen_output = True
                 content = o['content']
                 self.assertEqual(content, '[not shown]')
+
+    def assertLogIsMentionedButNoContent(self, details):
+        self.assertOutputIsMentionedButNoContent(details, 'log.txt')
+
+    def assertSolutionIsMentionedButNoContent(self, details):
+        self.assertOutputIsMentionedButNoContent(details, 'solution.json')
+
+    def assertEngineActivityButNoContent(self, details):
+        self.assertIn('solve_state', details['entity']['decision_optimization'])
+        self.assertIn('latest_engine_activity', details['entity']['decision_optimization']['solve_state'])
+        activity = details['entity']['decision_optimization']['solve_state']['latest_engine_activity']
+        self.assertEqual(activity, ['[not shown]'])
 
     def assertStatsAreMentionedButNoContent(self, details):
         output = details['entity']['decision_optimization']['output_data']
@@ -91,9 +97,6 @@ class TestDetailsAndOutputs(TestCase):
 
     def assertNoOutputData(self, details):
         self.assertNotIn('output_data',  details['entity']['decision_optimization'])
-
-
-
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -138,6 +141,7 @@ class TestDetailsAndOutputs(TestCase):
         self.assertLogIsMentionedButNoContent(details)
         self.assertSolutionIsMentionedButNoContent(details)
         self.assertStatsAreMentionedButNoContent(details)
+        self.assertEngineActivityButNoContent(details)
 
     def test_non_inline_details_do_have_inputs_and_outputs_if_names(self):
         l = self.lib
@@ -149,10 +153,10 @@ class TestDetailsAndOutputs(TestCase):
         self.assertLogIsMentionedButNoContent(details)
         self.assertSolutionIsMentionedButNoContent(details)
         self.assertStatsAreMentionedButNoContent(details)
+        self.assertEngineActivityButNoContent(details)
 
     # FIXME: check full details
     # FIXME: check content of input data only if inline
-    # FIXME: check engine activity only in full
 
 
 if __name__ == '__main__':
