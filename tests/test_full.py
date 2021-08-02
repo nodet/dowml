@@ -57,6 +57,16 @@ class TestDetailsAndOutputs(TestCase):
                 content = o['content']
                 self.assertEqual(content, '[not shown]')
 
+    def assertStatsAreMentionedButNoContent(self, details):
+        output = details['entity']['decision_optimization']['output_data']
+        seen_output = False
+        for o in output:
+            if o['id'] == 'stats.csv':
+                self.assertFalse(seen_output)
+                seen_output = True
+                values = o['values']
+                self.assertEqual(values, ['[not shown]'])
+
     @classmethod
     def setUpClass(cls) -> None:
         l = DOWMLLib()
@@ -102,6 +112,7 @@ class TestDetailsAndOutputs(TestCase):
         self.assertIn   ('output_data',            details['entity']['decision_optimization'], )
         self.assertLogIsMentionedButNoContent(details)
         self.assertSolutionIsMentionedButNoContent(details)
+        self.assertStatsAreMentionedButNoContent(details)
 
     def test_non_inline_details_do_have_inputs_and_outputs_if_names(self):
         l = self.lib
@@ -115,6 +126,7 @@ class TestDetailsAndOutputs(TestCase):
         self.assertIn   ('output_data',            details['entity']['decision_optimization'], )
         self.assertLogIsMentionedButNoContent(details)
         self.assertSolutionIsMentionedButNoContent(details)
+        self.assertStatsAreMentionedButNoContent(details)
 
     # FIXME: check full details
     # FIXME: check presence or absence of log
