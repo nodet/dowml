@@ -57,6 +57,22 @@ class TestDetailsAndOutputs(TestCase):
     def assertSolutionIsMentionedButNoContent(self, details):
         self.assertOutputIsMentionedButNoContent(details, 'solution.json')
 
+    def assertOutputHasContent(self, details, name):
+        output = details['entity']['decision_optimization']['output_data']
+        seen_output = False
+        for o in output:
+            if o['id'] == name:
+                self.assertFalse(seen_output)
+                seen_output = True
+                content = o['content']
+                self.assertNotEqual(content, '[not shown]')
+
+    def assertLogHasContent(self, details):
+        self.assertOutputHasContent(details, 'log.txt')
+
+    def assertSolutionHasContent(self, details):
+        self.assertOutputHasContent(details, 'solution.json')
+
     def assertEngineActivityButNoContent(self, details):
         self.assertIn('solve_state', details['entity']['decision_optimization'])
         self.assertIn('latest_engine_activity', details['entity']['decision_optimization']['solve_state'])
@@ -72,6 +88,22 @@ class TestDetailsAndOutputs(TestCase):
                 seen_output = True
                 values = o['values']
                 self.assertEqual(values, ['[not shown]'])
+
+    def assertEngineActivityWithContent(self, details):
+        self.assertIn('solve_state', details['entity']['decision_optimization'])
+        self.assertIn('latest_engine_activity', details['entity']['decision_optimization']['solve_state'])
+        activity = details['entity']['decision_optimization']['solve_state']['latest_engine_activity']
+        self.assertNotEqual(activity, ['[not shown]'])
+
+    def assertStatsAreMentionedWithContent(self, details):
+        output = details['entity']['decision_optimization']['output_data']
+        seen_output = False
+        for o in output:
+            if o['id'] == 'stats.csv':
+                self.assertFalse(seen_output)
+                seen_output = True
+                values = o['values']
+                self.assertNotEqual(values, ['[not shown]'])
 
     def assertNoInputDataReference(self, details):
         self.assertNotIn('input_data_references',  details['entity']['decision_optimization'])
@@ -157,8 +189,36 @@ class TestDetailsAndOutputs(TestCase):
         self.assertStatsAreMentionedButNoContent(details)
         self.assertEngineActivityButNoContent(details)
 
-    # FIXME: check full details
-    # FIXME: check content of input data only if inline
+    def assert_full_details_have_all_info(self, details):
+        self.assertLogHasContent(details)
+        self.assertSolutionHasContent(details)
+        self.assertStatsAreMentionedWithContent(details)
+        self.assertEngineActivityWithContent(details)
+
+    def test_inline_details_full(self):
+        l = self.lib
+        id_inline = self.id_inline
+        details = l.get_job_details(id_inline, with_contents='full')
+        self.assertNoInputDataReference(details)
+        self.assertInputData(details)
+        input_list = details['entity']['decision_optimization']['input_data']
+        self.assertEqual(len(input_list), 1)
+        input = input_list[0]
+        self.assertIn('id', input)
+        self.assertEqual('afiro.mps', input['id'])
+        self.assertIn('content', input)
+        self.assertNotEqual('[not shown]', input['content'])
+        self.assertEmptyOutputDataReference(details)
+        self.assert_full_details_have_all_info(details)
+
+    def test_non_inline_details_full(self):
+        l = self.lib
+        id_not_inline = self.id_not_inline
+        details = l.get_job_details(id_not_inline, with_contents='full')
+        self.assertInputDataReference(details)
+        self.assertNoInputData(details)
+        self.assertEmptyOutputDataReference(details)
+        self.assert_full_details_have_all_info(details)
 
 
 if __name__ == '__main__':
