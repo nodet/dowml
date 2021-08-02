@@ -67,6 +67,34 @@ class TestDetailsAndOutputs(TestCase):
                 values = o['values']
                 self.assertEqual(values, ['[not shown]'])
 
+    def assertNoInputDataReference(self, details):
+        self.assertNotIn('input_data_references',  details['entity']['decision_optimization'])
+
+    def assertInputDataReference(self, details):
+        self.assertIn('input_data_references',  details['entity']['decision_optimization'])
+
+    def assertNoInputData(self, details):
+        self.assertNotIn('input_data',  details['entity']['decision_optimization'])
+
+    def assertInputData(self, details):
+        self.assertIn('input_data',  details['entity']['decision_optimization'])
+
+    def assertOutputDataReference(self, details):
+        self.assertIn('output_data_references',  details['entity']['decision_optimization'])
+
+    def assertNoOutputDataReference(self, details):
+        self.assertNotIn('output_data_references',  details['entity']['decision_optimization'])
+
+    def assertEmptyOutputDataReference(self, details):
+        self.assertOutputDataReference(details)
+        self.assertEqual(len(details['entity']['decision_optimization']['output_data_references']), 0)
+
+    def assertNoOutputData(self, details):
+        self.assertNotIn('output_data',  details['entity']['decision_optimization'])
+
+
+
+
     @classmethod
     def setUpClass(cls) -> None:
         l = DOWMLLib()
@@ -87,29 +115,26 @@ class TestDetailsAndOutputs(TestCase):
     def test_inline_details_dont_have_inputs_or_outputs_by_default(self):
         l = self.lib
         details = l.get_job_details(self.id_inline)
-        self.assertNotIn('input_data_references',  details['entity']['decision_optimization'])
-        self.assertNotIn('input_data',             details['entity']['decision_optimization'])
-        self.assertNotIn('output_data_references', details['entity']['decision_optimization'])
-        self.assertNotIn('output_data',            details['entity']['decision_optimization'])
+        self.assertNoInputDataReference(details)
+        self.assertNoInputData(details)
+        self.assertNoOutputDataReference(details)
+        self.assertNoOutputData(details)
 
     def test_non_inline_details_dont_have_inputs_or_outputs_by_default(self):
         l = self.lib
         details = l.get_job_details(self.id_not_inline)
-        self.assertNotIn('input_data_references',  details['entity']['decision_optimization'])
-        self.assertNotIn('input_data',             details['entity']['decision_optimization'])
-        self.assertNotIn('output_data_references', details['entity']['decision_optimization'])
-        self.assertNotIn('output_data',            details['entity']['decision_optimization'])
+        self.assertNoInputDataReference(details)
+        self.assertNoInputData(details)
+        self.assertNoOutputDataReference(details)
+        self.assertNoOutputData(details)
 
     def test_inline_details_do_have_inputs_and_outputs_if_names(self):
         l = self.lib
         id_inline = self.id_inline
         details = l.get_job_details(id_inline, with_contents='names')
-        self.assertNotIn('input_data_references',  details['entity']['decision_optimization'])
-        self.assertIn   ('input_data',             details['entity']['decision_optimization'])
-        self.assertIn   ('output_data_references', details['entity']['decision_optimization'])
-        # There is a list of output references, but it's empty
-        self.assertEqual(len(details['entity']['decision_optimization']['output_data_references']), 0)
-        self.assertIn   ('output_data',            details['entity']['decision_optimization'], )
+        self.assertNoInputDataReference(details)
+        self.assertInputData(details)
+        self.assertEmptyOutputDataReference(details)
         self.assertLogIsMentionedButNoContent(details)
         self.assertSolutionIsMentionedButNoContent(details)
         self.assertStatsAreMentionedButNoContent(details)
@@ -118,12 +143,9 @@ class TestDetailsAndOutputs(TestCase):
         l = self.lib
         id_not_inline = self.id_not_inline
         details = l.get_job_details(id_not_inline, with_contents='names')
-        self.assertIn   ('input_data_references',  details['entity']['decision_optimization'])
-        self.assertNotIn('input_data',             details['entity']['decision_optimization'])
-        self.assertIn   ('output_data_references', details['entity']['decision_optimization'])
-        # There is a list of output references, but it's empty
-        self.assertEqual(len(details['entity']['decision_optimization']['output_data_references']), 0)
-        self.assertIn   ('output_data',            details['entity']['decision_optimization'], )
+        self.assertInputDataReference(details)
+        self.assertNoInputData(details)
+        self.assertEmptyOutputDataReference(details)
         self.assertLogIsMentionedButNoContent(details)
         self.assertSolutionIsMentionedButNoContent(details)
         self.assertStatsAreMentionedButNoContent(details)
