@@ -1,4 +1,4 @@
-quick_tests = tests/test_lib.py tests/test_cli.py
+quick_tests = tests/test_lib.py tests/test_cli.py tests/test_bugs.py
 slow_tests = tests/test_full.py
 all_tests = $(quick_tests) $(slow_tests)
 
