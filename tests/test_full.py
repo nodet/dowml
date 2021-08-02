@@ -137,6 +137,8 @@ class TestDetailsAndOutputs(TestCase):
         details = l.get_job_details(id_inline, with_contents='names')
         self.assertNoInputDataReference(details)
         self.assertInputData(details)
+        self.assertEqual(details['entity']['decision_optimization']['input_data'],
+                         [{'content': '[not shown]', 'id': 'afiro.mps'}])
         self.assertEmptyOutputDataReference(details)
         self.assertLogIsMentionedButNoContent(details)
         self.assertSolutionIsMentionedButNoContent(details)
