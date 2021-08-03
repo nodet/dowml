@@ -41,6 +41,7 @@ jobs:
         run: |
           export DOWML_CREDENTIALS="{'apikey': '${WML_PROD_APIKEY}', 'url': '${WML_PROD_URL}', 'cos_resource_crn': '${WML_PROD_COS_CRN}', 'ml_instance_crn': '${WML_PROD_ML_CRN}', 'space_name': 'dowml-test-space' }"
           make delete-space
+          sleep 5
           make quick
           make basic
           make fulltests
