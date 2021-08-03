@@ -29,3 +29,6 @@ fulltests:
        'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'details full' delete \
        'inline no' 'type cplex' 'solve examples/afiro.mps' jobs wait details delete \
        'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' 'details names' wait delete
+
+delete-space:
+	PYTHONPATH=. python3 tests/delete_space.py
