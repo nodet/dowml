@@ -173,7 +173,6 @@ class DOWMLLib:
     DO_VERSION = '20.1'
     TSHIRT_SIZES = ['S', 'M', 'XL']
     DEPLOYMENT_NAME = f'{DOWML_PREFIX}-deployment'
-    JOB_END_SLEEP_DELAY = 2
 
     def __init__(self, wml_credentials_file=None,
                  space_id=None,
