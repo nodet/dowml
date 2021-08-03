@@ -39,8 +39,10 @@ jobs:
           WML_PROD_APIKEY: '${{secrets.WML_PROD_APIKEY}}'
           WML_PROD_URL: '${{secrets.WML_PROD_URL}}'
           WML_PROD_SPACE_ID: '${{secrets.WML_PROD_SPACE_ID}}'
+          WML_PROD_COS_CRN: '${{secrets.WML_PROD_COS_CRN}}'
+          WML_PROD_ML_CRN: '${{secrets.WML_PROD_ML_CRN}}'
         run: |
-          export DOWML_CREDENTIALS="{'apikey': '${WML_PROD_APIKEY}', 'url': '${WML_PROD_URL}', 'space_name': 'dowml-test-space' }"
+          export DOWML_CREDENTIALS="{'apikey': '${WML_PROD_APIKEY}', 'url': '${WML_PROD_URL}', 'cos_resource_crn': '${WML_PROD_COS_CRN}', 'ml_instance_crn': ${WML_PROD_ML_CRN}, 'space_name': 'dowml-test-space' }"
           make basic
           make slow
           make fulltests
