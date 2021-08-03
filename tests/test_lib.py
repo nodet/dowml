@@ -27,6 +27,24 @@ class TestCredentials(TestCase):
         with self.assertRaises(InvalidCredentials):
             _ = _CredentialsProvider(wml_credentials_str='{\'apikey\': \'<apikey>\', \'url\': \'\'}')
 
+    def test_space_name_has_default(self):
+        default_space_name = 'dowml-space'
+        # Let's check the default value is correct
+        l = DOWMLLib()
+        self.assertEqual(l.space_name, default_space_name)
+
+    def test_space_name_in_credentials_change_default(self):
+        # Let's now try to change that default value
+        non_default_name = 'dowml-test-space'
+        l = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
+        # Let's first check that the test was setup properly: it relies on
+        # 'space-name' being included in the test credentials file
+        # FIXME: the test would be much cleaner if DOWMLlib would accept credentials directly
+        self.assertIn(_CredentialsProvider.SPACE_NAME, l._wml_credentials)
+        self.assertEqual(non_default_name, l._wml_credentials[_CredentialsProvider.SPACE_NAME])
+        # Let's confirm that the space name is changed
+        self.assertEqual(l.space_name, non_default_name)
+
 
 class TestSolveInline(TestCase):
 

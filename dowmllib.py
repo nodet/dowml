@@ -90,6 +90,7 @@ class _CredentialsProvider:
     APIKEY = 'apikey'
     TOKEN = 'token'
     SPACE_ID = 'space_id'
+    SPACE_NAME = 'space_name'
     URL = 'url'
     COS_CRN = 'cos_resource_crn'
     ML_CRN = 'ml_instance_crn'
@@ -167,7 +168,7 @@ class DOWMLLib:
     """A Python client to run DO models on WML"""
 
     DOWML_PREFIX = 'dowml'
-    SPACE_NAME = f'{DOWML_PREFIX}-space'
+    space_name = f'{DOWML_PREFIX}-space'
     MODEL_NAME = f'{DOWML_PREFIX}-model'
     MODEL_TYPES = ['cplex', 'cpo', 'opl', 'docplex']
     DO_VERSION = '20.1'
@@ -189,6 +190,11 @@ class DOWMLLib:
 
         cred_provider = _CredentialsProvider(wml_credentials_file)
         wml_credentials = cred_provider.credentials
+
+        # A space name in the credentials changes the default
+        if cred_provider.SPACE_NAME in wml_credentials:
+            self._logger.debug(f'They contain a space name.')
+            self.space_name = wml_credentials[cred_provider.SPACE_NAME]
 
         if cred_provider.SPACE_ID in wml_credentials:
             self._logger.debug(f'And they contain a space id.')
@@ -784,10 +790,10 @@ class DOWMLLib:
         self._logger.debug(f'Fetching existing spaces...')
         space_details = client.spaces.get_details()
         resources = space_details['resources']
-        self._logger.debug(f'Got the list. Looking for space named \'{self.SPACE_NAME}\'')
+        self._logger.debug(f'Got the list. Looking for space named \'{self.space_name}\'')
         space_id = None
         for r in resources:
-            if r['entity']['name'] == self.SPACE_NAME:
+            if r['entity']['name'] == self.space_name:
                 space_id = r['metadata']['id']
                 self._logger.debug(f'Found it.')
                 break
@@ -807,8 +813,8 @@ class DOWMLLib:
 
             csc = client.spaces.ConfigurationMetaNames
             metadata = {
-                csc.NAME: self.SPACE_NAME,
-                csc.DESCRIPTION: self.SPACE_NAME + ' description',
+                csc.NAME: self.space_name,
+                csc.DESCRIPTION: self.space_name + ' description',
                 csc.STORAGE: {
                     "type": "bmcos_object_storage",
                     "resource_crn": self._wml_credentials[cos_crn]
