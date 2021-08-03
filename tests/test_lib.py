@@ -1,4 +1,5 @@
 import datetime
+import os
 import pprint
 from logging import Logger
 from unittest.mock import Mock, patch
@@ -11,8 +12,7 @@ from ibm_watson_machine_learning.model_definition import ModelDefinition
 from ibm_watson_machine_learning.spaces import Spaces
 
 from dowmllib import DOWMLLib, SimilarNamesInJob, version_is_greater, _CredentialsProvider, InvalidCredentials
-from unittest import TestCase, main
-
+from unittest import TestCase, main, mock
 
 TEST_CREDENTIALS_FILE_NAME = 'tests/test_credentials.txt'
 
@@ -28,10 +28,13 @@ class TestCredentials(TestCase):
             _ = _CredentialsProvider(wml_credentials_str='{\'apikey\': \'<apikey>\', \'url\': \'\'}')
 
     def test_space_name_has_default(self):
-        default_space_name = 'dowml-space'
-        # Let's check the default value is correct
-        l = DOWMLLib()
-        self.assertEqual(l.space_name, default_space_name)
+        with mock.patch.dict(os.environ,
+                             {'DOWML_CREDENTIALS':
+                              "{'apikey': '<apikey>', 'url': 'https://us-south.ml.cloud.ibm.com'}"}):
+            default_space_name = 'dowml-space'
+            # Let's check the default value is correct
+            l = DOWMLLib()
+            self.assertEqual(l.space_name, default_space_name)
 
     def test_space_name_in_credentials_change_default(self):
         # Let's now try to change that default value
