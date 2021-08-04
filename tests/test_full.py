@@ -220,6 +220,25 @@ class TestDetailsAndOutputs(TestCase):
         self.assertEmptyOutputDataReference(details)
         self.assert_full_details_have_all_info(details)
 
+    def find_output_with_id(self, outputs, id):
+        result = None
+        for name, content in outputs:
+            if name == id:
+                # We should find at most one
+                self.assertIsNone(result)
+                result = content
+        # We should find at least one
+        self.assertIsNotNone(result)
+        return result
+
+    def test_log_is_correctly_decoded(self):
+        l = self.lib
+        id_not_inline = self.id_not_inline
+        details = l.get_job_details(id_not_inline, with_contents='full')
+        outputs = l.get_output(details)
+        log = self.find_output_with_id(outputs, 'log.txt')
+        self.assertEqual(f'CPLEX version', str(log[29:42], 'UTF-8'))
+
 
 if __name__ == '__main__':
     main()
