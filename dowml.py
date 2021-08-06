@@ -304,8 +304,10 @@ job is either a job number or a job id. Uses current job if not specified."""
     def do_shell(self, command):
         """shell command
 Runs the specified command in a shell."""
-        return os.system(command)
-
+        os.system(command)
+        # We ignore the value returned as anything non-zero would just stop
+        # the Interactive.
+        return 0
 
 def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
     try:

@@ -240,12 +240,15 @@ class TestShellCommand(TestCase):
         self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
 
     def test_successful_shell_returns_zero(self):
-        cli = self.cli
-        self.assertEqual(0, cli.do_shell('ls > /dev/null'))
+        self.assertEqual(0, self.cli.do_shell('ls > /dev/null'))
 
-    def test_invalid_command_returns_non_zero(self):
-        cli = self.cli
-        self.assertNotEqual(0, cli.do_shell('foo 2>/dev/null'))
+    def test_invalid_command_returns_zero(self):
+        # May seem counter-intuitive, but anything else would
+        # stop the Interactive
+        self.assertEqual(0, self.cli.do_shell('foo 2>/dev/null'))
+
+    def test_empty_command_returns_zero(self):
+        self.assertEqual(0, self.cli.do_shell(''))
 
 
 if __name__ == '__main__':
