@@ -1,6 +1,7 @@
 import pprint
 
 from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
+from pandas import DataFrame
 
 from dowmllib import DOWMLLib
 from unittest import TestCase, main
@@ -237,8 +238,27 @@ class TestDetailsAndOutputs(TestCase):
         details = l.get_job_details(id_not_inline, with_contents='full')
         outputs = l.get_output(details)
         log = self.find_output_with_id(outputs, 'log.txt')
-        self.assertEqual(f'CPLEX version', str(log[29:42], 'UTF-8'))
+        self.assertEqual(b'CPLEX version', log[29:42])
 
+    def test_csv_is_correctly_decoded(self):
+        l = self.lib
+        id_not_inline = self.id_not_inline
+        details = l.get_job_details(id_not_inline, with_contents='full')
+        outputs = l.get_output(details)
+        csv = self.find_output_with_id(outputs, 'stats.csv')
+        self.assertEqual(b'Name,Value\r\n', csv[0:12])
+
+    def test_csv_is_correctly_decoded_as_dataframe(self):
+        l = self.lib
+        id_not_inline = self.id_not_inline
+        details = l.get_job_details(id_not_inline, with_contents='full')
+        outputs = l.get_output(details, csv_as_dataframe=True)
+        csv = self.find_output_with_id(outputs, 'stats.csv')
+        self.assertEqual(DataFrame, type(csv))
+        self.assertEqual(['Name', 'Value'], list(csv.columns))
+        # There exists at least one line with 'job.coresCount' in the 'Name'
+        # column, and that line has '1' in the 'Value' column
+        self.assertEqual(1, csv.loc[csv['Name'] == 'job.coresCount']['Value'].values[0])
 
 if __name__ == '__main__':
     main()

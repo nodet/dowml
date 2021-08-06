@@ -275,10 +275,12 @@ class DOWMLLib:
                 return output
         return None
 
-    def get_output(self, details):
+    def get_output(self, details, csv_as_dataframe=False):
         """"Extracts the outputs from the job
 
         :param details: The details of the job to get the output from
+        :param csv_as_dataframe: Whether the content of a CSV file should be
+        returned as a Pandas DataFrame or not.
         :return: A list of outputs. Each output is a tuple (name, content)
         where the name is, well, the name of the output, and content is the
         decoded content, as bytes. We don't assume that the content is actually
@@ -295,23 +297,38 @@ class DOWMLLib:
             if 'content' in output_data:
                 # What we have here is a regular file, encoded
                 self._logger.debug(f'Found a regular file named {name}')
-                content = output_data['content']
-                content = content.encode('UTF-8')
-                content = base64.b64decode(content)
+                content = self._extract_regular_file(output_data)
                 result.append((name, content))
             elif ('values' in output_data and
                   'fields' in output_data and
                   name.lower().endswith('.csv')):
                 self._logger.debug(f'Found a CSV file named {name}')
-                content = io.StringIO()
-                writer = csv.writer(content)
-                writer.writerow(output_data['fields'])
-                for r in output_data['values']:
-                    writer.writerow(r)
-                result.append((name, content.getvalue().encode()))
+                content = self._extract_csv_file(output_data, csv_as_dataframe)
+                result.append((name, content))
             else:
                 self._logger.warning(f'Found an unknown file named {name}')
+                # FIXME: add raw content
         return result
+
+    def _extract_csv_file(self, output_data, csv_as_dataframe):
+        if not csv_as_dataframe:
+            content = io.StringIO()
+            writer = csv.writer(content)
+            writer.writerow(output_data['fields'])
+            for r in output_data['values']:
+                writer.writerow(r)
+            content = content.getvalue().encode()
+        else:
+            import pandas
+            content = pandas.DataFrame(output_data['values'],
+                                       columns=output_data['fields'])
+        return content
+
+    def _extract_regular_file(self, output_data):
+        content = output_data['content']
+        content = content.encode('UTF-8')
+        content = base64.b64decode(content)
+        return content
 
     def get_job_details(self, job_id, with_contents=None):
         """ Get the job details for the given job
