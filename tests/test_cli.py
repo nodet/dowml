@@ -243,6 +243,10 @@ class TestShellCommand(TestCase):
         cli = self.cli
         self.assertEqual(0, cli.do_shell('ls > /dev/null'))
 
+    def test_invalid_command_returns_non_zero(self):
+        cli = self.cli
+        self.assertNotEqual(0, cli.do_shell('foo 2>/dev/null'))
+
 
 if __name__ == '__main__':
     main()
