@@ -234,5 +234,15 @@ class TestInline(TestCase):
             cli.do_inline('y')
 
 
+class TestShellCommand(TestCase):
+
+    def setUp(self) -> None:
+        self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
+
+    def test_successful_shell_returns_zero(self):
+        cli = self.cli
+        self.assertEqual(0, cli.do_shell('ls > /dev/null'))
+
+
 if __name__ == '__main__':
     main()

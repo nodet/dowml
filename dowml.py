@@ -12,6 +12,7 @@
 
 import argparse
 import logging
+import os
 import pprint
 import re
 import sys
@@ -298,6 +299,12 @@ Stops the job specified.
 job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._get_and_remember_job_id(job_id)
         self.lib.delete_job(job_id, False)
+
+
+    def do_shell(self, command):
+        """shell command
+Runs the specified command in a shell."""
+        return os.system(command)
 
 
 def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
