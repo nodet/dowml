@@ -307,7 +307,8 @@ class DOWMLLib:
                 result.append((name, content))
             else:
                 self._logger.warning(f'Found an unknown file named {name}')
-                # FIXME: add raw content
+                content = output_data
+                result.append((name, content))
         return result
 
     def _extract_csv_file(self, output_data, csv_as_dataframe):
