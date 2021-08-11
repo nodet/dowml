@@ -44,25 +44,29 @@ In order to use either of them, you need to provide IBM Cloud credentials.
 Here's a sample session:
 ```
 $ python3 dowml.py -h
-usage: dowml.py [-h] [-w WML_CRED_FILE] [--verbose] [--commands [COMMANDS [COMMANDS ...]]] [--input] [-s SPACE]
+usage: dowml.py [-h] [-w WML_CRED_FILE] [--verbose] [--commands [COMMANDS [COMMANDS ...]]]
+                [--input] [-s SPACE]
 
 Interactive program for DO on WML
 
 optional arguments:
   -h, --help            show this help message and exit
   -w WML_CRED_FILE, --wml-cred-file WML_CRED_FILE
-                        Name of the file from which to read WML credentials. If not specified, credentials are
-                        read from environment variable $DOWML_CREDENTIALS.
-  --verbose, -v         Verbose mode. Causes the program to print debugging messages about its progress.
-                        Multiple -v options increase the verbosity. The maximum is 4.
+                        Name of the file from which to read WML credentials. If not
+                        specified, credentials are read from environment variable
+                        $DOWML_CREDENTIALS.
+  --verbose, -v         Verbose mode. Causes the program to print debugging messages about
+                        its progress. Multiple -v options increase the verbosity. The
+                        maximum is 4.
   --commands [COMMANDS [COMMANDS ...]], -c [COMMANDS [COMMANDS ...]]
-                        Carries out the specified commands. Each command is executed as if it had been
-                        specified at the prompt. The program stops after last command.
-  --input, -i           Prompts for new input commands even if some commands have been specified as arguments
-                        using --commands.
+                        Carries out the specified commands. Each command is executed as if
+                        it had been specified at the prompt. The program stops after last
+                        command.
+  --input, -i           Prompts for new input commands even if some commands have been
+                        specified as arguments using --commands.
   -s SPACE, --space SPACE
-                        Id of the space to connect to. Takes precedence over the one specified in the
-                        credentials under the 'space_id' key, if any.
+                        Id of the space to connect to. Takes precedence over the one
+                        specified in the credentials under the 'space_id' key, if any.
 $
 $
 $ python3 dowml.py -c help type size 'inline yes' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'shell ls -l e81b392d*'
@@ -152,7 +156,8 @@ dowml> shell ls -l e81b392d*
 -rw-rw-r--  1 nodet  staff    39 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_kpis.csv
 -rw-rw-r--  1 nodet  staff  7142 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_log.txt
 -rw-rw-r--  1 nodet  staff  1770 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_solution.json
--rw-rw-r--  1 nodet  staff   342 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_stats.csv```
+-rw-rw-r--  1 nodet  staff   342 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_stats.csv
+```
 
 
 ## WML credentials
