@@ -4,7 +4,7 @@ A library and command line client to use Decision Optimization on WML
 ## tldr;
 
 ```
-$ git clone git@github.ibm.com:xavier-nodet/dowml.git
+$ git clone git@github.com:IBMDecisionOptimization/dowml.git
 $ cd dowml
 $ source venv/bin/activate
 $ cat tests/test_credentials.txt
