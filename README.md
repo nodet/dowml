@@ -44,36 +44,32 @@ In order to use either of them, you need to provide IBM Cloud credentials.
 Here's a sample session:
 ```
 $ python3 dowml.py -h
-usage: dowml.py [-h] [-w WML_CRED_FILE] [--verbose]
-                [--commands [COMMANDS [COMMANDS ...]]] [--input] [-s SPACE]
+usage: dowml.py [-h] [-w WML_CRED_FILE] [--verbose] [--commands [COMMANDS [COMMANDS ...]]] [--input] [-s SPACE]
 
 Interactive program for DO on WML
 
 optional arguments:
   -h, --help            show this help message and exit
   -w WML_CRED_FILE, --wml-cred-file WML_CRED_FILE
-                        Name of the file from which to read WML credentials.
-                        If not specified, credentials are read from
-                        environment variable $DOWML_CREDENTIALS.
-  --verbose, -v         Verbose mode. Causes the program to print debugging
-                        messages about its progress. Multiple -v options
-                        increase the verbosity. The maximum is 4.
+                        Name of the file from which to read WML credentials. If not specified, credentials are
+                        read from environment variable $DOWML_CREDENTIALS.
+  --verbose, -v         Verbose mode. Causes the program to print debugging messages about its progress.
+                        Multiple -v options increase the verbosity. The maximum is 4.
   --commands [COMMANDS [COMMANDS ...]], -c [COMMANDS [COMMANDS ...]]
-                        Carries out the specified commands. Each command is
-                        executed as if it had been specified at the prompt.
-                        The program stops after last command.
-  --input, -i           Prompts for new input commands even if some commands
-                        have been specified as arguments using --commands.
+                        Carries out the specified commands. Each command is executed as if it had been
+                        specified at the prompt. The program stops after last command.
+  --input, -i           Prompts for new input commands even if some commands have been specified as arguments
+                        using --commands.
   -s SPACE, --space SPACE
-                        Id of the space to connect to. Takes precedence over
-                        the one specified in the credentials under the
-                        'space_id' key, if any.
+                        Id of the space to connect to. Takes precedence over the one specified in the
+                        credentials under the 'space_id' key, if any.
 $
 $
-$ python3 dowml.py -c help type size 'inline yes' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output
+$ python3 dowml.py -c help type size 'inline yes' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'shell ls -l e81b392d*'
 
 Decision Optimization in WML Interactive.
 Submit and manage Decision Optimization models interactively.
+(c) Copyright IBM Corp. 2021
 
 Type ? for a list of commands.
 
@@ -85,8 +81,8 @@ dowml> help
 
 Documented commands (type help <topic>):
 ========================================
-cancel  details  help    jobs  output  solve  type     wait
-delete  exit     inline  log   size    time   version
+cancel  details  help    jobs  output  size   time  version
+delete  exit     inline  log   shell   solve  type  wait
 
 dowml> type
 Current model type: cplex. Known types: cplex, cpo, opl, docplex
@@ -94,64 +90,69 @@ dowml> size
 Current size: S. Known sizes: S, M, XL
 dowml> inline yes
 dowml> solve examples/afiro.mps
-Job id: 3f18394b-1b2e-4e86-94aa-470471e8c57e
+Job id: 60c885c9-72ae-4568-be32-1e7c702252c0
 dowml> jobs
      #  status      id                                    creation date        type     ver.   size  inputs
-=>   1: running     3f18394b-1b2e-4e86-94aa-470471e8c57e  2021-05-20 15:03:07  cplex    20.1   S     afiro.mps
+=>   1: queued      60c885c9-72ae-4568-be32-1e7c702252c0  2021-08-11 15:07:03  cplex    20.1   S     afiro.mps
 dowml> wait
 dowml> jobs
      #  status      id                                    creation date        type     ver.   size  inputs
-=>   1: completed   3f18394b-1b2e-4e86-94aa-470471e8c57e  2021-05-20 15:03:07  cplex    20.1   S     afiro.mps
+=>   1: completed   60c885c9-72ae-4568-be32-1e7c702252c0  2021-08-11 15:07:03  cplex    20.1   S     afiro.mps
 dowml> log
-[2021-05-20T15:03:08Z, INFO] CPLEX version 20010000
-[2021-05-20T15:03:08Z, WARNING] Changed parameter CPX_PARAM_THREADS from 0 to 1
-[2021-05-20T15:03:08Z, INFO] Param[1,067] = 1
-[2021-05-20T15:03:08Z, INFO] Param[1,130] = UTF-8
-[2021-05-20T15:03:08Z, INFO] Param[1,132] = -1
-[2021-05-20T15:03:08Z, INFO]
-[2021-05-20T15:03:08Z, INFO] Selected objective sense:  MINIMIZE
-[2021-05-20T15:03:08Z, INFO] Selected objective  name:  obj
-[2021-05-20T15:03:08Z, INFO] Selected RHS        name:  rhs
-[2021-05-20T15:03:08Z, INFO] Version identifier: 20.1.0.0 | 2020-11-10 | 9bedb6d68
-[2021-05-20T15:03:08Z, INFO] CPXPARAM_Threads                                 1
-[2021-05-20T15:03:08Z, INFO] CPXPARAM_Output_CloneLog                         -1
-[2021-05-20T15:03:08Z, INFO] CPXPARAM_Read_APIEncoding                        "UTF-8"
-[2021-05-20T15:03:08Z, INFO] Tried aggregator 1 time.
-[2021-05-20T15:03:08Z, INFO] LP Presolve eliminated 9 rows and 10 columns.
-[2021-05-20T15:03:08Z, INFO] Aggregator did 7 substitutions.
-[2021-05-20T15:03:08Z, INFO] Reduced LP has 11 rows, 15 columns, and 37 nonzeros.
-[2021-05-20T15:03:08Z, INFO] Presolve time = 0.00 sec. (0.03 ticks)
-[2021-05-20T15:03:08Z, INFO]
-[2021-05-20T15:03:08Z, INFO] Iteration log . . .
-[2021-05-20T15:03:08Z, INFO] Iteration:     1   Scaled dual infeas =             1.200000
-[2021-05-20T15:03:08Z, INFO] Iteration:     5   Dual objective     =          -464.753143
-[2021-05-20T15:03:08Z, INFO] There are no bound infeasibilities.
-[2021-05-20T15:03:08Z, INFO] There are no reduced-cost infeasibilities.
-[2021-05-20T15:03:08Z, INFO] Max. unscaled (scaled) Ax-b resid.          = 1.77636e-14 (1.77636e-14)
-[2021-05-20T15:03:08Z, INFO] Max. unscaled (scaled) c-B'pi resid.        = 5.55112e-17 (5.55112e-17)
-[2021-05-20T15:03:08Z, INFO] Max. unscaled (scaled) |x|                  = 500 (500)
-[2021-05-20T15:03:08Z, INFO] Max. unscaled (scaled) |slack|              = 500 (500)
-[2021-05-20T15:03:08Z, INFO] Max. unscaled (scaled) |pi|                 = 0.942857 (1.88571)
-[2021-05-20T15:03:08Z, INFO] Max. unscaled (scaled) |red-cost|           = 10 (10)
-[2021-05-20T15:03:08Z, INFO] Condition number of scaled basis            = 1.5e+01
-[2021-05-20T15:03:08Z, INFO] optimal (1)
+[2021-08-11T13:07:33Z, INFO] CPLEX version 20010000
+[2021-08-11T13:07:34Z, WARNING] Changed parameter CPX_PARAM_THREADS from 0 to 1
+[2021-08-11T13:07:34Z, INFO] Param[1,067] = 1
+[2021-08-11T13:07:34Z, INFO] Param[1,130] = UTF-8
+[2021-08-11T13:07:34Z, INFO] Param[1,132] = -1
+[2021-08-11T13:07:34Z, INFO]
+[2021-08-11T13:07:34Z, INFO] Selected objective sense:  MINIMIZE
+[2021-08-11T13:07:34Z, INFO] Selected objective  name:  obj
+[2021-08-11T13:07:34Z, INFO] Selected RHS        name:  rhs
+[2021-08-11T13:07:34Z, INFO] Version identifier: 20.1.0.0 | 2020-11-10 | 9bedb6d68
+[2021-08-11T13:07:34Z, INFO] CPXPARAM_Threads                                 1
+[2021-08-11T13:07:34Z, INFO] CPXPARAM_Output_CloneLog                         -1
+[2021-08-11T13:07:34Z, INFO] CPXPARAM_Read_APIEncoding                        "UTF-8"
+[2021-08-11T13:07:34Z, INFO] Tried aggregator 1 time.
+[2021-08-11T13:07:34Z, INFO] LP Presolve eliminated 9 rows and 10 columns.
+[2021-08-11T13:07:34Z, INFO] Aggregator did 7 substitutions.
+[2021-08-11T13:07:34Z, INFO] Reduced LP has 11 rows, 15 columns, and 37 nonzeros.
+[2021-08-11T13:07:34Z, INFO] Presolve time = 0.00 sec. (0.03 ticks)
+[2021-08-11T13:07:34Z, INFO]
+[2021-08-11T13:07:34Z, INFO] Iteration log . . .
+[2021-08-11T13:07:34Z, INFO] Iteration:     1   Scaled dual infeas =             1.200000
+[2021-08-11T13:07:34Z, INFO] Iteration:     5   Dual objective     =          -464.753143
+[2021-08-11T13:07:34Z, INFO] There are no bound infeasibilities.
+[2021-08-11T13:07:34Z, INFO] There are no reduced-cost infeasibilities.
+[2021-08-11T13:07:34Z, INFO] Max. unscaled (scaled) Ax-b resid.          = 1.77636e-14 (1.77636e-14)
+[2021-08-11T13:07:34Z, INFO] Max. unscaled (scaled) c-B'pi resid.        = 5.55112e-17 (5.55112e-17)
+[2021-08-11T13:07:34Z, INFO] Max. unscaled (scaled) |x|                  = 500 (500)
+[2021-08-11T13:07:34Z, INFO] Max. unscaled (scaled) |slack|              = 500 (500)
+[2021-08-11T13:07:34Z, INFO] Max. unscaled (scaled) |pi|                 = 0.942857 (1.88571)
+[2021-08-11T13:07:34Z, INFO] Max. unscaled (scaled) |red-cost|           = 10 (10)
+[2021-08-11T13:07:34Z, INFO] Condition number of scaled basis            = 1.5e+01
+[2021-08-11T13:07:34Z, INFO] optimal (1)
 dowml> type docplex
 dowml> solve examples/markshare.py examples/markshare1.mps.gz
-Job id: d5e86486-4cd0-4a13-b006-066431a6d70f
+Job id: e81b392d-38ed-4d2a-912b-ff0249caf9e7
 dowml> wait
-[2021-05-20T15:03:20Z, WARNING] Support for Python 3.7 is now enabled and used as the default.
-[2021-05-20T15:03:20Z, INFO] Reading markshare1.mps.gz...
+[2021-08-11T13:08:09Z, WARNING] Support for Python 3.7 is now enabled and used as the default.
+[2021-08-11T13:08:10Z, INFO] Reading markshare1.mps.gz...
 dowml> jobs
      #  status      id                                    creation date        type     ver.   size  inputs
-     1: completed   3f18394b-1b2e-4e86-94aa-470471e8c57e  2021-05-20 15:03:07  cplex    20.1   S     afiro.mps
-=>   2: completed   d5e86486-4cd0-4a13-b006-066431a6d70f  2021-05-20 15:03:20  docplex  20.1   S     markshare.py, markshare1.mps.gz
+     1: completed   60c885c9-72ae-4568-be32-1e7c702252c0  2021-08-11 15:07:03  cplex    20.1   S     afiro.mps
+=>   2: completed   e81b392d-38ed-4d2a-912b-ff0249caf9e7  2021-08-11 15:07:44  docplex  20.1   S     markshare.py, markshare1.mps.gz
 dowml> output
-Storing d5e86486-4cd0-4a13-b006-066431a6d70f_solution.json
-Storing d5e86486-4cd0-4a13-b006-066431a6d70f_kpis.csv
-Storing d5e86486-4cd0-4a13-b006-066431a6d70f_stats.csv
-Storing d5e86486-4cd0-4a13-b006-066431a6d70f_log.txt
-Storing d5e86486-4cd0-4a13-b006-066431a6d70f_details.json
-```
+Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7_solution.json
+Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7_kpis.csv
+Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7_stats.csv
+Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7_log.txt
+Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7_details.json
+dowml> shell ls -l e81b392d*
+-rw-rw-r--  1 nodet  staff  5445 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_details.json
+-rw-rw-r--  1 nodet  staff    39 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_kpis.csv
+-rw-rw-r--  1 nodet  staff  7142 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_log.txt
+-rw-rw-r--  1 nodet  staff  1770 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_solution.json
+-rw-rw-r--  1 nodet  staff   342 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_stats.csv```
 
 
 ## WML credentials
