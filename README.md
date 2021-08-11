@@ -69,7 +69,7 @@ optional arguments:
                         specified in the credentials under the 'space_id' key, if any.
 $
 $
-$ python3 dowml.py -c help type size 'inline yes' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'shell ls -l e81b392d*'
+$ python3 dowml.py -c help type size 'inline yes' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'shell ls -l *-*-*-*-*'
 
 Decision Optimization in WML Interactive.
 Submit and manage Decision Optimization models interactively.
@@ -146,17 +146,17 @@ dowml> jobs
      1: completed   60c885c9-72ae-4568-be32-1e7c702252c0  2021-08-11 15:07:03  cplex    20.1   S     afiro.mps
 =>   2: completed   e81b392d-38ed-4d2a-912b-ff0249caf9e7  2021-08-11 15:07:44  docplex  20.1   S     markshare.py, markshare1.mps.gz
 dowml> output
-Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7_solution.json
-Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7_kpis.csv
-Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7_stats.csv
-Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7_log.txt
-Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7_details.json
-dowml> shell ls -l e81b392d*
--rw-rw-r--  1 nodet  staff  5445 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_details.json
--rw-rw-r--  1 nodet  staff    39 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_kpis.csv
--rw-rw-r--  1 nodet  staff  7142 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_log.txt
--rw-rw-r--  1 nodet  staff  1770 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_solution.json
--rw-rw-r--  1 nodet  staff   342 Aug 11 15:08 e81b392d-38ed-4d2a-912b-ff0249caf9e7_stats.csv
+Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7/solution.json
+Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7/kpis.csv
+Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7/stats.csv
+Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7/log.txt
+Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7/details.json
+dowml> shell ls -l *-*-*-*-*
+-rw-rw-r--  1 nodet  staff  5445 Aug 11 15:08 details.json
+-rw-rw-r--  1 nodet  staff    39 Aug 11 15:08 kpis.csv
+-rw-rw-r--  1 nodet  staff  7142 Aug 11 15:08 log.txt
+-rw-rw-r--  1 nodet  staff  1770 Aug 11 15:08 solution.json
+-rw-rw-r--  1 nodet  staff   342 Aug 11 15:08 stats.csv
 ```
 
 

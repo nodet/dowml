@@ -239,7 +239,11 @@ job is either a job number or a job id. Uses current job if not specified."""
 
     @staticmethod
     def save_content(job_id, name, content, text=False):
-        file_name = f'{job_id}_{name}'
+        try:
+            os.mkdir(job_id)
+        except FileExistsError:
+            pass
+        file_name = f'{job_id}/{name}'
         flags = 'wt' if text else 'wb'
         with open(file_name, flags) as f:
             print(f'Storing {file_name}')

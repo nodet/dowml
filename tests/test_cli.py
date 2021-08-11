@@ -131,7 +131,11 @@ class TestOutput(TestCase):
 
     def test_command_exists(self):
         self.cli.lib.get_output.return_value = []
-        self.cli.do_output('1')
+        mock_open = mock.mock_open()
+        mock_mkdir = Mock()
+        with mock.patch('os.mkdir', mock_mkdir):
+            with mock.patch('builtins.open', mock_open):
+                self.cli.do_output('1')
 
     def test_store_files(self):
         self.cli.lib.get_output.return_value = [
@@ -139,7 +143,11 @@ class TestOutput(TestCase):
             ('out2', b'content-b'),
         ]
         self.cli.save_content = Mock()
-        self.cli.do_output('1')
+        mock_open = mock.mock_open()
+        mock_mkdir = Mock()
+        with mock.patch('os.mkdir', mock_mkdir):
+            with mock.patch('builtins.open', mock_open):
+                self.cli.do_output('1')
         self.cli.save_content.assert_has_calls([
             call('a', 'out1', b'content-a'),
             call('a', 'out2', b'content-b'),
@@ -153,12 +161,22 @@ class TestOutput(TestCase):
         with mock.patch('os.mkdir', mock_mkdir):
             with mock.patch('builtins.open', mock_open):
                 self.cli.save_content('id', 'name', write_data)
-        mock_open.assert_called_once_with('id_name', 'wb')
-        mock_mkdir.assert_not_called()
+        mock_mkdir.assert_called_once_with('id')
+        mock_open.assert_called_once_with('id/name', 'wb')
         # noinspection PyArgumentList
         handle = mock_open()
         # noinspection PyUnresolvedReferences
         handle.write.assert_called_once_with(write_data)
+
+    def test_save_two_files_under_same_id_doesnt_throw(self):
+        write_data = b'content'
+        mock_open = mock.mock_open()
+        mock_mkdir = Mock()
+        with mock.patch('os.mkdir', mock_mkdir):
+            with mock.patch('builtins.open', mock_open):
+                self.cli.save_content('id', 'name1', write_data)
+                self.cli.save_content('id', 'name2', write_data)
+        mock_mkdir.assert_has_calls([call('id'), call('id')])
 
 
 class TestOneJobShouldBeCurrent(TestCase):
