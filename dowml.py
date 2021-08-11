@@ -300,7 +300,6 @@ job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._get_and_remember_job_id(job_id)
         self.lib.delete_job(job_id, False)
 
-
     def do_shell(self, command):
         """shell command
 Runs the specified command in a shell."""
@@ -308,6 +307,7 @@ Runs the specified command in a shell."""
         # We ignore the value returned as anything non-zero would just stop
         # the Interactive.
         return 0
+
 
 def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
     try:
@@ -375,7 +375,7 @@ def mocked_requests_session_send(*arguments, **kwargs):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Interactive program for DO on WML')
-    parser.add_argument('-w', '--wml-cred-file', default=None,
+    parser.add_argument('--wml-cred-file', '-w', default=None,
                         help=f'Name of the file from which to read WML '
                              f'credentials. If not specified, credentials ' 
                              f'are read from environment variable '
@@ -387,11 +387,12 @@ if __name__ == '__main__':
     parser.add_argument('--commands', '-c', nargs='*', default=[],
                         help=f'Carries out the specified commands.  Each command '
                              f'is executed as if it had been specified at the prompt. '
-                             f'The program stops after last command.')
+                             f'The program stops after last command, unless --input '
+                             f'is used.')
     parser.add_argument('--input', '-i', action='store_true',
                         help=f'Prompts for new input commands even if some commands '
                              f'have been specified as arguments using --commands.')
-    parser.add_argument('-s', '--space', default=None,
+    parser.add_argument('--space', '-s', default=None,
                         help=f'Id of the space to connect to. Takes precedence over '
                              f'the one specified in the credentials under the '
                              f'\'{_CredentialsProvider.SPACE_ID}\' key, if any.')
