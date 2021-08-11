@@ -149,11 +149,14 @@ class TestOutput(TestCase):
     def test_save_content(self):
         write_data = b'content'
         mock_open = mock.mock_open()
-        with mock.patch('builtins.open', mock_open) as m:
-            self.cli.save_content('id', 'name', write_data)
-        m.assert_called_once_with('id_name', 'wb')
+        mock_mkdir = Mock()
+        with mock.patch('os.mkdir', mock_mkdir):
+            with mock.patch('builtins.open', mock_open):
+                self.cli.save_content('id', 'name', write_data)
+        mock_open.assert_called_once_with('id_name', 'wb')
+        mock_mkdir.assert_not_called()
         # noinspection PyArgumentList
-        handle = m()
+        handle = mock_open()
         # noinspection PyUnresolvedReferences
         handle.write.assert_called_once_with(write_data)
 
