@@ -487,6 +487,41 @@ class TestWait(TestCase):
         self.assertEqual(nb_not_complete_calls + 1, self.lib._client.deployments.get_job_details.call_count)
 
 
+class TestLog(TestCase):
+
+    def setUp(self) -> None:
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
+        lib._logger = Mock(spec=Logger)
+        lib._client = Mock(spec=APIClient)
+        lib._client.set = Mock(spec=Set)
+        lib._client.deployments = Mock(spec=Deployments)
+        lib._client.spaces = Mock(spec=Spaces)
+        lib._client.spaces.get_details.return_value = {'resources': []}
+        self.lib = lib
+
+    def test_get_log_return_none_if_no_output(self):
+        self.lib._client.deployments.get_job_details.return_value = {'entity': {'decision_optimization': {}}}
+        self.assertIsNone(self.lib.get_log('1'))
+
+    def test_get_log_return_none_if_empty_log(self):
+        self.lib._client.deployments.get_job_details.return_value = {'entity': {'decision_optimization': {
+            'output_data': [{'id': 'log.txt'}]
+        }}}
+        self.assertIsNone(self.lib.get_log('1'))
+
+    def test_get_log_removes_empty_lines(self):
+        self.lib._client.deployments.get_job_details.return_value = {'entity': {'decision_optimization': {
+            'output_data': [{
+                'id': 'log.txt',
+                # This is 'line 1\n\nline 2\n' encoded with
+                #    openssl base64 < log.txt
+                'content': 'bGluZSAxCgpsaW5lIDIK'
+            }]
+        }}}
+        # Let's confirm that empty lines were removed
+        self.assertEqual('line 1\nline 2', self.lib.get_log('1'))
+
+
 class TestVersionComparison(TestCase):
 
     def test_1_0_95_greater_than_1_0_95(self):
