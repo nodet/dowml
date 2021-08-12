@@ -184,8 +184,17 @@ class TestSolveInline(TestCase):
         self.assertEqual('minimize x', lines[0])
 
     def test_get_unknown_file(self):
-        # FIXME: todo
-        pass
+        name = 'unknown'
+        content = {
+            'id': name,
+            'foo': 'bar'
+        }
+        details = {
+            'entity': {'decision_optimization': {'output_data': [content]}}
+        }
+        output = self.lib.get_output(details)
+        # We get back the raw content
+        self.assertEqual(content, output[name])
 
 
 class TestSolveUsingDataAssets(TestCase):
