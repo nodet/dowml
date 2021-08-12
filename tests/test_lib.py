@@ -48,6 +48,13 @@ class TestCredentials(TestCase):
         # Let's confirm that the space name is changed
         self.assertEqual(l.space_name, non_default_name)
 
+    def test_url_with_trailing_slash_is_accounted_for_automatically(self):
+        url = 'https://us-south.ml.cloud.ibm.com/'
+        wml_credentials_str = '{\'apikey\': \'<apikey>\', \'url\': \'https://us-south.ml.cloud.ibm.com/\'}'
+        cred_provider = _CredentialsProvider()
+        cred = cred_provider.check_credentials(wml_cred_str=wml_credentials_str)
+        self.assertEqual(url[:-1], cred['url'])
+
 
 class TestSolveInline(TestCase):
 

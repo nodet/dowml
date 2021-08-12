@@ -131,7 +131,7 @@ class _CredentialsProvider:
             raise InvalidCredentials
         if url[-1] == '/':
             self._logger.warning(f'URL should not have a \'/\' at the end.')
-            url = url[:-1]
+            wml_credentials[self.URL] = url[:-1]
         self._logger.debug(f'Credentials have the expected structure.')
         return wml_credentials
 
