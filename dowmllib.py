@@ -291,24 +291,24 @@ class DOWMLLib:
         except KeyError:
             self._logger.warning(f'No output structure available for this job')
             return []
-        result = []
+        result = {}
         for output_data in outputs:
             name = output_data['id']
             if 'content' in output_data:
                 # What we have here is a regular file, encoded
                 self._logger.debug(f'Found a regular file named {name}')
                 content = self._extract_regular_file(output_data)
-                result.append((name, content))
+                result[name] = content
             elif ('values' in output_data and
                   'fields' in output_data and
                   name.lower().endswith('.csv')):
                 self._logger.debug(f'Found a CSV file named {name}')
                 content = self._extract_csv_file(output_data, csv_as_dataframe)
-                result.append((name, content))
+                result[name] = content
             else:
                 self._logger.warning(f'Found an unknown file named {name}')
                 content = output_data
-                result.append((name, content))
+                result[name] = content
         return result
 
     def _extract_csv_file(self, output_data, csv_as_dataframe):

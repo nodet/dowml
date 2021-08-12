@@ -223,11 +223,11 @@ class TestDetailsAndOutputs(TestCase):
 
     def find_output_with_id(self, outputs, id):
         result = None
-        for name, content in outputs:
+        for name in outputs:
             if name == id:
                 # We should find at most one
                 self.assertIsNone(result)
-                result = content
+                result = outputs[name]
         # We should find at least one
         self.assertIsNotNone(result)
         return result

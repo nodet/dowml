@@ -152,15 +152,23 @@ class TestSolveInline(TestCase):
             }
         }
         output = self.lib.get_output(details)
-        output_data = details['entity']['decision_optimization']['output_data']
-        self.assertEqual(len(output), 1)
-        self.assertEqual(output[0][0], 'results.csv')
-        lines = output[0][1].decode().split('\r\n')
+        self.assertIsInstance(output, dict)
+        self.assertEqual(1, len(output))
+        self.assertIn('results.csv', output)
+        lines = output['results.csv'].decode().split('\r\n')
         # There is one empty line at the end
         self.assertEqual(len(lines), 4)
         self.assertEqual(lines[0], 'i,f')
         self.assertEqual(lines[1], '0,0')
         self.assertEqual(lines[2], '"a,b",c d')
+
+    def test_get_regular_file(self):
+        # FIXME: todo
+        pass
+
+    def test_get_unknown_file(self):
+        # FIXME: todo
+        pass
 
 
 class TestSolveUsingDataAssets(TestCase):

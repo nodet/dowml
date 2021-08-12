@@ -138,10 +138,10 @@ class TestOutput(TestCase):
                 self.cli.do_output('1')
 
     def test_store_files(self):
-        self.cli.lib.get_output.return_value = [
-            ('out1', b'content-a'),
-            ('out2', b'content-b'),
-        ]
+        self.cli.lib.get_output.return_value = {
+            'out1': b'content-a',
+            'out2': b'content-b'
+        }
         self.cli.save_content = Mock()
         mock_open = mock.mock_open()
         mock_mkdir = Mock()

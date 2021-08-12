@@ -1,6 +1,6 @@
 User-visible changes
 --------------------
 
-
+- [#18] DOWMLLib.get_output returns a dict instead of a list
 - [#16] 'output' stores files in subdirectories
 - [#12] Add 'shell' command in the Interactive
