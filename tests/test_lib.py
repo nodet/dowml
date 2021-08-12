@@ -53,10 +53,15 @@ class TestCredentials(TestCase):
         non_default_space_id = 'foo'
         # Let's make sure we are really testing something: by default, we don't
         # have a space_id in the credentials
-        l = DOWMLLib()
-        self.assertNotEqual(non_default_space_id, l._wml_credentials['space_id'])
-        # And now we change the default
-        l = DOWMLLib(space_id=non_default_space_id)
+        with mock.patch.dict(os.environ,
+                             {'DOWML_CREDENTIALS':
+                              "{'apikey': '<apikey>',"
+                              " 'url': 'https://us-south.ml.cloud.ibm.com',"
+                              " 'space_id': 'bar'}"}):
+            l = DOWMLLib()
+            self.assertNotEqual(non_default_space_id, l._wml_credentials['space_id'])
+            # And now we change the default
+            l = DOWMLLib(space_id=non_default_space_id)
         # Let's confirm that the space name is changed
         self.assertEqual(non_default_space_id, l._wml_credentials['space_id'])
 
