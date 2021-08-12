@@ -48,12 +48,29 @@ class TestCredentials(TestCase):
         # Let's confirm that the space name is changed
         self.assertEqual(l.space_name, non_default_name)
 
+    def test_space_id_in_constructor_overrides_credentials(self):
+        # Let's now try to change that default value
+        non_default_space_id = 'foo'
+        # Let's make sure we are really testing something: by default, we don't
+        # have a space_id in the credentials
+        l = DOWMLLib()
+        self.assertNotEqual(non_default_space_id, l._wml_credentials['space_id'])
+        # And now we change the default
+        l = DOWMLLib(space_id=non_default_space_id)
+        # Let's confirm that the space name is changed
+        self.assertEqual(non_default_space_id, l._wml_credentials['space_id'])
+
     def test_url_with_trailing_slash_is_accounted_for_automatically(self):
         url = 'https://us-south.ml.cloud.ibm.com/'
         wml_credentials_str = '{\'apikey\': \'<apikey>\', \'url\': \'https://us-south.ml.cloud.ibm.com/\'}'
         cred_provider = _CredentialsProvider()
         cred = cred_provider.check_credentials(wml_cred_str=wml_credentials_str)
         self.assertEqual(url[:-1], cred['url'])
+
+    def test_error_if_no_credentials_found_anywhere(self):
+        with mock.patch.dict(os.environ, clear=True):
+            with self.assertRaises(InvalidCredentials):
+                _ = DOWMLLib()
 
 
 class TestSolveInline(TestCase):
@@ -156,7 +173,8 @@ class TestSolveInline(TestCase):
                  ['a,b', 'c d']
               ]
         }]}}}
-        output = self.lib.get_output(details, tabular_as_csv=True)
+        # We use the deprecated parameter, to confirm it's still there
+        output = self.lib.get_output(details, csv_as_dataframe=False)
         self.assertIsInstance(output, dict)
         self.assertEqual(1, len(output))
         self.assertIn('results.csv', output)
@@ -440,7 +458,7 @@ class TestWait(TestCase):
             'metadata': {'id': 'job_id'}
         }
         self.lib._client.deployments.get_job_details.return_value = input_job_details
-        status, job_details = self.lib.wait_for_job_end('job_id')
+        status, job_details = self.lib.wait_for_job_end('job_id', print_activity=True)
         self.lib._client.deployments.get_job_details.assert_called_once()
         self.assertEqual('completed', status)
         self.assertEqual(input_job_details, job_details)
@@ -448,7 +466,8 @@ class TestWait(TestCase):
     def test_wait_sleeps_as_long_as_job_not_complete_yet(self):
         not_complete_yet = {
             'entity': {'decision_optimization': {
-                'status': {'state': 'running'}
+                'status': {'state': 'running'},
+                'solve_state': {'latest_engine_activity': ['foo', 'bar']}
             }},
             'metadata': {'id': 'job_id'}
         }
@@ -463,7 +482,7 @@ class TestWait(TestCase):
         return_values = [not_complete_yet for i in range(nb_not_complete_calls)] + [finished]
         self.lib._client.deployments.get_job_details.side_effect = return_values
         with patch('time.sleep', return_value=None) as patched_time_sleep:
-            _, _ = self.lib.wait_for_job_end('job_id')
+            _, _ = self.lib.wait_for_job_end('job_id', print_activity=True)
         self.assertEqual(nb_not_complete_calls    , patched_time_sleep.call_count)
         self.assertEqual(nb_not_complete_calls + 1, self.lib._client.deployments.get_job_details.call_count)
 
