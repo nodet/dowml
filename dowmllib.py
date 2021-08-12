@@ -275,17 +275,27 @@ class DOWMLLib:
                 return output
         return None
 
-    def get_output(self, details, csv_as_dataframe=True):
+    def get_output(self, details, csv_as_dataframe=None, tabular_as_csv=False):
         """"Extracts the outputs from the job
 
         :param details: The details of the job to get the output from
         :param csv_as_dataframe: Whether the content of a CSV file should be
-        returned as a Pandas DataFrame or not.
+        returned as a Pandas DataFrame or not. Deprecated: use tabular_as_csv
+        instead
+        :param tabular_as_csv: Whether tabular outputs should be returned as
+        CSV file content instead of Pandas dataframe
         :return: A list of outputs. Each output is a tuple (name, content)
         where the name is, well, the name of the output, and content is the
         decoded content, as bytes. We don't assume that the content is actually
         text.
         """
+        if csv_as_dataframe is not None:
+            # We have a non-default value for this deprecated parameter
+            # Let's first check that the replacement parameter is at its default
+            # value
+            assert(tabular_as_csv is False)
+            # Now we can replace it with the correct value
+            tabular_as_csv = not csv_as_dataframe
         result = {}
         try:
             outputs = details['entity']['decision_optimization']['output_data']
@@ -303,7 +313,7 @@ class DOWMLLib:
                   'fields' in output_data and
                   name.lower().endswith('.csv')):
                 self._logger.debug(f'Found a CSV file named {name}')
-                content = self._extract_csv_file(output_data, csv_as_dataframe)
+                content = self._extract_csv_file(output_data, tabular_as_csv)
                 result[name] = content
             else:
                 self._logger.warning(f'Found an unknown file named {name}')
@@ -311,8 +321,8 @@ class DOWMLLib:
                 result[name] = content
         return result
 
-    def _extract_csv_file(self, output_data, csv_as_dataframe):
-        if not csv_as_dataframe:
+    def _extract_csv_file(self, output_data, tabular_as_csv):
+        if tabular_as_csv:
             content = io.StringIO()
             writer = csv.writer(content)
             writer.writerow(output_data['fields'])

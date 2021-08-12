@@ -160,6 +160,18 @@ class TestSolveInline(TestCase):
         self.assertEqual(lines[1], '0,0')
         self.assertEqual(lines[2], '"a,b",c d')
 
+    def test_get_csv_file_the_new_way(self):
+        details = {'entity': {'decision_optimization': {'output_data': [{
+              'fields': ['i', 'f'],
+              'id': 'results.csv',
+              'values': [
+                 [0, 0],
+                 ['a,b', 'c d']
+              ]
+        }]}}}
+        output = self.lib.get_output(details, tabular_as_csv=True)
+        self.assertEqual(type(b''), type(output['results.csv']))
+
     def test_get_regular_file(self):
         name = 'one-var.lp'
         details = {'entity': {
