@@ -163,8 +163,25 @@ class TestSolveInline(TestCase):
         self.assertEqual(lines[2], '"a,b",c d')
 
     def test_get_regular_file(self):
-        # FIXME: todo
-        pass
+        name = 'one-var.lp'
+        details = {
+            'entity': {
+                'decision_optimization': {
+                    'output_data': [
+                       {
+                          'id': name,
+                          'content': 'bWluaW1pemUgeApzdAogICB4ID49IDIKZW5k'
+                       }
+                    ]
+                }
+            }
+        }
+        output = self.lib.get_output(details)
+        self.assertIsInstance(output, dict)
+        self.assertEqual(1, len(output))
+        self.assertIn(name, output)
+        lines = output[name].decode().split('\n')
+        self.assertEqual('minimize x', lines[0])
 
     def test_get_unknown_file(self):
         # FIXME: todo
