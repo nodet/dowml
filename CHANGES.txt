@@ -1,0 +1,6 @@
+User-visible changes
+--------------------
+
+
+- [#16] 'output' stores files in subdirectories
+- [#12] Add 'shell' command in the Interactive
