@@ -63,9 +63,8 @@ class TestCredentials(TestCase):
     def test_url_with_trailing_slash_is_accounted_for_automatically(self):
         url = 'https://us-south.ml.cloud.ibm.com/'
         wml_credentials_str = '{\'apikey\': \'<apikey>\', \'url\': \'https://us-south.ml.cloud.ibm.com/\'}'
-        cred_provider = _CredentialsProvider()
-        cred = cred_provider.check_credentials(wml_cred_str=wml_credentials_str)
-        self.assertEqual(url[:-1], cred['url'])
+        cred_provider = _CredentialsProvider(wml_credentials_str=wml_credentials_str)
+        self.assertEqual(url[:-1], cred_provider.credentials['url'])
 
     def test_error_if_no_credentials_found_anywhere(self):
         with mock.patch.dict(os.environ, clear=True):
