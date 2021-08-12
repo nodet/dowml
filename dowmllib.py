@@ -286,12 +286,12 @@ class DOWMLLib:
         decoded content, as bytes. We don't assume that the content is actually
         text.
         """
+        result = {}
         try:
             outputs = details['entity']['decision_optimization']['output_data']
         except KeyError:
             self._logger.warning(f'No output structure available for this job')
-            return []
-        result = {}
+            return result
         for output_data in outputs:
             name = output_data['id']
             if 'content' in output_data:

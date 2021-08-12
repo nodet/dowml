@@ -134,6 +134,12 @@ class TestSolveInline(TestCase):
         create_job_mock.assert_called_once()
         self.assertNotIn('oaas.timeLimit', self.get_params(create_job_mock))
 
+    def test_get_no_output(self):
+        details = {'entity': {'decision_optimization': {}}}
+        output = self.lib.get_output(details)
+        self.assertIsInstance(output, dict)
+        self.assertEqual(0, len(output))
+
     def test_get_csv_file(self):
         details = {'entity': {'decision_optimization': {'output_data': [{
               'fields': ['i', 'f'],
