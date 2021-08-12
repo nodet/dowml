@@ -137,6 +137,17 @@ class TestOutput(TestCase):
             with mock.patch('builtins.open', mock_open):
                 self.cli.do_output('1')
 
+    def test_output_asks_for_tabular_outputs_as_csv(self):
+        mock_get_output = Mock()
+        mock_get_output.return_value = {}
+        self.cli.lib.get_output = mock_get_output
+        mock_open = mock.mock_open()
+        mock_mkdir = Mock()
+        with mock.patch('os.mkdir', mock_mkdir):
+            with mock.patch('builtins.open', mock_open):
+                self.cli.do_output('1')
+        mock_get_output.assert_called_once_with({}, csv_as_dataframe=False)
+
     def test_store_files(self):
         self.cli.lib.get_output.return_value = {
             'out1': b'content-a',

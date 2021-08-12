@@ -244,7 +244,7 @@ class TestDetailsAndOutputs(TestCase):
         l = self.lib
         id_not_inline = self.id_not_inline
         details = l.get_job_details(id_not_inline, with_contents='full')
-        outputs = l.get_output(details)
+        outputs = l.get_output(details, csv_as_dataframe=False)
         csv = self.find_output_with_id(outputs, 'stats.csv')
         self.assertEqual(b'Name,Value\r\n', csv[0:12])
 
@@ -252,7 +252,7 @@ class TestDetailsAndOutputs(TestCase):
         l = self.lib
         id_not_inline = self.id_not_inline
         details = l.get_job_details(id_not_inline, with_contents='full')
-        outputs = l.get_output(details, csv_as_dataframe=True)
+        outputs = l.get_output(details)
         csv = self.find_output_with_id(outputs, 'stats.csv')
         self.assertEqual(DataFrame, type(csv))
         self.assertEqual(['Name', 'Value'], list(csv.columns))

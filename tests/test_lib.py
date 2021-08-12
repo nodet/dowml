@@ -149,7 +149,7 @@ class TestSolveInline(TestCase):
                  ['a,b', 'c d']
               ]
         }]}}}
-        output = self.lib.get_output(details)
+        output = self.lib.get_output(details, csv_as_dataframe=False)
         self.assertIsInstance(output, dict)
         self.assertEqual(1, len(output))
         self.assertIn('results.csv', output)

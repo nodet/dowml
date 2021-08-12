@@ -275,7 +275,7 @@ class DOWMLLib:
                 return output
         return None
 
-    def get_output(self, details, csv_as_dataframe=False):
+    def get_output(self, details, csv_as_dataframe=True):
         """"Extracts the outputs from the job
 
         :param details: The details of the job to get the output from
