@@ -260,5 +260,6 @@ class TestDetailsAndOutputs(TestCase):
         # column, and that line has '1' in the 'Value' column
         self.assertEqual(1, csv.loc[csv['Name'] == 'job.coresCount']['Value'].values[0])
 
+
 if __name__ == '__main__':
     main()

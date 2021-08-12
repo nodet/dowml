@@ -16,7 +16,7 @@ slow:
 	python -m unittest $(slow_tests)
 
 cover:
-	coverage run -m unittest $(quick_tests)
+	coverage run -m unittest $(all_tests)
 	rm -rf a_details.json
 	coverage html
 	open htmlcov/dowmllib_py.html
