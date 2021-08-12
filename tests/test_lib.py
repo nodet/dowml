@@ -135,22 +135,14 @@ class TestSolveInline(TestCase):
         self.assertNotIn('oaas.timeLimit', self.get_params(create_job_mock))
 
     def test_get_csv_file(self):
-        details = {
-            'entity': {
-                'decision_optimization': {
-                    'output_data': [
-                       {
-                          'fields': ['i', 'f'],
-                          'id': 'results.csv',
-                          'values': [
-                             [0, 0],
-                             ['a,b', 'c d']
-                          ]
-                       }
-                    ]
-                }
-            }
-        }
+        details = {'entity': {'decision_optimization': {'output_data': [{
+              'fields': ['i', 'f'],
+              'id': 'results.csv',
+              'values': [
+                 [0, 0],
+                 ['a,b', 'c d']
+              ]
+        }]}}}
         output = self.lib.get_output(details)
         self.assertIsInstance(output, dict)
         self.assertEqual(1, len(output))
