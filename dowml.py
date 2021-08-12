@@ -229,7 +229,7 @@ Downloads all the outputs of a job, as well as the details/status of the job.
 job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._get_and_remember_job_id(job_id)
         details = self.lib.get_job_details(job_id, with_contents='full')
-        outputs = self.lib.get_output(details, csv_as_dataframe=False)
+        outputs = self.lib.get_output(details, tabular_as_csv=True)
         for name in outputs:
             self.save_content(job_id, name, outputs[name])
         # We don't want to store all the outputs in the details themselves

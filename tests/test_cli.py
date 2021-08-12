@@ -146,7 +146,7 @@ class TestOutput(TestCase):
         with mock.patch('os.mkdir', mock_mkdir):
             with mock.patch('builtins.open', mock_open):
                 self.cli.do_output('1')
-        mock_get_output.assert_called_once_with({}, csv_as_dataframe=False)
+        mock_get_output.assert_called_once_with({}, tabular_as_csv=True)
 
     def test_store_files(self):
         self.cli.lib.get_output.return_value = {

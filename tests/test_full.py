@@ -244,7 +244,7 @@ class TestDetailsAndOutputs(TestCase):
         l = self.lib
         id_not_inline = self.id_not_inline
         details = l.get_job_details(id_not_inline, with_contents='full')
-        outputs = l.get_output(details, csv_as_dataframe=False)
+        outputs = l.get_output(details, tabular_as_csv=True)
         csv = self.find_output_with_id(outputs, 'stats.csv')
         self.assertEqual(b'Name,Value\r\n', csv[0:12])
 
