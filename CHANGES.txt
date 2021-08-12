@@ -1,6 +1,8 @@
 User-visible changes
 --------------------
 
+- [#17] DOWMLLib now returns tabular outputs as dataframes by default.
+        Also replace the now-deprecated csv_as_dataframe with tabular_as_csv
 - [#18] DOWMLLib.get_output returns a dict instead of a list
 - [#16] 'output' stores files in subdirectories
 - [#12] Add 'shell' command in the Interactive
