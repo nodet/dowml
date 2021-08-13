@@ -860,37 +860,12 @@ class DOWMLLib:
         return space_id
 
     def _get_asset_details(self):
-        """This function returns the list of all the data assets in the space
-
-        This function should have been in the wml Python client, but unfortunately,
-        it's not.  At least, not as of version 1.0.53.
-        C.f. https://github.ibm.com/NGP-TWC/ml-planning/issues/21577#issuecomment-29056420"""
+        """This function returns the list of all the data assets in the space"""
         client = self._get_or_make_client()
-        if version_is_greater(client.version, "1.0.95.1"):
-            # This is the first version where data_assets.get_details() works
-            results = client.data_assets.get_details()['resources']
-            return results
-        href_owner = client.data_assets
-        if version_is_greater(client.version, "1.0.78"):
-            href_owner = client.service_instance
-        href = href_owner._href_definitions.get_search_asset_href()
-        data = {
-            "query": "*:*"
-        }
-        if not client.data_assets._ICP and not client.WSD:
-            response = requests.post(href,
-                                     params=client._params(),
-                                     headers=client._get_headers(),
-                                     json=data)
-        else:
-            response = requests.post(href,
-                                     params=client._params(),
-                                     headers=client._get_headers(),
-                                     json=data,
-                                     verify=False)
-        client.data_assets._handle_response(200, u'list assets', response)
-        asset_details = client.data_assets._handle_response(200, u'list assets', response)["results"]
-        return asset_details
+        # This is the first version where data_assets.get_details() works
+        assert(version_is_greater(client.version, "1.0.95.1"))
+        results = client.data_assets.get_details()['resources']
+        return results
 
     def _find_asset_id_by_name(self, name):
         """Looks for a data asset with the given name, returns its id, or None"""
