@@ -2,3 +2,4 @@
 /xavier-*.txt
 .coverage
 htmlcov/
+/dist/
