@@ -3,9 +3,9 @@ from collections import namedtuple
 from unittest import TestCase, main, mock
 from unittest.mock import Mock, ANY, call
 
-from dowml import DOWMLInteractive, \
+from dowml.interactive import DOWMLInteractive, \
     CommandNeedsJobID, CommandNeedsNonNullInteger, CommandNeedsBool
-from dowmllib import DOWMLLib
+from dowml.dowmllib import DOWMLLib
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
 EXPECTED = 'expected'

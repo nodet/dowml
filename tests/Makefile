@@ -1,4 +1,4 @@
-export PYTHONPATH=$PYTHONPATH:../src/dowml
+export PYTHONPATH=$PYTHONPATH:../src
 
 quick_tests = test_lib.py test_cli.py test_bugs.py
 slow_tests = test_full.py
@@ -11,7 +11,7 @@ quick:
 # A very basic test to confirm the client version number and that
 # credentials work
 basic:
-	python3 ../src/dowml/dowml.py -vv -c jobs
+	python3 ../src/dowml/interactive.py -vv -c jobs
 
 # Actual tests with checks
 slow:
@@ -26,7 +26,7 @@ cover:
 # This really exercises as much as possible
 # but doesn't check the results
 fulltests:
-	python3 ../src/dowml/dowml.py -c help type size 'inline yes' \
+	python3 ../src/dowml/interactive.py -c help type size 'inline yes' \
        'solve ../examples/afiro.mps' jobs wait log delete \
        'type docplex' 'solve ../examples/markshare.py ../examples/markshare1.mps.gz' wait jobs output 'details full' delete \
        'inline no' 'type cplex' 'solve ../examples/afiro.mps' jobs wait details delete \

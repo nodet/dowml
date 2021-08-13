@@ -22,7 +22,7 @@ import requests
 from cmd import Cmd
 from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
 
-from dowmllib import DOWMLLib, InvalidCredentials, NoCredentialsToCreateSpace, _CredentialsProvider
+from dowml.dowmllib import DOWMLLib, InvalidCredentials, NoCredentialsToCreateSpace, _CredentialsProvider
 
 
 class CommandNeedsJobID(Exception):
@@ -377,7 +377,7 @@ def mocked_requests_session_send(*arguments, **kwargs):
     return resp
 
 
-if __name__ == '__main__':
+def interactive():
     parser = argparse.ArgumentParser(description='Interactive program for DO on WML')
     parser.add_argument('--wml-cred-file', '-w', default=None,
                         help=f'Name of the file from which to read WML '
@@ -425,3 +425,7 @@ if __name__ == '__main__':
         # logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
 
     main_loop(args.wml_cred_file, args.space, args.commands, args.input)
+
+
+if __name__ == '__main__':
+    interactive()

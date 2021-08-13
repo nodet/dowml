@@ -3,7 +3,7 @@ import pprint
 from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
 from pandas import DataFrame
 
-from dowmllib import DOWMLLib
+from dowml.dowmllib import DOWMLLib
 from unittest import TestCase, main
 
 
