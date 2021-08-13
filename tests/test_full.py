@@ -29,13 +29,13 @@ class TestRunningOnWML(TestCase):
         self.assertNotIn(id, [j.id for j in l.get_jobs()])
 
     def test_simple_cplex_inline(self):
-        self.job_solves_to_completion(inline=True, paths='examples/afiro.mps')
+        self.job_solves_to_completion(inline=True, paths='../examples/afiro.mps')
 
     def test_docplex_inline(self):
         # 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'details full' delete
         self.job_solves_to_completion(inline=True,
                                       type='docplex',
-                                      paths='examples/markshare.py examples/markshare1.mps.gz')
+                                      paths='../examples/markshare.py ../examples/markshare1.mps.gz')
 
 
 class TestDetailsAndOutputs(TestCase):
@@ -134,9 +134,9 @@ class TestDetailsAndOutputs(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         l = DOWMLLib()
-        id_not_inline = l.solve('examples/afiro.mps')
+        id_not_inline = l.solve('../examples/afiro.mps')
         l.inline = True
-        id_inline = l.solve('examples/afiro.mps')
+        id_inline = l.solve('../examples/afiro.mps')
         l.wait_for_job_end(id_not_inline)
         l.wait_for_job_end(id_inline)
         cls.id_not_inline = id_not_inline

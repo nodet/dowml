@@ -1,4 +1,4 @@
-dowml/
-xavier-*.txt
+/dowml/
+/xavier-*.txt
 .coverage
 htmlcov/

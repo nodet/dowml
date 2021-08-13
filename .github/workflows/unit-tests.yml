@@ -36,4 +36,6 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Run unit tests
-        run: make quick
+        run: |
+          cd tests
+          make quick

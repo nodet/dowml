@@ -7,7 +7,7 @@ from dowml import DOWMLInteractive, \
     CommandNeedsJobID, CommandNeedsNonNullInteger, CommandNeedsBool
 from dowmllib import DOWMLLib
 
-TEST_CREDENTIALS_FILE_NAME = 'tests/test_credentials.txt'
+TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
 EXPECTED = 'expected'
 
 

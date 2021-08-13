@@ -11,10 +11,11 @@ from ibm_watson_machine_learning.assets import Assets
 from ibm_watson_machine_learning.model_definition import ModelDefinition
 from ibm_watson_machine_learning.spaces import Spaces
 
-from dowmllib import DOWMLLib, SimilarNamesInJob, version_is_greater, _CredentialsProvider, InvalidCredentials
 from unittest import TestCase, main, mock
 
-TEST_CREDENTIALS_FILE_NAME = 'tests/test_credentials.txt'
+from dowmllib import InvalidCredentials, _CredentialsProvider, DOWMLLib, SimilarNamesInJob, version_is_greater
+
+TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
 
 
 class TestCredentials(TestCase):
