@@ -33,4 +33,4 @@ fulltests:
        'type docplex' 'solve ../examples/markshare.py ../examples/markshare1.mps.gz' 'details names' wait delete
 
 delete-space:
-	PYTHONPATH=. python3 delete_space.py
+	python3 delete_space.py

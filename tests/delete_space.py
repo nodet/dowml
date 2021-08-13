@@ -5,7 +5,7 @@ import time
 
 from ibm_watson_machine_learning import APIClient
 
-from dowmllib import _CredentialsProvider
+from dowml.dowmllib import _CredentialsProvider
 
 logger = None
 
