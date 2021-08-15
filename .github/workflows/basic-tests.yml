@@ -4,11 +4,15 @@
 name: CI-basic
 
 # Controls when the workflow will run
-on: [push, pull_request, workflow_dispatch]
+on:
+  workflow_run:
+    workflows: ["CI-unit-tests"]
+    types: [completed]
 
 jobs:
   basic-test:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
