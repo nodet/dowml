@@ -6,7 +6,6 @@ A library and command line client to use Decision Optimization on WML
 ```
 $ git clone git@github.com:IBMDecisionOptimization/dowml.git
 $ cd dowml
-$ source venv/bin/activate
 $ cat tests/test_credentials.txt
 {
     'apikey': '<apikey>',
