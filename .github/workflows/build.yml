@@ -72,8 +72,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+          ls -l
           python -m pip install --upgrade pip
-          pip install dist/dowml-*.whl
+          pip install dowml-*.whl
 
       - name: Check
         env:
