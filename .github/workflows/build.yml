@@ -82,7 +82,7 @@ jobs:
         with:
           name: dist
           path:
-            dist/dowml-*.whl
+            dist/dowml-*
 
   install-and-test:
     needs: build
@@ -129,4 +129,4 @@ jobs:
         with:
           name: dist-checked
           path:
-            ./dowml-*.whl
+            ./dowml-*
