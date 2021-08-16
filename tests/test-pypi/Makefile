@@ -6,12 +6,12 @@ rebuild_venv:
 
 test_locally_built:
 	. test-pypi-venv/bin/activate                                                     ;\
-	python -m pip install  --force-reinstall ../../dist/dowml-*.whl  ;\
+	python -m pip install  ../../dist/dowml-*.whl  ;\
 	python list_jobs.py                                                               ;\
 	dowml -c 'jobs'
 
 test_pypi_test_build:
 	source test-pypi-venv/bin/activate
-	python -m pip install  --force-reinstall --extra-index-url -i https://test.pypi.org/simple/ dowml
+	python -m pip install  --extra-index-url -i https://test.pypi.org/simple/ dowml
 	python list_jobs.py
 	dowml -c 'jobs'
