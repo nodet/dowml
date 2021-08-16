@@ -6,7 +6,7 @@ rebuild_venv:
 
 test_locally_built:
 	. test-pypi-venv/bin/activate                                                     ;\
-	python -m pip install  --force-reinstall ../../dist/dowml-0.1.0-py3-none-any.whl  ;\
+	python -m pip install  --force-reinstall ../../dist/dowml-*.whl  ;\
 	python list_jobs.py                                                               ;\
 	dowml -c 'jobs'
 

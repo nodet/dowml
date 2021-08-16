@@ -22,6 +22,7 @@ import requests
 from cmd import Cmd
 from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
 
+import dowml
 from dowml.dowmllib import DOWMLLib, InvalidCredentials, NoCredentialsToCreateSpace, _CredentialsProvider
 
 
@@ -39,8 +40,8 @@ class CommandNeedsBool(Exception):
 
 class DOWMLInteractive(Cmd):
     prompt = 'dowml> '
-    intro = ('''
-Decision Optimization in WML Interactive.
+    intro = (f'''
+Decision Optimization in WML Interactive, version {dowml.VERSION}.
 Submit and manage Decision Optimization models interactively.
 (c) Copyright IBM Corp. 2021
 
