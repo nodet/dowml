@@ -17,7 +17,7 @@ $ cat tests/test_credentials.txt
 $ cp tests/test_credentials.txt my-credentials.txt
 $ open my-credentials.txt
 ... put your own credentials
-$ python3 dowml.py -w my-credentials.txt
+$ PYTHONPATH='src' python3 src/dowml/interactive.py -w my-credentials.txt
 dowml> solve examples/afiro.mps
 dowml> wait
 dowml> log
@@ -43,33 +43,31 @@ In order to use either of them, you need to provide IBM Cloud credentials.
 
 Here's a sample session:
 ```
-$ python3 dowml.py -h
-usage: dowml.py [-h] [-w WML_CRED_FILE] [--verbose] [--commands [COMMANDS [COMMANDS ...]]]
-                [--input] [-s SPACE]
+$ PYTHONPATH='src' python3 src/dowml/interactive.py -h
+usage: interactive.py [-h] [--wml-cred-file WML_CRED_FILE] [--verbose]
+                      [--commands [COMMANDS [COMMANDS ...]]] [--input] [--space SPACE]
 
 Interactive program for DO on WML
 
 optional arguments:
   -h, --help            show this help message and exit
-  -w WML_CRED_FILE, --wml-cred-file WML_CRED_FILE
-                        Name of the file from which to read WML credentials. If not
-                        specified, credentials are read from environment variable
-                        $DOWML_CREDENTIALS.
-  --verbose, -v         Verbose mode. Causes the program to print debugging messages about
-                        its progress. Multiple -v options increase the verbosity. The
-                        maximum is 4.
+  --wml-cred-file WML_CRED_FILE, -w WML_CRED_FILE
+                        Name of the file from which to read WML credentials. If not specified,
+                        credentials are read from environment variable $DOWML_CREDENTIALS.
+  --verbose, -v         Verbose mode. Causes the program to print debugging messages about its
+                        progress. Multiple -v options increase the verbosity. The maximum is 4.
   --commands [COMMANDS [COMMANDS ...]], -c [COMMANDS [COMMANDS ...]]
-                        Carries out the specified commands. Each command is executed as if
-                        it had been specified at the prompt. The program stops after last
-                        command.
-  --input, -i           Prompts for new input commands even if some commands have been
-                        specified as arguments using --commands.
-  -s SPACE, --space SPACE
-                        Id of the space to connect to. Takes precedence over the one
-                        specified in the credentials under the 'space_id' key, if any.
+                        Carries out the specified commands. Each command is executed as if it had
+                        been specified at the prompt. The program stops after last command, unless
+                        --input is used.
+  --input, -i           Prompts for new input commands even if some commands have been specified
+                        as arguments using --commands.
+  --space SPACE, -s SPACE
+                        Id of the space to connect to. Takes precedence over the one specified in
+                        the credentials under the 'space_id' key, if any.
 $
 $
-$ python3 dowml.py -c help type size 'inline yes' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'shell ls -l *-*-*-*-*'
+$ PYTHONPATH='src' python3 src/dowml/interactive.py -c help type size 'inline yes' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'shell ls -l *-*-*-*-*'
 
 Decision Optimization in WML Interactive.
 Submit and manage Decision Optimization models interactively.
