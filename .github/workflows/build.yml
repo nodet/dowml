@@ -11,7 +11,7 @@ on:
 #    types: [completed]
 
 jobs:
-  build-upload-install-test:
+  build:
     runs-on: ubuntu-latest
 #    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
@@ -36,7 +36,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install build
 
-      # Runs a single command using the runners shell
       - name: build
         run:
           make build
@@ -45,5 +44,50 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: dist
+          path:
+            dist
+
+  install-and-test:
+    runs-on: ubuntu-latest
+#    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: download
+        uses: actions/download-artifact@v2
+        with:
+          name: dist
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install dist/dowml-*.whl
+
+      - name: Check
+        env:
+          WML_PROD_APIKEY: '${{secrets.WML_PROD_APIKEY}}'
+          WML_PROD_URL: '${{secrets.WML_PROD_URL}}'
+          WML_PROD_SPACE_ID: '${{secrets.WML_PROD_SPACE_ID}}'
+          WML_PROD_COS_CRN: '${{secrets.WML_PROD_COS_CRN}}'
+          WML_PROD_ML_CRN: '${{secrets.WML_PROD_ML_CRN}}'
+        run: |
+          export DOWML_CREDENTIALS="{'apikey': '${WML_PROD_APIKEY}', 'url': '${WML_PROD_URL}', 'cos_resource_crn': '${WML_PROD_COS_CRN}', 'ml_instance_crn': '${WML_PROD_ML_CRN}', 'space_name': 'dowml-test-space' }"
+          dowml -c 'jobs'
+
+      - name: store
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist-checked
           path:
             dist
