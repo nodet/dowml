@@ -133,3 +133,29 @@ jobs:
           name: dist-checked
           path:
             ./dist/*
+
+  tag:
+    needs: install-and-test
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: download
+        uses: actions/download-artifact@v2
+        with:
+          name: dist-checked
+          path: dist-checked
+
+      - name: store-version-info
+        run: |
+          VERSION=`ls -1 dist-checked/dowml-*.tar.gz | sed 's/dist-checked/dowml-//' | sed 's/.tar.gz//'`
+          GITID=`cat dist-checked/version.info`
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git tag -f V${VERSION}-latest-build ${GITID}
+          git push --tags
