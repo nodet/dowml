@@ -16,8 +16,14 @@ gh run download -n dist-checked -D dist-checked
 VERSION=`ls -1 dist-checked/dowml-*.tar.gz | sed 's#dist-checked/dowml-##' | sed 's/.tar.gz//'`
 GITID=`cat dist-checked/version.info`
 echo "Found version" ${VERSION} "with git id" ${GITID}
+TAGNAME=V${VERSION}-test
 
-# Tag and upload
-git tag -f V${VERSION}-test ${GITID}
-python3 -m twine upload --repository testpypi dist/*
+if git rev-parse ${TAGNAME} > /dev/null 2>&1; then
+  echo "Error: the tag '${TAGNAME}' already exists!"
+  exit 1
+fi
+
+# Upload and tag
+python3 -m twine upload --repository testpypi dist-checked/dowml-*
+git tag ${TAGNAME} ${GITID}
 git push public --tags
