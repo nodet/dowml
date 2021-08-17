@@ -4,19 +4,15 @@ A library and command line client to use Decision Optimization on WML
 ## tldr;
 
 ```
-$ git clone git@github.com:IBMDecisionOptimization/dowml.git
-$ cd dowml
-$ cat tests/test_credentials.txt
+$ pip install dowml
+$ cat my_credentials.txt
 {
     'apikey': '<apikey>',
     'url': 'https://us-south.ml.cloud.ibm.com',
     'cos_resource_crn' = 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9...',
     'ml_instance_crn': 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f...'
 }
-$ cp tests/test_credentials.txt my-credentials.txt
-$ open my-credentials.txt
-... put your own credentials
-$ PYTHONPATH='src' python3 src/dowml/interactive.py -w my-credentials.txt
+$ dowml -w my-credentials.txt
 dowml> solve examples/afiro.mps
 dowml> wait
 dowml> log
@@ -42,7 +38,7 @@ In order to use either of them, you need to provide IBM Cloud credentials.
 
 Here's a sample session:
 ```
-$ PYTHONPATH='src' python3 src/dowml/interactive.py -h
+$ dowml -h
 usage: interactive.py [-h] [--wml-cred-file WML_CRED_FILE] [--verbose]
                       [--commands [COMMANDS [COMMANDS ...]]] [--input] [--space SPACE]
 
@@ -66,7 +62,7 @@ optional arguments:
                         the credentials under the 'space_id' key, if any.
 $
 $
-$ PYTHONPATH='src' python3 src/dowml/interactive.py -c help type size 'inline yes' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'shell ls -l *-*-*-*-*'
+$ dowml -c help type size 'inline yes' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'shell ls -l *-*-*-*-*'
 
 Decision Optimization in WML Interactive.
 Submit and manage Decision Optimization models interactively.
