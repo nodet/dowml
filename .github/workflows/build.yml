@@ -153,7 +153,7 @@ jobs:
 
       - name: store-version-info
         run: |
-          VERSION=`ls -1 dist-checked/dowml-*.tar.gz | sed 's/dist-checked/dowml-//' | sed 's/.tar.gz//'`
+          VERSION=`ls -1 dist-checked/dowml-*.tar.gz | sed 's#dist-checked/dowml-##' | sed 's/.tar.gz//'`
           GITID=`cat dist-checked/version.info`
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
