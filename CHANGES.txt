@@ -1,6 +1,8 @@
 User-visible changes
 --------------------
 
+V0.9.0, first release on PyPi:
+
 - [#17] DOWMLLib now returns tabular outputs as dataframes by default.
         Also replace the now-deprecated csv_as_dataframe with tabular_as_csv
 - [#18] DOWMLLib.get_output returns a dict instead of a list
