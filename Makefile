@@ -8,3 +8,6 @@ build:
 
 upload-on-test:
 	util/upload-on-test.sh
+
+upload-on-real:
+	util/upload-on-test.sh real
