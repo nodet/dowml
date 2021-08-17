@@ -77,13 +77,14 @@ jobs:
       - name: build
         run:
           make build
+          echo ${{github.sha}} > dist/version.info
 
       - name: store
         uses: actions/upload-artifact@v2
         with:
           name: dist
           path:
-            dist/dowml-*
+            dist/*
 
   install-and-test:
     needs: build
@@ -131,3 +132,4 @@ jobs:
           name: dist-checked
           path:
             ./dowml-*
+            ./version.info
