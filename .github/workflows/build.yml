@@ -158,4 +158,4 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
           git tag -f V${VERSION}-latest-build ${GITID}
-          git push --tags
+          git push -f --tags
