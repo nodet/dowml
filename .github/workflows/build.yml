@@ -108,11 +108,12 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: dist
+          path: dist
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install dowml-*.whl
+          pip install dist/dowml-*.whl
 
       - name: Check
         env:
@@ -131,5 +132,4 @@ jobs:
         with:
           name: dist-checked
           path:
-            ./dowml-*
-            ./version.info
+            ./dist/*
