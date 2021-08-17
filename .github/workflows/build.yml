@@ -75,7 +75,7 @@ jobs:
           pip install build
 
       - name: build
-        run:
+        run: |
           make build
           echo ${{github.sha}} > dist/version.info
 
