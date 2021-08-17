@@ -15,3 +15,9 @@ test_pypi_test_build:
 	python -m pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dowml ;\
 	python list_jobs.py                                                                                    ;\
 	dowml -c 'jobs'
+
+test_pypi_build:
+	. test-pypi-venv/bin/activate  ;\
+	python -m pip install dowml    ;\
+	python list_jobs.py            ;\
+	dowml -c 'jobs'
