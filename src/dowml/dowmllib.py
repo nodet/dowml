@@ -16,7 +16,6 @@ import glob
 import io
 import logging
 import os
-import pprint
 import re
 import tempfile
 import time
@@ -26,7 +25,6 @@ from functools import lru_cache
 from operator import attrgetter
 from packaging import version
 
-import requests
 from ibm_watson_machine_learning import APIClient
 
 
@@ -96,7 +94,7 @@ class _CredentialsProvider:
     COS_CRN = 'cos_resource_crn'
     ML_CRN = 'ml_instance_crn'
 
-    def __init__(self, wml_credentials_file=None, wml_credentials_str = None):
+    def __init__(self, wml_credentials_file=None, wml_credentials_str=None):
         self._logger = logging.getLogger(self.__class__.__name__)
 
         if wml_credentials_str is None:
@@ -110,7 +108,7 @@ class _CredentialsProvider:
     def usage(self):
         print(f'${self.ENVIRONMENT_VARIABLE_NAME} should contain credentials as a Python dict of the form:')
         print(f'  {{\'{self.APIKEY}\': \'<apikey>\', \'{self.URL}\': \'https://us-south.ml.cloud.ibm.com\'}}')
-        print(f'Or ${self.ENVIRONMENT_VARIABLE_NAME_FILE} should be the path to a file containing the same information.')
+        print(f'Or set ${self.ENVIRONMENT_VARIABLE_NAME_FILE} to the path to a file containing the same information.')
 
     def check_credentials(self, wml_cred_str):
         assert type(wml_cred_str) is str
@@ -330,7 +328,8 @@ class DOWMLLib:
                 result[name] = content
         return result
 
-    def _extract_csv_file(self, output_data, tabular_as_csv):
+    @staticmethod
+    def _extract_csv_file(output_data, tabular_as_csv):
         if tabular_as_csv:
             content = io.StringIO()
             writer = csv.writer(content)
@@ -344,7 +343,8 @@ class DOWMLLib:
                                        columns=output_data['fields'])
         return content
 
-    def _extract_regular_file(self, output_data):
+    @staticmethod
+    def _extract_regular_file(output_data):
         content = output_data['content']
         content = content.encode('UTF-8')
         content = base64.b64decode(content)
@@ -551,10 +551,10 @@ class DOWMLLib:
             model = self._get_model_definition_from_id(model_id)
             deployment_type = model['entity']['wml_model']['type']
             match = re.fullmatch(r"do-....*_([0-9.]*)", deployment_type)
-            version = '?????'
+            engine_version = '?????'
             if match:
-                version = match.group(1)
-            return version
+                engine_version = match.group(1)
+            return engine_version
         except KeyError:
             # Something changed. But let's not fail just for that
             self._logger.warning(f'Error while fetching version of a job!')
@@ -597,11 +597,11 @@ class DOWMLLib:
             created = self._get_creation_time_from_details(job, self.tz)
             names = self._get_input_names_from_details(job)
             deployment_type = self._get_type_from_details(job)
-            version = self._get_version_from_details(job)
+            engine_version = self._get_version_from_details(job)
             size = self._get_size_from_details(job)
             JobTuple = namedtuple('Job', ['status', 'id', 'created', 'names', 'type', 'version', 'size'])
             j = JobTuple(status=status, id=job_id, created=created, names=names,
-                         type=deployment_type, version=version, size=size)
+                         type=deployment_type, version=engine_version, size=size)
             result.append(j)
         result.sort(key=attrgetter('created'))
         self._logger.debug(f'Done.')
@@ -816,9 +816,9 @@ class DOWMLLib:
         if self._space_id:
             return self._space_id
 
-        SPACE_ID = _CredentialsProvider.SPACE_ID
-        if SPACE_ID in self._wml_credentials:
-            space_id = self._wml_credentials[SPACE_ID]
+        space_id = _CredentialsProvider.SPACE_ID
+        if space_id in self._wml_credentials:
+            space_id = self._wml_credentials[space_id]
             self._logger.debug(f'Using specified space \'{space_id}\'.')
         else:
             space_id = self._find_or_create_space()
