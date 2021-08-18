@@ -11,7 +11,7 @@ from ibm_watson_machine_learning.deployments import Deployments
 from ibm_watson_machine_learning.spaces import Spaces
 
 from dowml.interactive import DOWMLInteractive, \
-    CommandNeedsJobID, CommandNeedsNonNullInteger, CommandNeedsBool
+    CommandNeedsJobID, CommandNeedsNonNullInteger
 from dowml.dowmllib import DOWMLLib
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'

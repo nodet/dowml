@@ -34,11 +34,13 @@ class CommandNeedsNonNullInteger(Exception):
     pass
 
 
-class CommandNeedsBool(Exception):
-    pass
+class InvalidArgumentForCommand(Exception):
+    def __init__(self, command, value, possible_values):
+        super().__init__()
+        self.possible_values = possible_values
+        self.command = command
+        self.value = value
 
-
-class InvalidArgumentsForCommand(Exception):
     pass
 
 
@@ -175,7 +177,7 @@ the platform as part of the job payload, and not stored as a data asset."""
         elif arg == 'no':
             self.lib.inline = False
         else:
-            raise CommandNeedsBool
+            raise InvalidArgumentForCommand('inline', arg, ['yes', 'no'])
 
     def do_outputs(self, arg):
         """outputs [inline|assets]
@@ -191,10 +193,11 @@ file's name."""
         if not arg:
             print(f'outputs: {self.lib.outputs}')
             return
-        if arg == 'inline' or arg == 'assets':
+        allowed_values = ['inline', 'assets']
+        if arg in allowed_values:
             self.lib.outputs = arg
         else:
-            raise InvalidArgumentsForCommand
+            raise InvalidArgumentForCommand('outputs', arg, allowed_values)
 
     def do_solve(self, paths):
         """solve file1 [file2 ... [filen]]
@@ -375,6 +378,11 @@ def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
         except CommandNeedsJobID:
             print(f'This command requires a jod id or number, but you '
                   f'didn\'t specify one.  And there is no current job either.')
+            loop = True
+        except InvalidArgumentForCommand as e:
+            print(f'Invalid argument \'{e.value}\' for command \'{e.command}\'. '
+                  f'Possible values are {e.possible_values}. '
+                  f'Please type \'help {e.command}\' to learn more.')
             loop = True
         except NoCredentialsToCreateSpace as e:
             print(e)

@@ -4,7 +4,7 @@ from unittest import TestCase, main, mock
 from unittest.mock import Mock, ANY, call
 
 from dowml.interactive import DOWMLInteractive, \
-    CommandNeedsJobID, CommandNeedsNonNullInteger, CommandNeedsBool, InvalidArgumentsForCommand
+    CommandNeedsJobID, CommandNeedsNonNullInteger, InvalidArgumentForCommand
 from dowml.dowmllib import DOWMLLib
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
@@ -262,7 +262,7 @@ class TestInline(TestCase):
 
     def test_yes_or_no_only(self):
         cli = self.cli
-        with self.assertRaises(CommandNeedsBool):
+        with self.assertRaises(InvalidArgumentForCommand):
             cli.do_inline('y')
 
 
@@ -284,7 +284,7 @@ class TestOutputs(TestCase):
 
     def test_cant_set_outputs_to_arbitrary_value(self):
         cli = self.cli
-        with self.assertRaises(InvalidArgumentsForCommand):
+        with self.assertRaises(InvalidArgumentForCommand):
             cli.do_outputs('foo')
 
 
