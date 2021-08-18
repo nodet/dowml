@@ -125,14 +125,20 @@ class TestDetailsAndOutputs(TestCase):
         self.assertOutputDataReference(details)
         self.assertEqual(len(details['entity']['decision_optimization']['output_data_references']), 0)
 
+    def assertNonEmptyOutputDataReference(self, details):
+        self.assertOutputDataReference(details)
+        self.assertNotEqual(len(details['entity']['decision_optimization']['output_data_references']), 0)
+
     def assertNoOutputData(self, details):
         self.assertNotIn('output_data', details['entity']['decision_optimization'])
 
     @classmethod
     def setUpClass(cls) -> None:
         lib = DOWMLLib()
+        lib.outputs = 'assets'
         id_not_inline = lib.solve('../examples/afiro.mps')
         lib.inline = True
+        lib.outputs = 'inline'
         id_inline = lib.solve('../examples/afiro.mps')
         lib.wait_for_job_end(id_not_inline)
         lib.wait_for_job_end(id_inline)
@@ -181,7 +187,7 @@ class TestDetailsAndOutputs(TestCase):
         details = lib.get_job_details(id_not_inline, with_contents='names')
         self.assertInputDataReference(details)
         self.assertNoInputData(details)
-        self.assertEmptyOutputDataReference(details)
+        self.assertNonEmptyOutputDataReference(details)
         self.assertLogIsMentionedButNoContent(details)
         self.assertSolutionIsMentionedButNoContent(details)
         self.assertStatsAreMentionedButNoContent(details)
@@ -215,7 +221,7 @@ class TestDetailsAndOutputs(TestCase):
         details = lib.get_job_details(id_not_inline, with_contents='full')
         self.assertInputDataReference(details)
         self.assertNoInputData(details)
-        self.assertEmptyOutputDataReference(details)
+        self.assertNonEmptyOutputDataReference(details)
         self.assert_full_details_have_all_info(details)
 
     def find_output_with_id(self, outputs, job_id):
@@ -229,26 +235,23 @@ class TestDetailsAndOutputs(TestCase):
         self.assertIsNotNone(result)
         return result
 
-    def test_log_is_correctly_decoded(self):
+    def test_inline_log_is_correctly_decoded(self):
         lib = self.lib
-        id_not_inline = self.id_not_inline
-        details = lib.get_job_details(id_not_inline, with_contents='full')
+        details = lib.get_job_details(self.id_inline, with_contents='full')
         outputs = lib.get_output(details)
         log = self.find_output_with_id(outputs, 'log.txt')
         self.assertEqual(b'CPLEX version', log[29:42])
 
-    def test_csv_is_correctly_decoded(self):
+    def test_inline_csv_is_correctly_decoded(self):
         lib = self.lib
-        id_not_inline = self.id_not_inline
-        details = lib.get_job_details(id_not_inline, with_contents='full')
+        details = lib.get_job_details(self.id_inline, with_contents='full')
         outputs = lib.get_output(details, tabular_as_csv=True)
         csv = self.find_output_with_id(outputs, 'stats.csv')
         self.assertEqual(b'Name,Value\r\n', csv[0:12])
 
-    def test_csv_is_correctly_decoded_as_dataframe(self):
+    def test_inline_csv_is_correctly_decoded_as_dataframe(self):
         lib = self.lib
-        id_not_inline = self.id_not_inline
-        details = lib.get_job_details(id_not_inline, with_contents='full')
+        details = lib.get_job_details(self.id_inline, with_contents='full')
         outputs = lib.get_output(details)
         csv = self.find_output_with_id(outputs, 'stats.csv')
         self.assertEqual(DataFrame, type(csv))
