@@ -42,13 +42,17 @@ $ dowml -h
 usage: interactive.py [-h] [--wml-cred-file WML_CRED_FILE] [--verbose]
                       [--commands [COMMANDS [COMMANDS ...]]] [--input] [--space SPACE]
 
-Interactive program for DO on WML
+Decision Optimization in WML Interactive, version 1.0.0.
+Submit and manage Decision Optimization models interactively.
+(c) Copyright IBM Corp. 2021
 
 optional arguments:
   -h, --help            show this help message and exit
   --wml-cred-file WML_CRED_FILE, -w WML_CRED_FILE
                         Name of the file from which to read WML credentials. If not specified,
-                        credentials are read from environment variable $DOWML_CREDENTIALS.
+                        credentials are read from environment variable $DOWML_CREDENTIALS. If no
+                        such variable exists, but variable $DOWML_CREDENTIALS_FILE exists, tries
+                        to read that file.
   --verbose, -v         Verbose mode. Causes the program to print debugging messages about its
                         progress. Multiple -v options increase the verbosity. The maximum is 4.
   --commands [COMMANDS [COMMANDS ...]], -c [COMMANDS [COMMANDS ...]]
@@ -64,7 +68,7 @@ $
 $
 $ dowml -c help type size 'inline yes' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'shell ls -l *-*-*-*-*'
 
-Decision Optimization in WML Interactive, version 0.9.0.
+Decision Optimization in WML Interactive, version 1.0.0.
 Submit and manage Decision Optimization models interactively.
 (c) Copyright IBM Corp. 2021
 
@@ -87,69 +91,119 @@ dowml> size
 Current size: S. Known sizes: S, M, XL
 dowml> inline yes
 dowml> solve examples/afiro.mps
-Job id: 60c885c9-72ae-4568-be32-1e7c702252c0
+Job id: d2bac0fc-6a2f-4340-acb3-561982d5e434
 dowml> jobs
      #  status      id                                    creation date        type     ver.   size  inputs
-=>   1: queued      60c885c9-72ae-4568-be32-1e7c702252c0  2021-08-11 15:07:03  cplex    20.1   S     afiro.mps
+=>   1: queued      d2bac0fc-6a2f-4340-acb3-561982d5e434  2021-08-18 10:42:30  cplex    20.1   S     afiro.mps
 dowml> wait
 dowml> jobs
      #  status      id                                    creation date        type     ver.   size  inputs
-=>   1: completed   60c885c9-72ae-4568-be32-1e7c702252c0  2021-08-11 15:07:03  cplex    20.1   S     afiro.mps
+=>   1: completed   d2bac0fc-6a2f-4340-acb3-561982d5e434  2021-08-18 10:42:30  cplex    20.1   S     afiro.mps
 dowml> log
-[2021-08-11T13:07:33Z, INFO] CPLEX version 20010000
-[2021-08-11T13:07:34Z, WARNING] Changed parameter CPX_PARAM_THREADS from 0 to 1
-[2021-08-11T13:07:34Z, INFO] Param[1,067] = 1
-[2021-08-11T13:07:34Z, INFO] Param[1,130] = UTF-8
-[2021-08-11T13:07:34Z, INFO] Param[1,132] = -1
-[2021-08-11T13:07:34Z, INFO]
-[2021-08-11T13:07:34Z, INFO] Selected objective sense:  MINIMIZE
-[2021-08-11T13:07:34Z, INFO] Selected objective  name:  obj
-[2021-08-11T13:07:34Z, INFO] Selected RHS        name:  rhs
-[2021-08-11T13:07:34Z, INFO] Version identifier: 20.1.0.0 | 2020-11-10 | 9bedb6d68
-[2021-08-11T13:07:34Z, INFO] CPXPARAM_Threads                                 1
-[2021-08-11T13:07:34Z, INFO] CPXPARAM_Output_CloneLog                         -1
-[2021-08-11T13:07:34Z, INFO] CPXPARAM_Read_APIEncoding                        "UTF-8"
-[2021-08-11T13:07:34Z, INFO] Tried aggregator 1 time.
-[2021-08-11T13:07:34Z, INFO] LP Presolve eliminated 9 rows and 10 columns.
-[2021-08-11T13:07:34Z, INFO] Aggregator did 7 substitutions.
-[2021-08-11T13:07:34Z, INFO] Reduced LP has 11 rows, 15 columns, and 37 nonzeros.
-[2021-08-11T13:07:34Z, INFO] Presolve time = 0.00 sec. (0.03 ticks)
-[2021-08-11T13:07:34Z, INFO]
-[2021-08-11T13:07:34Z, INFO] Iteration log . . .
-[2021-08-11T13:07:34Z, INFO] Iteration:     1   Scaled dual infeas =             1.200000
-[2021-08-11T13:07:34Z, INFO] Iteration:     5   Dual objective     =          -464.753143
-[2021-08-11T13:07:34Z, INFO] There are no bound infeasibilities.
-[2021-08-11T13:07:34Z, INFO] There are no reduced-cost infeasibilities.
-[2021-08-11T13:07:34Z, INFO] Max. unscaled (scaled) Ax-b resid.          = 1.77636e-14 (1.77636e-14)
-[2021-08-11T13:07:34Z, INFO] Max. unscaled (scaled) c-B'pi resid.        = 5.55112e-17 (5.55112e-17)
-[2021-08-11T13:07:34Z, INFO] Max. unscaled (scaled) |x|                  = 500 (500)
-[2021-08-11T13:07:34Z, INFO] Max. unscaled (scaled) |slack|              = 500 (500)
-[2021-08-11T13:07:34Z, INFO] Max. unscaled (scaled) |pi|                 = 0.942857 (1.88571)
-[2021-08-11T13:07:34Z, INFO] Max. unscaled (scaled) |red-cost|           = 10 (10)
-[2021-08-11T13:07:34Z, INFO] Condition number of scaled basis            = 1.5e+01
-[2021-08-11T13:07:34Z, INFO] optimal (1)
+[2021-08-18T08:42:31Z, INFO] CPLEX version 20010000
+[2021-08-18T08:42:31Z, WARNING] Changed parameter CPX_PARAM_THREADS from 0 to 1
+[2021-08-18T08:42:31Z, INFO] Param[1,067] = 1
+[2021-08-18T08:42:31Z, INFO] Param[1,130] = UTF-8
+[2021-08-18T08:42:31Z, INFO] Param[1,132] = -1
+[2021-08-18T08:42:31Z, INFO]
+[2021-08-18T08:42:31Z, INFO] Selected objective sense:  MINIMIZE
+[2021-08-18T08:42:31Z, INFO] Selected objective  name:  obj
+[2021-08-18T08:42:31Z, INFO] Selected RHS        name:  rhs
+[2021-08-18T08:42:31Z, INFO] Version identifier: 20.1.0.0 | 2020-11-10 | 9bedb6d68
+[2021-08-18T08:42:31Z, INFO] CPXPARAM_Threads                                 1
+[2021-08-18T08:42:31Z, INFO] CPXPARAM_Output_CloneLog                         -1
+[2021-08-18T08:42:31Z, INFO] CPXPARAM_Read_APIEncoding                        "UTF-8"
+[2021-08-18T08:42:31Z, INFO] Tried aggregator 1 time.
+[2021-08-18T08:42:31Z, INFO] LP Presolve eliminated 9 rows and 10 columns.
+[2021-08-18T08:42:31Z, INFO] Aggregator did 7 substitutions.
+[2021-08-18T08:42:31Z, INFO] Reduced LP has 11 rows, 15 columns, and 37 nonzeros.
+[2021-08-18T08:42:31Z, INFO] Presolve time = 0.00 sec. (0.03 ticks)
+[2021-08-18T08:42:31Z, INFO]
+[2021-08-18T08:42:31Z, INFO] Iteration log . . .
+[2021-08-18T08:42:31Z, INFO] Iteration:     1   Scaled dual infeas =             1.200000
+[2021-08-18T08:42:31Z, INFO] Iteration:     5   Dual objective     =          -464.753143
+[2021-08-18T08:42:31Z, INFO] There are no bound infeasibilities.
+[2021-08-18T08:42:31Z, INFO] There are no reduced-cost infeasibilities.
+[2021-08-18T08:42:31Z, INFO] Max. unscaled (scaled) Ax-b resid.          = 1.77636e-14 (1.77636e-14)
+[2021-08-18T08:42:31Z, INFO] Max. unscaled (scaled) c-B'pi resid.        = 5.55112e-17 (5.55112e-17)
+[2021-08-18T08:42:31Z, INFO] Max. unscaled (scaled) |x|                  = 500 (500)
+[2021-08-18T08:42:31Z, INFO] Max. unscaled (scaled) |slack|              = 500 (500)
+[2021-08-18T08:42:31Z, INFO] Max. unscaled (scaled) |pi|                 = 0.942857 (1.88571)
+[2021-08-18T08:42:31Z, INFO] Max. unscaled (scaled) |red-cost|           = 10 (10)
+[2021-08-18T08:42:31Z, INFO] Condition number of scaled basis            = 1.5e+01
+[2021-08-18T08:42:31Z, INFO] optimal (1)
 dowml> type docplex
 dowml> solve examples/markshare.py examples/markshare1.mps.gz
-Job id: e81b392d-38ed-4d2a-912b-ff0249caf9e7
+Job id: b8c9630f-064f-4943-9b08-b013f40ed875
 dowml> wait
-[2021-08-11T13:08:09Z, WARNING] Support for Python 3.7 is now enabled and used as the default.
-[2021-08-11T13:08:10Z, INFO] Reading markshare1.mps.gz...
+[2021-08-18T08:42:38Z, WARNING] Support for Python 3.7 is now enabled and used as the default.
+[2021-08-18T08:42:38Z, INFO] Reading markshare1.mps.gz...
+[2021-08-18T08:42:38Z, WARNING] Support for Python 3.7 is now enabled and used as the default.
+[2021-08-18T08:42:38Z, INFO] Reading markshare1.mps.gz...
+[2021-08-18T08:42:38Z, WARNING] Support for Python 3.7 is now enabled and used as the default.
+[2021-08-18T08:42:38Z, INFO] Reading markshare1.mps.gz...
+[2021-08-18T08:42:39Z, INFO]         Nodes                                         Cuts/
+[2021-08-18T08:42:39Z, INFO]    Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+[2021-08-18T08:42:39Z, INFO]
+[2021-08-18T08:42:39Z, INFO] *     0+    0                         7286.0000        0.0000           100.00%
+[2021-08-18T08:42:39Z, INFO]       0     0        0.0000     6     7286.0000        0.0000       11  100.00%
+[2021-08-18T08:42:39Z, INFO] *     0+    0                          263.0000        0.0000           100.00%
+[2021-08-18T08:42:39Z, INFO] *     0+    0                          230.0000        0.0000           100.00%
+[2021-08-18T08:42:39Z, INFO]       0     0        0.0000     7      230.0000      Cuts: 15       15  100.00%
+[2021-08-18T08:42:39Z, INFO]       0     0        0.0000     7      230.0000      Cuts: 16       23  100.00%
+[2021-08-18T08:42:39Z, INFO] *     0+    0                          193.0000        0.0000           100.00%
+[2021-08-18T08:42:39Z, INFO] Detecting symmetries...
+[2021-08-18T08:42:39Z, INFO]       0     2        0.0000     7      193.0000        0.0000       23  100.00%
+[2021-08-18T08:42:39Z, INFO] Elapsed time = 0.01 sec. (2.91 ticks, tree = 0.01 MB, solutions = 4)
+[2021-08-18T08:42:39Z, INFO] *    70+   59                          166.0000        0.0000           100.00%
+[2021-08-18T08:42:39Z, INFO] *    80+   67                          132.0000        0.0000           100.00%
+[2021-08-18T08:42:39Z, INFO] *   190+  155                          111.0000        0.0000           100.00%
+[2021-08-18T08:42:39Z, INFO] *   220+  166                           96.0000        0.0000           100.00%
+[2021-08-18T08:42:39Z, INFO] *   320+  240                           71.0000        0.0000           100.00%
+[2021-08-18T08:42:39Z, INFO] *   420+  305                           67.0000        0.0000           100.00%
+[2021-08-18T08:42:39Z, INFO] *   420+  303                           66.0000        0.0000           100.00%
+[2021-08-18T08:42:39Z, INFO] *   491   310      integral     0       38.0000        0.0000     1112  100.00%
+[2021-08-18T08:42:39Z, INFO]
+[2021-08-18T08:42:39Z, INFO] Performing restart 1
+[2021-08-18T08:42:39Z, INFO]
+[2021-08-18T08:42:39Z, INFO] Repeating presolve.
+[2021-08-18T08:42:39Z, INFO] Tried aggregator 1 time.
+[2021-08-18T08:42:39Z, INFO] Reduced MIP has 6 rows, 56 columns, and 306 nonzeros.
+[2021-08-18T08:42:39Z, INFO] Reduced MIP has 50 binaries, 6 generals, 0 SOSs, and 0 indicators.
+[2021-08-18T08:42:39Z, INFO] Presolve time = 0.00 sec. (0.14 ticks)
+[2021-08-18T08:42:39Z, INFO] Tried aggregator 1 time.
+[2021-08-18T08:42:39Z, INFO] Reduced MIP has 6 rows, 56 columns, and 306 nonzeros.
+[2021-08-18T08:42:39Z, INFO] Reduced MIP has 50 binaries, 6 generals, 0 SOSs, and 0 indicators.
+[2021-08-18T08:42:39Z, INFO] Presolve time = 0.00 sec. (0.19 ticks)
+[2021-08-18T08:42:39Z, INFO] Represolve time = 0.00 sec. (0.81 ticks)
+[2021-08-18T08:42:39Z, INFO]    1518     0        0.0000     7       38.0000      Cuts: 17     3422  100.00%
+[2021-08-18T08:42:39Z, INFO]    1518     0        0.0000     8       38.0000      Cuts: 17     3429  100.00%
+[2021-08-18T08:42:39Z, INFO]    1518     0        0.0000     7       38.0000      Cuts: 14     3436  100.00%
+[2021-08-18T08:42:39Z, INFO]    1518     0        0.0000     7       38.0000      Cuts: 14     3441  100.00%
+[2021-08-18T08:42:39Z, INFO]    3918  1669        0.0000     6       38.0000        0.0000     8018  100.00%
+[2021-08-18T08:42:40Z, INFO]    6508  2914        0.0000     6       38.0000        0.0000    14256  100.00%
+[2021-08-18T08:42:40Z, INFO]    9718  4470        0.0000     6       38.0000        0.0000    22692  100.00%
+[2021-08-18T08:42:40Z, INFO] Began writing nodes to disk (directory ./cpxeezZXc created)
+[2021-08-18T08:42:44Z, INFO]   10638  4956       13.6062     6       38.0000        0.0000    25327  100.00%
+[2021-08-18T08:42:45Z, INFO]   13478  6155        0.0000     6       38.0000        0.0000    33717  100.00%
+[2021-08-18T08:42:46Z, INFO]   15515  7089    infeasible             38.0000        0.0000    39668  100.00%
 dowml> jobs
      #  status      id                                    creation date        type     ver.   size  inputs
-     1: completed   60c885c9-72ae-4568-be32-1e7c702252c0  2021-08-11 15:07:03  cplex    20.1   S     afiro.mps
-=>   2: completed   e81b392d-38ed-4d2a-912b-ff0249caf9e7  2021-08-11 15:07:44  docplex  20.1   S     markshare.py, markshare1.mps.gz
+     1: completed   d2bac0fc-6a2f-4340-acb3-561982d5e434  2021-08-18 10:42:30  cplex    20.1   S     afiro.mps
+=>   2: completed   b8c9630f-064f-4943-9b08-b013f40ed875  2021-08-18 10:42:36  docplex  20.1   S     markshare.py, markshare1.mps.gz
 dowml> output
-Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7/solution.json
-Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7/kpis.csv
-Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7/stats.csv
-Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7/log.txt
-Storing e81b392d-38ed-4d2a-912b-ff0249caf9e7/details.json
+Storing b8c9630f-064f-4943-9b08-b013f40ed875/solution.json
+Storing b8c9630f-064f-4943-9b08-b013f40ed875/kpis.csv
+Storing b8c9630f-064f-4943-9b08-b013f40ed875/stats.csv
+Storing b8c9630f-064f-4943-9b08-b013f40ed875/log.txt
+Storing b8c9630f-064f-4943-9b08-b013f40ed875/details.json
 dowml> shell ls -l *-*-*-*-*
--rw-rw-r--  1 nodet  staff  5445 Aug 11 15:08 details.json
--rw-rw-r--  1 nodet  staff    39 Aug 11 15:08 kpis.csv
--rw-rw-r--  1 nodet  staff  7142 Aug 11 15:08 log.txt
--rw-rw-r--  1 nodet  staff  1770 Aug 11 15:08 solution.json
--rw-rw-r--  1 nodet  staff   342 Aug 11 15:08 stats.csv
+total 56
+-rw-rw-r--  1 nodet  staff  5445 Aug 18 10:42 details.json
+-rw-rw-r--  1 nodet  staff    39 Aug 18 10:42 kpis.csv
+-rw-rw-r--  1 nodet  staff  7087 Aug 18 10:42 log.txt
+-rw-rw-r--  1 nodet  staff  1770 Aug 18 10:42 solution.json
+-rw-rw-r--  1 nodet  staff   343 Aug 18 10:42 stats.csv
 ```
 
 

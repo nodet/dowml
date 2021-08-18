@@ -3,7 +3,8 @@ User-visible changes
 
 master branch:
 
--
+- [#21] Read credentials from file $DOWML_CREDENTIALS_FILE
+        as last resort.
 
 
 V1.0.0:

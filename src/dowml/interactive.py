@@ -384,7 +384,10 @@ def interactive():
                         help=f'Name of the file from which to read WML '
                              f'credentials. If not specified, credentials ' 
                              f'are read from environment variable '
-                             f'${_CredentialsProvider.ENVIRONMENT_VARIABLE_NAME}.')
+                             f'${_CredentialsProvider.ENVIRONMENT_VARIABLE_NAME}. If '
+                             f'no such variable exists, but variable '
+                             f'${_CredentialsProvider.ENVIRONMENT_VARIABLE_NAME_FILE} '
+                             f'exists, tries to read that file.')
     parser.add_argument('--verbose', '-v', action='count', default=0,
                         help=f'Verbose mode.  Causes the program to print debugging '
                              f'messages about its progress.  Multiple -v options '
