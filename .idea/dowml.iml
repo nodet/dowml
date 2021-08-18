@@ -8,6 +8,8 @@
       <excludeFolder url="file://$MODULE_DIR$/dowml" />
       <excludeFolder url="file://$MODULE_DIR$/htmlcov" />
       <excludeFolder url="file://$MODULE_DIR$/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/src/dowml.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/test-pypi/test-pypi-venv" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
