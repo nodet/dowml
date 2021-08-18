@@ -86,6 +86,7 @@ class _CredentialsProvider:
     'credentials' attribute."""
 
     ENVIRONMENT_VARIABLE_NAME = 'DOWML_CREDENTIALS'
+    ENVIRONMENT_VARIABLE_NAME_FILE = 'DOWML_CREDENTIALS_FILE'
     # The keys in the credentials
     APIKEY = 'apikey'
     TOKEN = 'token'
@@ -102,13 +103,14 @@ class _CredentialsProvider:
             if wml_credentials_file is not None:
                 wml_credentials_str = self._read_wml_credentials_from_file(wml_credentials_file)
             else:
-                wml_credentials_str = self._read_wml_credentials_from_env(self.ENVIRONMENT_VARIABLE_NAME)
+                wml_credentials_str = self._read_wml_credentials_from_env()
             self._logger.debug(f'Found credential string.')
         self.credentials = self.check_credentials(wml_credentials_str)
 
     def usage(self):
-        print(f'It should contain credentials as a Python dict of the form:')
-        print(f'{{\'{self.APIKEY}\': \'<apikey>\', \'{self.URL}\': \'https://us-south.ml.cloud.ibm.com\'}}')
+        print(f'${self.ENVIRONMENT_VARIABLE_NAME} should contain credentials as a Python dict of the form:')
+        print(f'  {{\'{self.APIKEY}\': \'<apikey>\', \'{self.URL}\': \'https://us-south.ml.cloud.ibm.com\'}}')
+        print(f'Or ${self.ENVIRONMENT_VARIABLE_NAME_FILE} should be the path to a file containing the same information.')
 
     def check_credentials(self, wml_cred_str):
         assert type(wml_cred_str) is str
@@ -135,15 +137,20 @@ class _CredentialsProvider:
         self._logger.debug(f'Credentials have the expected structure.')
         return wml_credentials
 
-    def _read_wml_credentials_from_env(self, var_name):
+    def _read_wml_credentials_from_env(self):
         """Return a string of credentials suitable for WML from the environment
 
         Raises InvalidCredentials if anything is wrong."""
+        var_name = self.ENVIRONMENT_VARIABLE_NAME
+        var_file_name = self.ENVIRONMENT_VARIABLE_NAME_FILE
         self._logger.debug(f'Looking for credentials in environment variable {var_name}...')
-        try:
+        if var_name in os.environ:
             wml_cred_str = os.environ[var_name]
-        except KeyError:
-            print(f'Environment variable ${var_name} not found.')
+        elif var_file_name in os.environ:
+            self._logger.debug(f'Looking for credentials file name in environment variable {var_file_name}...')
+            wml_cred_str = self._read_wml_credentials_from_file(os.environ[var_file_name])
+        else:
+            print(f'Environment variables ${var_name} or ${var_file_name} not found.')
             self.usage()
             raise InvalidCredentials
 

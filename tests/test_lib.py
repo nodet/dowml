@@ -77,6 +77,16 @@ class TestCredentials(TestCase):
             with self.assertRaises(InvalidCredentials):
                 _ = DOWMLLib()
 
+    def test_lib_reads_file_referenced_in_env_var(self):
+        # Let's make sure we are really testing something: clear the environment
+        with mock.patch.dict(os.environ, clear=True):
+            with self.assertRaises(InvalidCredentials):
+                _ = DOWMLLib()
+            # We did get the exception when no credentials were found
+            # Let's check we find some with the new environment variable
+            os.environ['DOWML_CREDENTIALS_FILE'] = TEST_CREDENTIALS_FILE_NAME
+            _ = DOWMLLib()
+
 
 class TestSolveInline(TestCase):
 
