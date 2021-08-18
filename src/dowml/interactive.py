@@ -38,12 +38,16 @@ class CommandNeedsBool(Exception):
     pass
 
 
+INTERACTIVE_BANNER = \
+    f'''Decision Optimization in WML Interactive, version {dowml.VERSION}.
+Submit and manage Decision Optimization models interactively.
+(c) Copyright IBM Corp. 2021'''
+
+
 class DOWMLInteractive(Cmd):
     prompt = 'dowml> '
     intro = (f'''
-Decision Optimization in WML Interactive, version {dowml.VERSION}.
-Submit and manage Decision Optimization models interactively.
-(c) Copyright IBM Corp. 2021
+{INTERACTIVE_BANNER}
 
 Type ? for a list of commands.
 
@@ -379,7 +383,8 @@ def mocked_requests_session_send(*arguments, **kwargs):
 
 
 def interactive():
-    parser = argparse.ArgumentParser(description='Interactive program for DO on WML')
+    parser = argparse.ArgumentParser(description=INTERACTIVE_BANNER,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--wml-cred-file', '-w', default=None,
                         help=f'Name of the file from which to read WML '
                              f'credentials. If not specified, credentials ' 
