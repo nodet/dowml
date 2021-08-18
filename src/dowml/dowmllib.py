@@ -303,7 +303,6 @@ class DOWMLLib:
             # Now we can replace it with the correct value
             tabular_as_csv = not csv_as_dataframe
         result = {}
-        # FIXME: deal with output_data_references and download them
         try:
             outputs = details['entity']['decision_optimization']['output_data']
         except KeyError:
@@ -413,7 +412,9 @@ class DOWMLLib:
         self._logger.debug(f'Deleting job {job_id}...')
         client.deployments.delete_job(job_id, hard)
         self._logger.debug(f'Done.')
-        # FIXME: deal with output_data_references and delete the assets
+        if hard:
+            # FIXME: deal with output_data_references and delete the assets
+            pass
 
     def decode_log(self, output):
         """ Decode the log from DO4WML
