@@ -4,37 +4,6 @@ from dowml.dowmllib import DOWMLLib
 from unittest import TestCase, main
 
 
-class TestRunningOnWML(TestCase):
-
-    def setUp(self) -> None:
-        # Getting the credentials from the environment, so that this can run both
-        # locally and in GitHub
-        lib = DOWMLLib()
-        self.lib = lib
-
-    def job_solves_to_completion(self, paths, model_type=None, inline=None):
-        lib = self.lib
-        if inline is not None:
-            lib.inline = inline
-        if model_type is not None:
-            lib.model_type = model_type
-        job_id = lib.solve(paths)
-        lib.wait_for_job_end(job_id)
-        details = lib.get_job_details(job_id)
-        self.assertEqual(details['entity']['decision_optimization']['status']['state'], 'completed')
-        lib.delete_job(job_id, hard=True)
-        self.assertNotIn(job_id, [j.id for j in lib.get_jobs()])
-
-    def test_simple_cplex_inline(self):
-        self.job_solves_to_completion(inline=True, paths='../examples/afiro.mps')
-
-    def test_docplex_inline(self):
-        # 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'details full' delete
-        self.job_solves_to_completion(inline=True,
-                                      model_type='docplex',
-                                      paths='../examples/markshare.py ../examples/markshare1.mps.gz')
-
-
 class TestDetailsAndOutputs(TestCase):
     """"This class runs two CPLEX models, one inline, the other by reference.
     And it checks that the details and outputs are as expected"""
