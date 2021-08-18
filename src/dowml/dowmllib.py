@@ -222,6 +222,7 @@ class DOWMLLib:
         self.do_version = self.DO_VERSION
         self.timelimit = None
         self.inline = False
+        self.outputs = 'inline'
         self._data_connection = None
         self.tz = tz
 

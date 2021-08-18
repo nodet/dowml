@@ -266,6 +266,17 @@ class TestInline(TestCase):
             cli.do_inline('y')
 
 
+class TestOutputs(TestCase):
+
+    def setUp(self) -> None:
+        self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
+
+    def test_default_outputs_is_inline(self):
+        cli = self.cli
+        self.assertEqual('inline', cli.lib.outputs)
+
+
+
 class TestShellCommand(TestCase):
 
     def setUp(self) -> None:
