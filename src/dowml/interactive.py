@@ -38,6 +38,10 @@ class CommandNeedsBool(Exception):
     pass
 
 
+class InvalidArgumentsForCommand(Exception):
+    pass
+
+
 INTERACTIVE_BANNER = \
     f'''Decision Optimization in WML Interactive, version {dowml.VERSION}.
 Submit and manage Decision Optimization models interactively.
@@ -172,6 +176,25 @@ the platform as part of the job payload, and not stored as a data asset."""
             self.lib.inline = False
         else:
             raise CommandNeedsBool
+
+    def do_outputs(self, arg):
+        """outputs [inline|assets]
+Displays (if no argument) or sets (if given an argument) the type of outputs
+that jobs will use.  Possible values are 'inline' and 'assets'.
+
+In 'outputs inline' mode, which is the default, jobs use inline output data: the
+results of the job are included in the job details. This is fine for most jobs.
+
+In 'outputs assets' mode, the job outputs are stored as data assets in the job's
+deployment space.  Their names start with the id of the job, followed by the
+file's name."""
+        if not arg:
+            print(f'outputs: {self.lib.outputs}')
+            return
+        if arg == 'inline' or arg == 'assets':
+            self.lib.outputs = arg
+        else:
+            raise InvalidArgumentsForCommand
 
     def do_solve(self, paths):
         """solve file1 [file2 ... [filen]]

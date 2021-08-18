@@ -4,7 +4,7 @@ from unittest import TestCase, main, mock
 from unittest.mock import Mock, ANY, call
 
 from dowml.interactive import DOWMLInteractive, \
-    CommandNeedsJobID, CommandNeedsNonNullInteger, CommandNeedsBool
+    CommandNeedsJobID, CommandNeedsNonNullInteger, CommandNeedsBool, InvalidArgumentsForCommand
 from dowml.dowmllib import DOWMLLib
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
@@ -275,6 +275,17 @@ class TestOutputs(TestCase):
         cli = self.cli
         self.assertEqual('inline', cli.lib.outputs)
 
+    def test_can_set_outputs_to_assets_or_inline(self):
+        cli = self.cli
+        cli.do_outputs('assets')
+        self.assertEqual('assets', cli.lib.outputs)
+        cli.do_outputs('inline')
+        self.assertEqual('inline', cli.lib.outputs)
+
+    def test_cant_set_outputs_to_arbitrary_value(self):
+        cli = self.cli
+        with self.assertRaises(InvalidArgumentsForCommand):
+            cli.do_outputs('foo')
 
 
 class TestShellCommand(TestCase):
