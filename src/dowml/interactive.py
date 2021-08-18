@@ -319,50 +319,45 @@ Runs the specified command in a shell."""
 
 
 def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
-    try:
-        dowml = DOWMLInteractive(wml_cred_file, space_id)
-        # By default, we want to run the command loop
-        loop = True
-        for c in commands:
-            if loop:
-                # This is the first command we carry out. Let's print intro
-                print(dowml.intro, end='')
-                # And make sure we won't print it again
-                dowml.intro = ''
-            # We run the command loop iff this was asked for
-            loop = prompt_at_the_end
-            print(f'{dowml.prompt}{c}')
-            dowml.onecmd(c)
-        while loop:
-            # Generally speaking, one command loop is all we need, and we
-            # should not run another, except in case of errors
-            loop = False
-            try:
-                dowml.cmdloop()
-            except KeyboardInterrupt:
-                # The user interrupted. That's perfectly fine...
-                loop = True
-            except ApiRequestFailure:
-                # This happens when an invalid job id is specified. We want
-                # to keep running.
-                loop = True
-            except requests.exceptions.ConnectionError as e:
-                print(e)
-                loop = True
-            except CommandNeedsJobID:
-                print(f'This command requires a jod id or number, but you '
-                      f'didn\'t specify one.  And there is no current job either.')
-                loop = True
-            except NoCredentialsToCreateSpace as e:
-                print(e)
-                # There's nothing the user could do at this point: no need to loop
-            finally:
-                # But let's not print again the starting banner
-                dowml.intro = ''
-    except InvalidCredentials:
-        print(f'\nERROR: credentials not found!\n')
-        parser.print_help()
-        sys.exit(1)
+    dowml = DOWMLInteractive(wml_cred_file, space_id)
+    # By default, we want to run the command loop
+    loop = True
+    for c in commands:
+        if loop:
+            # This is the first command we carry out. Let's print intro
+            print(dowml.intro, end='')
+            # And make sure we won't print it again
+            dowml.intro = ''
+        # We run the command loop iff this was asked for
+        loop = prompt_at_the_end
+        print(f'{dowml.prompt}{c}')
+        dowml.onecmd(c)
+    while loop:
+        # Generally speaking, one command loop is all we need, and we
+        # should not run another, except in case of errors
+        loop = False
+        try:
+            dowml.cmdloop()
+        except KeyboardInterrupt:
+            # The user interrupted. That's perfectly fine...
+            loop = True
+        except ApiRequestFailure:
+            # This happens when an invalid job id is specified. We want
+            # to keep running.
+            loop = True
+        except requests.exceptions.ConnectionError as e:
+            print(e)
+            loop = True
+        except CommandNeedsJobID:
+            print(f'This command requires a jod id or number, but you '
+                  f'didn\'t specify one.  And there is no current job either.')
+            loop = True
+        except NoCredentialsToCreateSpace as e:
+            print(e)
+            # There's nothing the user could do at this point: no need to loop
+        finally:
+            # But let's not print again the starting banner
+            dowml.intro = ''
 
 
 # We will mock the 'requests' function that's used by APIClient
@@ -430,7 +425,12 @@ def interactive():
         # logging.getLogger('ibm_botocore').setLevel(logging.DEBUG)
         # logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
 
-    main_loop(args.wml_cred_file, args.space, args.commands, args.input)
+    try:
+        main_loop(args.wml_cred_file, args.space, args.commands, args.input)
+    except InvalidCredentials:
+        print(f'\nERROR: credentials not found!\n')
+        parser.print_help()
+        sys.exit(1)
 
 
 if __name__ == '__main__':
