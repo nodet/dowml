@@ -1,6 +1,3 @@
-import pprint
-
-from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
 from pandas import DataFrame
 
 from dowml.dowmllib import DOWMLLib
@@ -15,18 +12,18 @@ class TestRunningOnWML(TestCase):
         lib = DOWMLLib()
         self.lib = lib
 
-    def job_solves_to_completion(self, paths, type=None, inline=None):
-        l = self.lib
+    def job_solves_to_completion(self, paths, model_type=None, inline=None):
+        lib = self.lib
         if inline is not None:
-            l.inline = inline
-        if type is not None:
-            l.model_type = type
-        id = l.solve(paths)
-        l.wait_for_job_end(id)
-        details = l.get_job_details(id)
+            lib.inline = inline
+        if model_type is not None:
+            lib.model_type = model_type
+        job_id = lib.solve(paths)
+        lib.wait_for_job_end(job_id)
+        details = lib.get_job_details(job_id)
         self.assertEqual(details['entity']['decision_optimization']['status']['state'], 'completed')
-        l.delete_job(id, hard=True)
-        self.assertNotIn(id, [j.id for j in l.get_jobs()])
+        lib.delete_job(job_id, hard=True)
+        self.assertNotIn(job_id, [j.id for j in lib.get_jobs()])
 
     def test_simple_cplex_inline(self):
         self.job_solves_to_completion(inline=True, paths='../examples/afiro.mps')
@@ -34,7 +31,7 @@ class TestRunningOnWML(TestCase):
     def test_docplex_inline(self):
         # 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'details full' delete
         self.job_solves_to_completion(inline=True,
-                                      type='docplex',
+                                      model_type='docplex',
                                       paths='../examples/markshare.py ../examples/markshare1.mps.gz')
 
 
@@ -129,19 +126,19 @@ class TestDetailsAndOutputs(TestCase):
         self.assertEqual(len(details['entity']['decision_optimization']['output_data_references']), 0)
 
     def assertNoOutputData(self, details):
-        self.assertNotIn('output_data',  details['entity']['decision_optimization'])
+        self.assertNotIn('output_data', details['entity']['decision_optimization'])
 
     @classmethod
     def setUpClass(cls) -> None:
-        l = DOWMLLib()
-        id_not_inline = l.solve('../examples/afiro.mps')
-        l.inline = True
-        id_inline = l.solve('../examples/afiro.mps')
-        l.wait_for_job_end(id_not_inline)
-        l.wait_for_job_end(id_inline)
+        lib = DOWMLLib()
+        id_not_inline = lib.solve('../examples/afiro.mps')
+        lib.inline = True
+        id_inline = lib.solve('../examples/afiro.mps')
+        lib.wait_for_job_end(id_not_inline)
+        lib.wait_for_job_end(id_inline)
         cls.id_not_inline = id_not_inline
         cls.id_inline = id_inline
-        cls.lib = l
+        cls.lib = lib
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -149,25 +146,25 @@ class TestDetailsAndOutputs(TestCase):
         cls.lib.delete_job(cls.id_not_inline, hard=True)
 
     def test_inline_details_dont_have_inputs_or_outputs_by_default(self):
-        l = self.lib
-        details = l.get_job_details(self.id_inline)
+        lib = self.lib
+        details = lib.get_job_details(self.id_inline)
         self.assertNoInputDataReference(details)
         self.assertNoInputData(details)
         self.assertNoOutputDataReference(details)
         self.assertNoOutputData(details)
 
     def test_non_inline_details_dont_have_inputs_or_outputs_by_default(self):
-        l = self.lib
-        details = l.get_job_details(self.id_not_inline)
+        lib = self.lib
+        details = lib.get_job_details(self.id_not_inline)
         self.assertNoInputDataReference(details)
         self.assertNoInputData(details)
         self.assertNoOutputDataReference(details)
         self.assertNoOutputData(details)
 
     def test_inline_details_do_have_inputs_and_outputs_if_names(self):
-        l = self.lib
+        lib = self.lib
         id_inline = self.id_inline
-        details = l.get_job_details(id_inline, with_contents='names')
+        details = lib.get_job_details(id_inline, with_contents='names')
         self.assertNoInputDataReference(details)
         self.assertInputData(details)
         self.assertEqual(details['entity']['decision_optimization']['input_data'],
@@ -179,9 +176,9 @@ class TestDetailsAndOutputs(TestCase):
         self.assertEngineActivityButNoContent(details)
 
     def test_non_inline_details_do_have_inputs_and_outputs_if_names(self):
-        l = self.lib
+        lib = self.lib
         id_not_inline = self.id_not_inline
-        details = l.get_job_details(id_not_inline, with_contents='names')
+        details = lib.get_job_details(id_not_inline, with_contents='names')
         self.assertInputDataReference(details)
         self.assertNoInputData(details)
         self.assertEmptyOutputDataReference(details)
@@ -197,34 +194,34 @@ class TestDetailsAndOutputs(TestCase):
         self.assertEngineActivityWithContent(details)
 
     def test_inline_details_full(self):
-        l = self.lib
+        lib = self.lib
         id_inline = self.id_inline
-        details = l.get_job_details(id_inline, with_contents='full')
+        details = lib.get_job_details(id_inline, with_contents='full')
         self.assertNoInputDataReference(details)
         self.assertInputData(details)
         input_list = details['entity']['decision_optimization']['input_data']
         self.assertEqual(len(input_list), 1)
-        input = input_list[0]
-        self.assertIn('id', input)
-        self.assertEqual('afiro.mps', input['id'])
-        self.assertIn('content', input)
-        self.assertNotEqual('[not shown]', input['content'])
+        the_input = input_list[0]
+        self.assertIn('id', the_input)
+        self.assertEqual('afiro.mps', the_input['id'])
+        self.assertIn('content', the_input)
+        self.assertNotEqual('[not shown]', the_input['content'])
         self.assertEmptyOutputDataReference(details)
         self.assert_full_details_have_all_info(details)
 
     def test_non_inline_details_full(self):
-        l = self.lib
+        lib = self.lib
         id_not_inline = self.id_not_inline
-        details = l.get_job_details(id_not_inline, with_contents='full')
+        details = lib.get_job_details(id_not_inline, with_contents='full')
         self.assertInputDataReference(details)
         self.assertNoInputData(details)
         self.assertEmptyOutputDataReference(details)
         self.assert_full_details_have_all_info(details)
 
-    def find_output_with_id(self, outputs, id):
+    def find_output_with_id(self, outputs, job_id):
         result = None
         for name in outputs:
-            if name == id:
+            if name == job_id:
                 # We should find at most one
                 self.assertIsNone(result)
                 result = outputs[name]
@@ -233,26 +230,26 @@ class TestDetailsAndOutputs(TestCase):
         return result
 
     def test_log_is_correctly_decoded(self):
-        l = self.lib
+        lib = self.lib
         id_not_inline = self.id_not_inline
-        details = l.get_job_details(id_not_inline, with_contents='full')
-        outputs = l.get_output(details)
+        details = lib.get_job_details(id_not_inline, with_contents='full')
+        outputs = lib.get_output(details)
         log = self.find_output_with_id(outputs, 'log.txt')
         self.assertEqual(b'CPLEX version', log[29:42])
 
     def test_csv_is_correctly_decoded(self):
-        l = self.lib
+        lib = self.lib
         id_not_inline = self.id_not_inline
-        details = l.get_job_details(id_not_inline, with_contents='full')
-        outputs = l.get_output(details, tabular_as_csv=True)
+        details = lib.get_job_details(id_not_inline, with_contents='full')
+        outputs = lib.get_output(details, tabular_as_csv=True)
         csv = self.find_output_with_id(outputs, 'stats.csv')
         self.assertEqual(b'Name,Value\r\n', csv[0:12])
 
     def test_csv_is_correctly_decoded_as_dataframe(self):
-        l = self.lib
+        lib = self.lib
         id_not_inline = self.id_not_inline
-        details = l.get_job_details(id_not_inline, with_contents='full')
-        outputs = l.get_output(details)
+        details = lib.get_job_details(id_not_inline, with_contents='full')
+        outputs = lib.get_output(details)
         csv = self.find_output_with_id(outputs, 'stats.csv')
         self.assertEqual(DataFrame, type(csv))
         self.assertEqual(['Name', 'Value'], list(csv.columns))
