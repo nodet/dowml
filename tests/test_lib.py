@@ -1,6 +1,5 @@
 import datetime
 import os
-import pprint
 from logging import Logger
 from unittest.mock import Mock, patch
 
@@ -34,20 +33,20 @@ class TestCredentials(TestCase):
                               "{'apikey': '<apikey>', 'url': 'https://us-south.ml.cloud.ibm.com'}"}):
             default_space_name = 'dowml-space'
             # Let's check the default value is correct
-            l = DOWMLLib()
-            self.assertEqual(l.space_name, default_space_name)
+            lib = DOWMLLib()
+            self.assertEqual(default_space_name, lib.space_name)
 
     def test_space_name_in_credentials_change_default(self):
         # Let's now try to change that default value
         non_default_name = 'dowml-test-space'
-        l = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
         # Let's first check that the test was setup properly: it relies on
         # 'space-name' being included in the test credentials file
         # FIXME: the test would be much cleaner if DOWMLlib would accept credentials directly
-        self.assertIn(_CredentialsProvider.SPACE_NAME, l._wml_credentials)
-        self.assertEqual(non_default_name, l._wml_credentials[_CredentialsProvider.SPACE_NAME])
+        self.assertIn(_CredentialsProvider.SPACE_NAME, lib._wml_credentials)
+        self.assertEqual(non_default_name, lib._wml_credentials[_CredentialsProvider.SPACE_NAME])
         # Let's confirm that the space name is changed
-        self.assertEqual(l.space_name, non_default_name)
+        self.assertEqual(lib.space_name, non_default_name)
 
     def test_space_id_in_constructor_overrides_credentials(self):
         # Let's now try to change that default value
@@ -59,12 +58,12 @@ class TestCredentials(TestCase):
                               "{'apikey': '<apikey>',"
                               " 'url': 'https://us-south.ml.cloud.ibm.com',"
                               " 'space_id': 'bar'}"}):
-            l = DOWMLLib()
-            self.assertNotEqual(non_default_space_id, l._wml_credentials['space_id'])
+            lib = DOWMLLib()
+            self.assertNotEqual(non_default_space_id, lib._wml_credentials['space_id'])
             # And now we change the default
-            l = DOWMLLib(space_id=non_default_space_id)
+            lib = DOWMLLib(space_id=non_default_space_id)
         # Let's confirm that the space name is changed
-        self.assertEqual(non_default_space_id, l._wml_credentials['space_id'])
+        self.assertEqual(non_default_space_id, lib._wml_credentials['space_id'])
 
     def test_url_with_trailing_slash_is_accounted_for_automatically(self):
         url = 'https://us-south.ml.cloud.ibm.com/'
@@ -401,7 +400,6 @@ class TestOutputs(TestCase):
         create_job_mock.assert_called_once()
         kall = create_job_mock.call_args
         self.assertEqual(kall.kwargs, {})
-        pprint.pprint(kall.args)
         self.assertEqual(kall.args[0], 'deployment-id')
         odr = 'output_data_references'
         self.assertEqual(len(kall.args[1][odr]), 1)
@@ -464,7 +462,9 @@ class TestGetJobs(TestCase):
             }
         }
         self.lib._client.model_definitions = Mock(ModelDefinition)
-        self.lib._client.model_definitions.get_details.return_value = {'entity': {'wml_model': {'type': 'do-cplex_1.0'}}}
+        self.lib._client.model_definitions.get_details.return_value = {'entity': {
+            'wml_model': {'type': 'do-cplex_1.0'}}
+        }
         self.lib._client.deployments.get_job_details.return_value = {'resources': [
             # One job with a known deployment
             {
@@ -548,11 +548,11 @@ class TestWait(TestCase):
             }},
             'metadata': {'id': 'job_id'}
         }
-        return_values = [not_complete_yet for i in range(nb_not_complete_calls)] + [finished]
+        return_values = [not_complete_yet for _ in range(nb_not_complete_calls)] + [finished]
         self.lib._client.deployments.get_job_details.side_effect = return_values
         with patch('time.sleep', return_value=None) as patched_time_sleep:
             _, _ = self.lib.wait_for_job_end('job_id', print_activity=True)
-        self.assertEqual(nb_not_complete_calls    , patched_time_sleep.call_count)
+        self.assertEqual(nb_not_complete_calls, patched_time_sleep.call_count)
         self.assertEqual(nb_not_complete_calls + 1, self.lib._client.deployments.get_job_details.call_count)
 
 
