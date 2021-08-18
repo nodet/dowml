@@ -358,6 +358,60 @@ class TestSolveUsingDataAssets(TestCase):
         self.assertEqual(i['location']['href'], '/v2/assets/uid_for_created_asset?space_id=space-id')
 
 
+class TestOutputs(TestCase):
+
+    def setUp(self) -> None:
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
+        lib._logger = Mock(spec=Logger)
+        lib._client = Mock(spec=APIClient)
+        lib._client.deployments = Mock(spec=Deployments)
+        lib.inline = True
+        domn = Mock()
+        domn.SOLVE_PARAMETERS = 'solve-parameters'
+        domn.INPUT_DATA = 'input-data'
+        domn.OUTPUT_DATA = 'output-data'
+        domn.OUTPUT_DATA_REFERENCES = 'output_data_references'
+        lib._client.deployments.DecisionOptimizationMetaNames = domn
+        lib.get_file_as_data = lambda path: 'base-64-content'
+        lib._space_id = 'space-id'
+        lib._get_deployment_id = Mock(spec=DOWMLLib._get_deployment_id)
+        lib._get_deployment_id.return_value = 'deployment-id'
+        self.lib = lib
+
+    def test_solve_with_outputs_inline(self):
+        # If outputs are inline, we create a single output-data,
+        # that catches all outputs
+        self.assertEqual('inline', self.lib.outputs)
+        self.lib.solve('afiro.mps')
+        create_job_mock = self.lib._client.deployments.create_job
+        create_job_mock.assert_called_once()
+        kall = create_job_mock.call_args
+        self.assertEqual(kall.kwargs, {})
+        self.assertEqual(kall.args[0], 'deployment-id')
+        self.assertEqual(len(kall.args[1]['output-data']), 1)
+        i = kall.args[1]['output-data'][0]
+        self.assertEqual(i['id'], '.*\\.*')
+
+    def test_solve_with_outputs_assets(self):
+        # If outputs are assets, we create a single output-data-reference,
+        # that catches all outputs
+        self.lib.outputs = 'assets'
+        self.lib.solve('afiro.mps')
+        create_job_mock = self.lib._client.deployments.create_job
+        create_job_mock.assert_called_once()
+        kall = create_job_mock.call_args
+        self.assertEqual(kall.kwargs, {})
+        pprint.pprint(kall.args)
+        self.assertEqual(kall.args[0], 'deployment-id')
+        odr = 'output_data_references'
+        self.assertEqual(len(kall.args[1][odr]), 1)
+        i = kall.args[1][odr][0]
+        self.assertEqual('data_asset', i['type'])
+        self.assertEqual('.*\\.*', i['id'])
+        self.assertEqual({}, i['connection'])
+        self.assertEqual({'name': '${job_id}/${attachment_name}'}, i['location'])
+
+
 class TestGetJobs(TestCase):
 
     def setUp(self) -> None:

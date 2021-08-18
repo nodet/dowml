@@ -305,6 +305,7 @@ class DOWMLLib:
             # Now we can replace it with the correct value
             tabular_as_csv = not csv_as_dataframe
         result = {}
+        # FIXME: deal with output_data_references and download them
         try:
             outputs = details['entity']['decision_optimization']['output_data']
         except KeyError:
@@ -412,6 +413,7 @@ class DOWMLLib:
         self._logger.debug(f'Deleting job {job_id}...')
         client.deployments.delete_job(job_id, hard)
         self._logger.debug(f'Done.')
+        # FIXME: deal with output_data_references and delete the assets
 
     def decode_log(self, output):
         """ Decode the log from DO4WML
@@ -609,8 +611,10 @@ class DOWMLLib:
         """Create a deployment job (aka a run) and return its id"""
         client = self._get_or_make_client()
         cdd = client.deployments.DecisionOptimizationMetaNames
-        # We always use inline output
+        assert(self.outputs == 'inline' or self.outputs == 'assets')
         cdd_outputdata = cdd.OUTPUT_DATA
+        if self.outputs == 'assets':
+            cdd_outputdata = cdd.OUTPUT_DATA_REFERENCES
         # Assume we use inline data (i.e. content in the job request)
         cdd_inputdata = cdd.INPUT_DATA
         if not self.inline:
@@ -629,6 +633,11 @@ class DOWMLLib:
                 {'id': '.*\\.*'}
             ]
         }
+        if self.outputs == 'assets':
+            out = solve_payload[cdd_outputdata][0]
+            out['type'] = 'data_asset'
+            out['connection'] = {}
+            out['location'] = {'name': '${job_id}/${attachment_name}'}
         if self.timelimit:
             params = solve_payload[cdd.SOLVE_PARAMETERS]
             params['oaas.timeLimit'] = 1000 * self.timelimit
