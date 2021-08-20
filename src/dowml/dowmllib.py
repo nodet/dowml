@@ -23,6 +23,8 @@ from collections import namedtuple
 from datetime import datetime
 from functools import lru_cache
 from operator import attrgetter
+
+from ibm_watson_machine_learning.wml_client_error import WMLClientError
 from packaging import version
 
 from ibm_watson_machine_learning import APIClient
@@ -416,8 +418,11 @@ class DOWMLLib:
             else:
                 data_asset_id = output['location']['id']
                 self._logger.debug(f'Deleting data asset {data_asset_id}...')
-                self._client.data_assets.delete(data_asset_id)
-                self._logger.debug(f'Done.')
+                try:
+                    self._client.data_assets.delete(data_asset_id)
+                    self._logger.debug(f'Done.')
+                except WMLClientError as e:
+                    self._logger.error('Exception raised while trying to delete the asset', exc_info=True)
 
     def delete_job(self, job_id, hard=False):
         """ Delete the given job

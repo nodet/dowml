@@ -12,6 +12,8 @@ from ibm_watson_machine_learning.spaces import Spaces
 
 from unittest import TestCase, main, mock
 
+from ibm_watson_machine_learning.wml_client_error import WMLClientError
+
 from dowml.dowmllib import InvalidCredentials, _CredentialsProvider, DOWMLLib, SimilarNamesInJob, version_is_greater
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
@@ -668,6 +670,29 @@ class TestDeleteJob(TestCase):
             call.delete_asset(data_asset_id),
             call.delete_job(job_id, True)
         ])
+
+    def test_delete_catches_errors_for_missing_assets(self):
+        job_id = 'job_id'
+        self.lib.get_job_details.return_value = {
+            'entity': {'decision_optimization': {
+                'output_data_references': [
+                    {
+                        'location': {'id': 'an_id'},
+                        'type': 'data_asset'
+                    },
+                    # Another one, to confirm that the error doesn't
+                    # stop the loop
+                    {
+                        'location': {'id': 'another_id'},
+                        'type': 'data_asset'
+                    },
+                ]
+            }},
+        }
+        delete_asset = self.lib._client.data_assets.delete
+        delete_asset.side_effect = WMLClientError("delete assets failed")
+        self.lib.delete_job(job_id, hard=True)
+        self.assertEqual(2, delete_asset.call_count)
 
 
 class TestVersionComparison(TestCase):
