@@ -425,11 +425,11 @@ class DOWMLLib:
         :param hard: if False, cancel the job. If true, delete it completely
         """
         client = self._get_or_make_client()
+        if hard:
+            self._delete_data_assets(job_id)
         self._logger.debug(f'Deleting job {job_id}...')
         client.deployments.delete_job(job_id, hard)
         self._logger.debug(f'Done.')
-        if hard:
-            self._delete_data_assets(job_id)
 
     def decode_log(self, output):
         """ Decode the log from DO4WML

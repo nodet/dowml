@@ -1,7 +1,7 @@
 import datetime
 import os
 from logging import Logger
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, call
 
 from ibm_watson_machine_learning import APIClient
 from ibm_watson_machine_learning.Set import Set
@@ -646,10 +646,26 @@ class TestDeleteJob(TestCase):
                 ]
             }},
         }
+        delete_job = self.lib._client.deployments.delete_job
+        get_job_details = self.lib.get_job_details
+        delete_asset = self.lib._client.data_assets.delete
+
+        # This mock will record the call orders of its children
+        m = Mock()
+        m.attach_mock(delete_job, 'delete_job')
+        m.attach_mock(get_job_details, 'get_job_details')
+        m.attach_mock(delete_asset, 'delete_asset')
+
         self.lib.delete_job(job_id, hard=True)
-        self.lib._client.deployments.delete_job.assert_called_once_with(job_id, True)
-        self.lib.get_job_details.assert_called_once_with(job_id)
-        self.lib._client.data_assets.delete.assert_called_once_with('data_asset_id')
+        delete_job.assert_called_once_with(job_id, True)
+        get_job_details.assert_called_once_with(job_id)
+        delete_asset.assert_called_once_with('data_asset_id')
+        # Delete the assets first, and only then delete the job itself
+        m.assert_has_calls([
+            call.get_job_details(job_id),
+            call.delete_asset(data_asset_id),
+            call.delete_job(job_id, True)
+        ])
 
 
 class TestVersionComparison(TestCase):
