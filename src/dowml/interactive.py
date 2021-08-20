@@ -236,7 +236,8 @@ job is either a job number or a job id. Uses current job if not specified."""
 Lists all the jobs in the space.
 Current job, if any, is indicated with an arrow."""
         jobs = self._cache_jobs()
-        print('     #  status      id                                    creation date        type     ver.   size  inputs')
+        print('     #  status      id                                    '
+              'creation date        type     ver.   size  inputs')
         for i, j in enumerate(jobs, start=1):
             # Prepare list of input files
             names = ', '.join(j.names)
@@ -244,7 +245,8 @@ Current job, if any, is indicated with an arrow."""
             mark = '   '
             if j.id == self.last_job_id:
                 mark = '=> '
-            print(f'{mark}{i:>3}: {j.status:<10}  {j.id}  {j.created}  {j.type:<7}  {j.version:<5}  {j.size:<4}  {names}')
+            print(f'{mark}{i:>3}: {j.status:<10}  {j.id}  '
+                  f'{j.created}  {j.type:<7}  {j.version:<5}  {j.size:<4}  {names}')
 
     def do_log(self, job_id):
         """log [job]
@@ -416,7 +418,7 @@ def interactive():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--wml-cred-file', '-w', default=None,
                         help=f'Name of the file from which to read WML '
-                             f'credentials. If not specified, credentials ' 
+                             f'credentials. If not specified, credentials '
                              f'are read from environment variable '
                              f'${_CredentialsProvider.ENVIRONMENT_VARIABLE_NAME}. If '
                              f'no such variable exists, but variable '
