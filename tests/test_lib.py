@@ -624,7 +624,32 @@ class TestDeleteJob(TestCase):
         self.lib._client.data_assets.delete.assert_not_called()
 
     def test_delete_hard_does_delete_assets_if_job_has_any(self):
-        pass
+        job_id = 'job_id'
+        data_asset_id = 'data_asset_id'
+        self.lib.get_job_details.return_value = {
+            'entity': {'decision_optimization': {
+                'output_data_references': [
+                    # A 'normal' data asset output
+                    {
+                        'location': {'id': data_asset_id},
+                        'type': 'data_asset'
+                    },
+                    # One output that is not a data_asset
+                    {'type': 'connection_asset'},
+                    # Error case: A data-asset that has no location
+                    {'type': 'data_asset'},
+                    # Error case: A data-asset that has no id
+                    {
+                        'location': {},
+                        'type': 'data_asset'
+                    },
+                ]
+            }},
+        }
+        self.lib.delete_job(job_id, hard=True)
+        self.lib._client.deployments.delete_job.assert_called_once_with(job_id, True)
+        self.lib.get_job_details.assert_called_once_with(job_id)
+        self.lib._client.data_assets.delete.assert_called_once_with('data_asset_id')
 
 
 class TestVersionComparison(TestCase):

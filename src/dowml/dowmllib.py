@@ -403,6 +403,22 @@ class DOWMLLib:
             # GH-1: This happens when the job failed
             pass
 
+    def _delete_data_assets(self, job_id):
+        job_details = self.get_job_details(job_id)
+        odr = job_details['entity']['decision_optimization'].get('output_data_references', [])
+        for output in odr:
+            if output.get('type') != 'data_asset':
+                break
+            if 'location' not in output:
+                self._logger.error(f'Missing \'location\' in details for job {job_id}')
+            elif 'id' not in output['location']:
+                self._logger.error(f'Missing \'location.id\' in details for job {job_id}')
+            else:
+                data_asset_id = output['location']['id']
+                self._logger.debug(f'Deleting data asset {data_asset_id}...')
+                self._client.data_assets.delete(data_asset_id)
+                self._logger.debug(f'Done.')
+
     def delete_job(self, job_id, hard=False):
         """ Delete the given job
         :param job_id: the job to be deleted
@@ -413,8 +429,7 @@ class DOWMLLib:
         client.deployments.delete_job(job_id, hard)
         self._logger.debug(f'Done.')
         if hard:
-            job_details = self.get_job_details(job_id)
-            pass
+            self._delete_data_assets(job_id)
 
     def decode_log(self, output):
         """ Decode the log from DO4WML
