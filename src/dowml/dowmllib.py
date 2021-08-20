@@ -410,7 +410,7 @@ class DOWMLLib:
         odr = job_details['entity']['decision_optimization'].get('output_data_references', [])
         for output in odr:
             if output.get('type') != 'data_asset':
-                break
+                continue
             if 'location' not in output:
                 self._logger.error(f'Missing \'location\' in details for job {job_id}')
             elif 'id' not in output['location']:

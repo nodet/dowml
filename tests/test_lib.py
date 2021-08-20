@@ -631,11 +631,6 @@ class TestDeleteJob(TestCase):
         self.lib.get_job_details.return_value = {
             'entity': {'decision_optimization': {
                 'output_data_references': [
-                    # A 'normal' data asset output
-                    {
-                        'location': {'id': data_asset_id},
-                        'type': 'data_asset'
-                    },
                     # One output that is not a data_asset
                     {'type': 'connection_asset'},
                     # Error case: A data-asset that has no location
@@ -643,6 +638,11 @@ class TestDeleteJob(TestCase):
                     # Error case: A data-asset that has no id
                     {
                         'location': {},
+                        'type': 'data_asset'
+                    },
+                    # A 'normal' data asset output
+                    {
+                        'location': {'id': data_asset_id},
                         'type': 'data_asset'
                     },
                 ]
@@ -670,6 +670,7 @@ class TestDeleteJob(TestCase):
             call.delete_asset(data_asset_id),
             call.delete_job(job_id, True)
         ])
+
 
     def test_delete_catches_errors_for_missing_assets(self):
         job_id = 'job_id'
