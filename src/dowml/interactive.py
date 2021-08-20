@@ -380,8 +380,8 @@ def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
             print(e)
             loop = True
         except CommandNeedsJobID:
-            print(f'This command requires a jod id or number, but you '
-                  f'didn\'t specify one.  And there is no current job either.')
+            print('This command requires a jod id or number, but you '
+                  'didn\'t specify one.  And there is no current job either.')
             loop = True
         except InvalidArgumentForCommand as e:
             print(f'Invalid argument \'{e.value}\' for command \'{e.command}\'. '
@@ -425,17 +425,17 @@ def interactive():
                              f'${_CredentialsProvider.ENVIRONMENT_VARIABLE_NAME_FILE} '
                              f'exists, tries to read that file.')
     parser.add_argument('--verbose', '-v', action='count', default=0,
-                        help=f'Verbose mode.  Causes the program to print debugging '
-                             f'messages about its progress.  Multiple -v options '
-                             f'increase the verbosity.  The maximum is 4.')
+                        help='Verbose mode.  Causes the program to print debugging '
+                             'messages about its progress.  Multiple -v options '
+                             'increase the verbosity.  The maximum is 4.')
     parser.add_argument('--commands', '-c', nargs='*', default=[],
-                        help=f'Carries out the specified commands.  Each command '
-                             f'is executed as if it had been specified at the prompt. '
-                             f'The program stops after last command, unless --input '
-                             f'is used.')
+                        help='Carries out the specified commands.  Each command '
+                             'is executed as if it had been specified at the prompt. '
+                             'The program stops after last command, unless --input '
+                             'is used.')
     parser.add_argument('--input', '-i', action='store_true',
-                        help=f'Prompts for new input commands even if some commands '
-                             f'have been specified as arguments using --commands.')
+                        help='Prompts for new input commands even if some commands '
+                             'have been specified as arguments using --commands.')
     parser.add_argument('--space', '-s', default=None,
                         help=f'Id of the space to connect to. Takes precedence over '
                              f'the one specified in the credentials under the '
@@ -467,7 +467,7 @@ def interactive():
     try:
         main_loop(args.wml_cred_file, args.space, args.commands, args.input)
     except InvalidCredentials:
-        print(f'\nERROR: credentials not found!\n')
+        print('\nERROR: credentials not found!\n')
         parser.print_help()
         sys.exit(1)
 
