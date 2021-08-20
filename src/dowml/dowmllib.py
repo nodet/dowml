@@ -413,7 +413,7 @@ class DOWMLLib:
         client.deployments.delete_job(job_id, hard)
         self._logger.debug(f'Done.')
         if hard:
-            # FIXME: deal with output_data_references and delete the assets
+            job_details = self.get_job_details(job_id)
             pass
 
     def decode_log(self, output):

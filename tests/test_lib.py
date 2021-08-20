@@ -602,14 +602,29 @@ class TestDeleteJob(TestCase):
         lib._client.spaces = Mock(spec=Spaces)
         lib._client.data_assets = Mock(spec=Assets)
         lib._client.spaces.get_details.return_value = {'resources': []}
+        lib.get_job_details = Mock()
         self.lib = lib
 
-    def test_delete_soft_doesnt_delete_assets(self):
+    def test_delete_soft_doesnt_look_for_job_details(self):
         job_id = 'job_id'
         self.lib.delete_job(job_id, hard=False)
         self.lib._client.deployments.delete_job.assert_called_once_with(job_id, False)
+        self.lib.get_job_details.assert_not_called()
+
+    def test_delete_hard_doesnt_delete_assets_if_job_has_none(self):
+        job_id = 'job_id'
+        self.lib.get_job_details.return_value = {
+            'entity': {'decision_optimization': {
+                'output_data_references': []
+            }},
+        }
+        self.lib.delete_job(job_id, hard=True)
+        self.lib._client.deployments.delete_job.assert_called_once_with(job_id, True)
+        self.lib.get_job_details.assert_called_once_with(job_id)
         self.lib._client.data_assets.delete.assert_not_called()
 
+    def test_delete_hard_does_delete_assets_if_job_has_any(self):
+        pass
 
 
 class TestVersionComparison(TestCase):
