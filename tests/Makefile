@@ -29,7 +29,7 @@ fulltests:
 	python3 ../src/dowml/interactive.py -c help type size 'inline yes' \
        'solve ../examples/afiro.mps' jobs wait log delete \
        'type docplex' 'solve ../examples/markshare.py ../examples/markshare1.mps.gz' wait jobs output 'details full' delete \
-       'inline no' 'type cplex' 'solve ../examples/afiro.mps' jobs wait details delete \
+       'inline no' 'outputs assets' 'type cplex' 'solve ../examples/afiro.mps' jobs wait details delete \
        'type docplex' 'solve ../examples/markshare.py ../examples/markshare1.mps.gz' 'details names' wait delete
 
 delete-space:

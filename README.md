@@ -82,8 +82,8 @@ dowml> help
 
 Documented commands (type help <topic>):
 ========================================
-cancel  details  help    jobs  output  size   time  version
-delete  exit     inline  log   shell   solve  type  wait
+cancel  details  help    jobs  output   shell  solve  type     wait
+delete  exit     inline  log   outputs  size   time   version
 
 dowml> type
 Current model type: cplex. Known types: cplex, cpo, opl, docplex

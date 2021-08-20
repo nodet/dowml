@@ -189,7 +189,7 @@ results of the job are included in the job details. This is fine for most jobs.
 
 In 'outputs assets' mode, the job outputs are stored as data assets in the job's
 deployment space.  Their names start with the id of the job, followed by the
-file's name."""
+file's name. This is useful for jobs that create very large outputs."""
         if not arg:
             print(f'outputs: {self.lib.outputs}')
             return
