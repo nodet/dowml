@@ -350,25 +350,25 @@ Runs the specified command in a shell."""
 
 
 def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
-    dowml = DOWMLInteractive(wml_cred_file, space_id)
+    instance = DOWMLInteractive(wml_cred_file, space_id)
     # By default, we want to run the command loop
     loop = True
     for c in commands:
         if loop:
             # This is the first command we carry out. Let's print intro
-            print(dowml.intro, end='')
+            print(instance.intro, end='')
             # And make sure we won't print it again
-            dowml.intro = ''
+            instance.intro = ''
         # We run the command loop iff this was asked for
         loop = prompt_at_the_end
-        print(f'{dowml.prompt}{c}')
-        dowml.onecmd(c)
+        print(f'{instance.prompt}{c}')
+        instance.onecmd(c)
     while loop:
         # Generally speaking, one command loop is all we need, and we
         # should not run another, except in case of errors
         loop = False
         try:
-            dowml.cmdloop()
+            instance.cmdloop()
         except KeyboardInterrupt:
             # The user interrupted. That's perfectly fine...
             loop = True
@@ -393,7 +393,7 @@ def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
             # There's nothing the user could do at this point: no need to loop
         finally:
             # But let's not print again the starting banner
-            dowml.intro = ''
+            instance.intro = ''
 
 
 # We will mock the 'requests' function that's used by APIClient
