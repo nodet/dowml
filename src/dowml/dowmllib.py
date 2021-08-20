@@ -404,7 +404,7 @@ class DOWMLLib:
             pass
 
     def _delete_data_assets(self, job_id):
-        job_details = self.get_job_details(job_id)
+        job_details = self.get_job_details(job_id, with_contents='names')
         odr = job_details['entity']['decision_optimization'].get('output_data_references', [])
         for output in odr:
             if output.get('type') != 'data_asset':

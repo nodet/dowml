@@ -620,7 +620,7 @@ class TestDeleteJob(TestCase):
         }
         self.lib.delete_job(job_id, hard=True)
         self.lib._client.deployments.delete_job.assert_called_once_with(job_id, True)
-        self.lib.get_job_details.assert_called_once_with(job_id)
+        self.lib.get_job_details.assert_called_once_with(job_id, with_contents='names')
         self.lib._client.data_assets.delete.assert_not_called()
 
     def test_delete_hard_does_delete_assets_if_job_has_any(self):
@@ -658,11 +658,13 @@ class TestDeleteJob(TestCase):
 
         self.lib.delete_job(job_id, hard=True)
         delete_job.assert_called_once_with(job_id, True)
-        get_job_details.assert_called_once_with(job_id)
+        # By default, get_job_details will filter the outputs, we need them
+        # when we want to check what data asset to delete
+        get_job_details.assert_called_once_with(job_id, with_contents='names')
         delete_asset.assert_called_once_with('data_asset_id')
         # Delete the assets first, and only then delete the job itself
         m.assert_has_calls([
-            call.get_job_details(job_id),
+            call.get_job_details(job_id, with_contents='names'),
             call.delete_asset(data_asset_id),
             call.delete_job(job_id, True)
         ])
