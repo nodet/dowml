@@ -1,17 +1,13 @@
 import datetime
-import pprint
-from collections import namedtuple
 from logging import Logger
-from unittest import TestCase, main, mock
-from unittest.mock import Mock, ANY, call
+from unittest import TestCase, main
+from unittest.mock import Mock
 
 from ibm_watson_machine_learning import APIClient
 from ibm_watson_machine_learning.Set import Set
 from ibm_watson_machine_learning.deployments import Deployments
 from ibm_watson_machine_learning.spaces import Spaces
 
-from dowml.interactive import DOWMLInteractive, \
-    CommandNeedsJobID, CommandNeedsNonNullInteger
 from dowml.dowmllib import DOWMLLib
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
