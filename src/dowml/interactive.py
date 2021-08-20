@@ -261,13 +261,16 @@ Downloads all the outputs of a job, as well as the details/status of the job.
 job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._get_and_remember_job_id(job_id)
         details = self.lib.get_job_details(job_id, with_contents='full')
-        outputs = self.lib.get_output(details, tabular_as_csv=True)
-        for name in outputs:
-            self.save_content(job_id, name, outputs[name])
+        self._output_regular_files(job_id, details)
         # We don't want to store all the outputs in the details themselves
         self.lib.filter_large_chunks_from_details(details)
         details = pprint.pformat(details)
         self.save_content(job_id, 'details.json', details, text=True)
+
+    def _output_regular_files(self, job_id, details):
+        outputs = self.lib.get_output(details, tabular_as_csv=True)
+        for name in outputs:
+            self.save_content(job_id, name, outputs[name])
 
     @staticmethod
     def save_content(job_id, name, content, text=False):
