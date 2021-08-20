@@ -3,7 +3,10 @@
 tests:
 	$(MAKE) -C tests quick basic slow fulltests
 
-build:
+lint:
+	flake8 src tests/*.py
+
+build: lint
 	python3 -m build
 
 upload-on-test:

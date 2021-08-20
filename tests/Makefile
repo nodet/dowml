@@ -37,3 +37,7 @@ fulltests:
 
 delete-space:
 	python3 delete_space.py
+
+
+lint:
+	$(MAKE) -C .. lint
