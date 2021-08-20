@@ -591,6 +591,27 @@ class TestLog(TestCase):
         self.assertEqual('line 1\nline 2', self.lib.get_log('1'))
 
 
+class TestDeleteJob(TestCase):
+
+    def setUp(self) -> None:
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
+        lib._logger = Mock(spec=Logger)
+        lib._client = Mock(spec=APIClient)
+        lib._client.set = Mock(spec=Set)
+        lib._client.deployments = Mock(spec=Deployments)
+        lib._client.spaces = Mock(spec=Spaces)
+        lib._client.data_assets = Mock(spec=Assets)
+        lib._client.spaces.get_details.return_value = {'resources': []}
+        self.lib = lib
+
+    def test_delete_soft_doesnt_delete_assets(self):
+        job_id = 'job_id'
+        self.lib.delete_job(job_id, hard=False)
+        self.lib._client.deployments.delete_job.assert_called_once_with(job_id, False)
+        self.lib._client.data_assets.delete.assert_not_called()
+
+
+
 class TestVersionComparison(TestCase):
 
     def test_1_0_95_greater_than_1_0_95(self):
