@@ -104,7 +104,7 @@ class _CredentialsProvider:
                 wml_credentials_str = self._read_wml_credentials_from_file(wml_credentials_file)
             else:
                 wml_credentials_str = self._read_wml_credentials_from_env()
-            self._logger.debug(f'Found credential string.')
+            self._logger.debug('Found credential string.')
         self.credentials = self.check_credentials(wml_credentials_str)
 
     def usage(self):
@@ -115,7 +115,7 @@ class _CredentialsProvider:
     def check_credentials(self, wml_cred_str):
         assert type(wml_cred_str) is str
         if len(wml_cred_str) == 0:
-            self._logger.error(f'WML credentials must not be an empty string.')
+            self._logger.error('WML credentials must not be an empty string.')
             self.usage()
             raise InvalidCredentials
         wml_credentials = eval(wml_cred_str)
@@ -129,12 +129,12 @@ class _CredentialsProvider:
         assert type(wml_credentials[self.URL]) is str
         url = wml_credentials[self.URL]
         if len(url) == 0:
-            self._logger.error(f'URL must not be an empty string.')
+            self._logger.error('URL must not be an empty string.')
             raise InvalidCredentials
         if url[-1] == '/':
-            self._logger.warning(f'URL should not have a \'/\' at the end.')
+            self._logger.warning('URL should not have a \'/\' at the end.')
             wml_credentials[self.URL] = url[:-1]
-        self._logger.debug(f'Credentials have the expected structure.')
+        self._logger.debug('Credentials have the expected structure.')
         return wml_credentials
 
     def _read_wml_credentials_from_env(self):
@@ -200,11 +200,11 @@ class DOWMLLib:
 
         # A space name in the credentials changes the default
         if cred_provider.SPACE_NAME in wml_credentials:
-            self._logger.debug(f'They contain a space name.')
+            self._logger.debug('They contain a space name.')
             self.space_name = wml_credentials[cred_provider.SPACE_NAME]
 
         if cred_provider.SPACE_ID in wml_credentials:
-            self._logger.debug(f'And they contain a space id.')
+            self._logger.debug('And they contain a space id.')
 
         # The space_id specified here takes precedence
         # over the one, if any, defined in the credentials
@@ -229,7 +229,7 @@ class DOWMLLib:
     def _create_client(self):
         """Create the Python APIClient instance"""
         assert self._client is None
-        self._logger.debug(f'Creating the WML client...')
+        self._logger.debug('Creating the WML client...')
         # http://ibm-wml-api-pyclient.mybluemix.net/#api-for-ibm-cloud
         client = APIClient(self._wml_credentials)
         self._logger.info(f'Creating the client succeeded.  Client version is {client.version}')
@@ -270,7 +270,7 @@ class DOWMLLib:
         try:
             outputs = job_details['entity']['decision_optimization']['output_data']
         except KeyError:
-            self._logger.warning(f'No output structure available for this job')
+            self._logger.warning('No output structure available for this job')
             return None
         for output_data in outputs:
             if output_data['id'] == 'log.txt':
@@ -308,7 +308,7 @@ class DOWMLLib:
         try:
             outputs = details['entity']['decision_optimization']['output_data']
         except KeyError:
-            self._logger.warning(f'No output structure available for this job')
+            self._logger.warning('No output structure available for this job')
             return result
         for output_data in outputs:
             name = output_data['id']
@@ -360,14 +360,14 @@ class DOWMLLib:
         :return: The job details
         """
         client = self._get_or_make_client()
-        self._logger.debug(f'Fetching output...')
+        self._logger.debug('Fetching output...')
         output_filter = None
         if not with_contents:
             output_filter = 'solve_parameters,solve_state,status'
         elif with_contents == 'log':
             output_filter = 'output_data'
         job_details = self.client_get_job_details(client, job_id, output_filter)
-        self._logger.debug(f'Done.')
+        self._logger.debug('Done.')
         if with_contents != 'full' and with_contents != 'log':
             self.filter_large_chunks_from_details(job_details)
         return job_details
@@ -420,8 +420,8 @@ class DOWMLLib:
                 self._logger.debug(f'Deleting data asset {data_asset_id}...')
                 try:
                     self._client.data_assets.delete(data_asset_id)
-                    self._logger.debug(f'Done.')
-                except WMLClientError as e:
+                    self._logger.debug('Done.')
+                except WMLClientError:
                     self._logger.error('Exception raised while trying to delete the asset', exc_info=True)
 
     def delete_job(self, job_id, hard=False):
@@ -434,7 +434,7 @@ class DOWMLLib:
             self._delete_data_assets(job_id)
         self._logger.debug(f'Deleting job {job_id}...')
         client.deployments.delete_job(job_id, hard)
-        self._logger.debug(f'Done.')
+        self._logger.debug('Done.')
 
     def decode_log(self, output):
         """ Decode the log from DO4WML
@@ -561,7 +561,7 @@ class DOWMLLib:
             return deployment_type
         except KeyError:
             # Something changed. But let's not fail just for that
-            self._logger.warning(f'Error while fetching type of a job!')
+            self._logger.warning('Error while fetching type of a job!')
             return '?????'
 
     def _get_version_from_details(self, job):
@@ -578,7 +578,7 @@ class DOWMLLib:
             return engine_version
         except KeyError:
             # Something changed. But let's not fail just for that
-            self._logger.warning(f'Error while fetching version of a job!')
+            self._logger.warning('Error while fetching version of a job!')
             return '?????'
 
     @lru_cache
@@ -601,16 +601,16 @@ class DOWMLLib:
             return size
         except KeyError:
             # Something changed. But let's not fail just for that
-            self._logger.warning(f'Error while fetching size of a job!')
+            self._logger.warning('Error while fetching size of a job!')
             return '?'
 
     def get_jobs(self):
         """Return the list of tuples (status, id, ...) for all jobs in the deployment"""
         client = self._get_or_make_client()
-        self._logger.debug(f'Getting job details...')
+        self._logger.debug('Getting job details...')
         job_details = client.deployments.get_job_details()
-        self._logger.debug(f'Done.')
-        self._logger.debug(f'Getting information about deployments and models...')
+        self._logger.debug('Done.')
+        self._logger.debug('Getting information about deployments and models...')
         result = []
         for job in job_details['resources']:
             status = self._get_job_status_from_details(job)
@@ -625,7 +625,7 @@ class DOWMLLib:
                          type=deployment_type, version=engine_version, size=size)
             result.append(j)
         result.sort(key=attrgetter('created'))
-        self._logger.debug(f'Done.')
+        self._logger.debug('Done.')
         return result
 
     def create_job(self, paths, deployment_id):
@@ -663,9 +663,9 @@ class DOWMLLib:
             params = solve_payload[cdd.SOLVE_PARAMETERS]
             params['oaas.timeLimit'] = 1000 * self.timelimit
         self.create_inputs(paths, cdd_inputdata, solve_payload)
-        self._logger.debug(f'Creating the job...')
+        self._logger.debug('Creating the job...')
         if self.inline:
-            self._logger.debug(f'Data is inline. Let\'s not print the payload...')
+            self._logger.debug('Data is inline. Let\'s not print the payload...')
         else:
             self._logger.debug(repr(solve_payload))
         dt = datetime.now()
@@ -728,10 +728,10 @@ class DOWMLLib:
         if not self._space_id:
             self._space_id = self._get_space_id()
 
-        self._logger.debug(f'Getting deployments...')
+        self._logger.debug('Getting deployments...')
         client = self._get_or_make_client()
         deployment_details = client.deployments.get_details()
-        self._logger.debug(f'Done.')
+        self._logger.debug('Done.')
         resources = deployment_details['resources']
         deployment_name = f'{self.DEPLOYMENT_NAME}-{self.model_type}-{self.do_version}-{self.tshirt_size}'
         self._logger.debug(f'Got the list. Looking for deployment named \'{deployment_name}\'')
@@ -739,12 +739,12 @@ class DOWMLLib:
         for r in resources:
             if r['entity']['name'] == deployment_name:
                 deployment_id = r['metadata']['id']
-                self._logger.debug(f'Found it.')
+                self._logger.debug('Found it.')
                 break
         if deployment_id is not None:
             return deployment_id
 
-        self._logger.debug(f'This deployment doesn\'t exist yet. Creating it...')
+        self._logger.debug('This deployment doesn\'t exist yet. Creating it...')
 
         deployment_id = self._create_deployment(deployment_name)
         return deployment_id
@@ -753,7 +753,7 @@ class DOWMLLib:
         # We need a model to create a deployment
         model_id = self._get_model_id()
         # Create the deployment
-        self._logger.debug(f'Creating the deployment itself...')
+        self._logger.debug('Creating the deployment itself...')
         client = self._get_or_make_client()
         cdc = client.deployments.ConfigurationMetaNames
         meta_props = {
@@ -763,16 +763,16 @@ class DOWMLLib:
             cdc.HARDWARE_SPEC: {'name': self.tshirt_size, 'num_nodes': 2}
         }
         deployment = client.deployments.create(artifact_uid=model_id, meta_props=meta_props)
-        self._logger.debug(f'Deployment created.')
+        self._logger.debug('Deployment created.')
         deployment_id = client.deployments.get_id(deployment)
         return deployment_id
 
     def _get_model_id(self):
         """Create an empty model if one doesn't exist, return its id"""
-        self._logger.debug(f'Getting models...')
+        self._logger.debug('Getting models...')
         client = self._get_or_make_client()
         details = client.repository.get_details()
-        self._logger.debug(f'Done.')
+        self._logger.debug('Done.')
         resources = details['models']['resources']
         model_name = f'{self.MODEL_NAME}-{self.model_type}-{self.do_version}'
         self._logger.debug(f'Got the list. Looking for model named \'{model_name}\'')
@@ -780,11 +780,11 @@ class DOWMLLib:
         for r in resources:
             if r['metadata']['name'] == model_name:
                 model_id = r['metadata']['id']
-                self._logger.debug(f'Found it.')
+                self._logger.debug('Found it.')
                 self._logger.debug(f'Model id: {model_id}')
                 break
         if model_id is None:
-            self._logger.debug(f'This model doesn\'t exist yet. Creating it...')
+            self._logger.debug('This model doesn\'t exist yet. Creating it...')
             model_id = self._create_model(model_name)
         return model_id
 
@@ -828,9 +828,9 @@ class DOWMLLib:
                                            meta_props=model_metadata)
         finally:
             os.remove(path)
-        self._logger.debug(f'Model created.')
+        self._logger.debug('Model created.')
         model_id = client.repository.get_model_id(model_details)
-        self._logger.debug(f'Model id: {model_id}')
+        self._logger.debug('Model id: {model_id}')
         return model_id
 
     def _get_space_id(self):
@@ -844,16 +844,16 @@ class DOWMLLib:
         else:
             space_id = self._find_or_create_space()
 
-        self._logger.debug(f'Setting default space...')
+        self._logger.debug('Setting default space...')
         self._client.set.default_space(space_id)
-        self._logger.debug(f'Done.')
+        self._logger.debug('Done.')
         return space_id
 
     def _find_or_create_space(self):
         """Find the Space to use, create it if it doesn't exist"""
         assert self._client
         client = self._client
-        self._logger.debug(f'Fetching existing spaces...')
+        self._logger.debug('Fetching existing spaces...')
         space_details = client.spaces.get_details()
         resources = space_details['resources']
         self._logger.debug(f'Got the list. Looking for space named \'{self.space_name}\'')
@@ -861,10 +861,10 @@ class DOWMLLib:
         for r in resources:
             if r['entity']['name'] == self.space_name:
                 space_id = r['metadata']['id']
-                self._logger.debug(f'Found it.')
+                self._logger.debug('Found it.')
                 break
         if space_id is None:
-            self._logger.debug(f'This space doesn\'t exist yet. Creating it...')
+            self._logger.debug('This space doesn\'t exist yet. Creating it...')
             # Prepare necessary information
 
             wml_credentials = self._wml_credentials
@@ -892,7 +892,7 @@ class DOWMLLib:
             }
             # Create the space
             space = client.spaces.store(meta_props=metadata)
-            self._logger.debug(f'Space created')
+            self._logger.debug('Space created')
             space_id = client.spaces.get_uid(space)
         self._logger.info(f'Space id: {space_id}')
         return space_id
@@ -937,16 +937,16 @@ class DOWMLLib:
             self._logger.debug(f'Yes, with id {data_asset_id}.')
             if not force:
                 return data_asset_id
-            self._logger.debug(f'Creating new asset with local content.')
+            self._logger.debug('Creating new asset with local content.')
             asset_to_delete = data_asset_id
         else:
-            self._logger.debug(f'No, creating the data asset.')
+            self._logger.debug('No, creating the data asset.')
         data_asset_id = self.create_asset(path, basename)
-        self._logger.debug(f'Done.')
+        self._logger.debug('Done.')
         if asset_to_delete:
-            self._logger.debug(f'Deleting the old data asset.')
+            self._logger.debug('Deleting the old data asset.')
             if self.delete_asset(asset_to_delete):
-                self._logger.debug(f'Done.')
+                self._logger.debug('Done.')
             else:
-                self._logger.warning(f'Could not delete pre-existing asset')
+                self._logger.warning('Could not delete pre-existing asset')
         return data_asset_id
