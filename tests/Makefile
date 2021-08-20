@@ -17,8 +17,11 @@ basic:
 slow:
 	python -m unittest $(slow_tests)
 
+clean-cover:
+	rm -f .coverage
+
 cover:
-	coverage run -m unittest $(all_tests)
+	coverage run -a -m unittest $(all_tests)
 	rm -rf a_details.json
 	coverage html
 	open htmlcov/_Users_nodet_Documents_work_git_master_dowml_src_dowml_dowmllib_py.html
