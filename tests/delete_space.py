@@ -1,5 +1,4 @@
 import logging
-import pprint
 import sys
 import time
 
@@ -13,9 +12,9 @@ logger = None
 def find_space_in_list(client, space_name):
     global logger
     spaces = client.spaces.get_details()
-    logger.debug(f'Retrieved spaces.')
+    logger.debug('Retrieved spaces.')
     resources = spaces['resources']
-    logger.debug(f'There are {len(resources)} spaces.')
+    logger.debug('There are {len(resources)} spaces.')
     for s in resources:
         if s['entity']['name'] == space_name:
             logger.debug(f'Found one with name \'{space_name}\'')
@@ -34,20 +33,20 @@ def main():
     wml_credentials = _CredentialsProvider().credentials
 
     if _CredentialsProvider.SPACE_NAME not in wml_credentials:
-        logger.error(f'Refusing to destroy the default space')
+        logger.error('Refusing to destroy the default space')
         sys.exit(1)
 
     space_name = wml_credentials[_CredentialsProvider.SPACE_NAME]
     client = APIClient(wml_credentials)
-    logger.debug(f'Created client.')
+    logger.debug('Created client.')
     space_id = find_space_in_list(client, space_name)
     if not space_id:
         logger.error(f'No space found named \'{space_name}\'')
         sys.exit(1)
 
-    logger.debug(f'Deleting space...')
+    logger.debug('Deleting space...')
     client.spaces.delete(space_id)
-    logger.debug(f'Done.')
+    logger.debug('Done.')
 
     counter = 0
     while space_id:
@@ -55,7 +54,7 @@ def main():
         space_id = find_space_in_list(client, space_name)
         counter = counter + 1
         if counter > 50:
-            logger.error(f'Waited too long... Exiting.')
+            logger.error('Waited too long... Exiting.')
             sys.exit(1)
 
 
