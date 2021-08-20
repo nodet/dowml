@@ -671,7 +671,6 @@ class TestDeleteJob(TestCase):
             call.delete_job(job_id, True)
         ])
 
-
     def test_delete_catches_errors_for_missing_assets(self):
         job_id = 'job_id'
         self.lib.get_job_details.return_value = {
