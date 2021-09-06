@@ -99,7 +99,7 @@ job id, but none is specified, the last one is used.
 
     def do_type(self, model_type):
         """type [type-of-model]
-Prints current model type (if no argument), or sets the model type."""
+Prints current model type and known types (if no argument), or sets the model type."""
         known_types = ', '.join(self.lib.MODEL_TYPES)
         if not model_type:
             print(f'Current model type: {self.lib.model_type}. Known types: {known_types}')
