@@ -97,17 +97,22 @@ job id, but none is specified, the last one is used.
         """Exit this program."""
         return True
 
+    def print_known_types(self):
+        known_types = ', '.join(self.lib.MODEL_TYPES)
+        print(f'Known types: {known_types}.')
+
     def do_type(self, model_type):
         """type [type-of-model]
 Prints current model type and known types (if no argument), or sets the model type."""
-        known_types = ', '.join(self.lib.MODEL_TYPES)
         if not model_type:
-            print(f'Current model type: {self.lib.model_type}. Known types: {known_types}')
+            print(f'Current model type: {self.lib.model_type}.')
+            self.print_known_types()
             # Let's make sure we don't set the model_type to None, but
             # return immediately
             return
         if model_type not in self.lib.MODEL_TYPES:
-            print(f'Warning: unknown model type \'{model_type}\'. Known types: {known_types}')
+            print(f'Warning: unknown model type \'{model_type}\'.')
+            self.print_known_types()
         # We set the type nevertheless: this code may not be up-to-date
         self.lib.model_type = model_type
 
