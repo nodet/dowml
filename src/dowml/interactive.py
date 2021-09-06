@@ -116,18 +116,22 @@ Prints current model type and known types (if no argument), or sets the model ty
         # We set the type nevertheless: this code may not be up-to-date
         self.lib.model_type = model_type
 
+    def print_known_sizes(self):
+        known_sizes = ', '.join(self.lib.TSHIRT_SIZES)
+        print(f'Known sizes: {known_sizes}.')
+
     def do_size(self, tshirt_size):
         """size [size-of-deployment]
-Prints current deployment size (if no argument), or sets the deployment size."""
-        sizes = self.lib.TSHIRT_SIZES
-        known_sizes = ', '.join(sizes)
+Prints current deployment size and known sizes (if no argument), or sets the deployment size."""
         if not tshirt_size:
-            print(f'Current size: {self.lib.tshirt_size}. Known sizes: {known_sizes}')
+            print(f'Current size: {self.lib.tshirt_size}.')
+            self.print_known_sizes()
             # Let's make sure we don't set the tshirt_size to None, but
             # return immediately
             return
-        if tshirt_size not in sizes:
-            print(f'Warning: unknown tee-shirt size \'{tshirt_size}\'. Known sizes: {known_sizes}')
+        if tshirt_size not in self.lib.TSHIRT_SIZES:
+            print(f'Warning: unknown tee-shirt size \'{tshirt_size}\'.')
+            self.print_known_sizes()
         # We set the size nevertheless: this code may not be up-to-date
         self.lib.tshirt_size = tshirt_size
 
