@@ -349,7 +349,8 @@ job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._get_and_remember_job_id(job_id)
         self.lib.delete_job(job_id, False)
 
-    def do_shell(self, command):
+    @staticmethod
+    def do_shell(command):
         """shell command
 Runs the specified command in a shell."""
         os.system(command)
