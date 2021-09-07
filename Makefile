@@ -10,6 +10,10 @@ lint:
 build: lint
 	python3 -m build
 
+install: build
+	python -m pip uninstall --yes dowml
+	python -m pip install  dist/dowml-*-py3-none-any.whl
+
 upload-on-test:
 	util/upload-on-test.sh
 
