@@ -1,4 +1,5 @@
 .ONESHELL:
+.PHONY: tests
 
 tests:
 	$(MAKE) -C tests quick basic slow fulltests
