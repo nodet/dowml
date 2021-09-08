@@ -79,7 +79,7 @@ class TestDetails(TestCase):
         self.with_content_helper('a full')
 
 
-class TestJobs(TestCase):
+class TestDelete(TestCase):
 
     def setUp(self) -> None:
         self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
