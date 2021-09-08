@@ -4,15 +4,24 @@
 tests:
 	$(MAKE) -C tests quick basic slow fulltests
 
-lint:
-	flake8 src tests/*.py
+SRC=src/dowml/*.py
 
-build: lint
+lint: $(SRC)
+	flake8 $(SRC) tests/*.py > lint
+	cat lint
+
+DISTRIB=dist/dowml-*-py3-none-any.whl
+
+$(DISTRIB): $(SRC)
 	python3 -m build
+
+build: lint $(DISTRIB)
+	touch build
 
 install: build
 	python -m pip uninstall --yes dowml
 	python -m pip install  dist/dowml-*-py3-none-any.whl
+	touch install
 
 upload-on-test:
 	util/upload-on-test.sh

@@ -5,3 +5,6 @@ htmlcov/
 /dist/
 /tests/test-pypi/
 /src/dowml.egg-info/
+/build
+/install
+/lint
