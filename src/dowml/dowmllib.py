@@ -221,10 +221,20 @@ class DOWMLLib:
         self.tshirt_size = self.TSHIRT_SIZES[0]
         self.do_version = self.DO_VERSION
         self.timelimit = None
-        self.inline = False
+        self.inputs = 'assets'
         self.outputs = 'inline'
         self._data_connection = None
         self.tz = tz
+
+    @property
+    def inline(self):
+        self._logger.warning('Attribute \'inline\' is deprecated: use \'inputs\' instead.')
+        return self.inputs == 'inline'
+
+    @inline.setter
+    def inline(self, value):
+        self._logger.warning('Attribute \'inline\' is deprecated: use \'inputs\' instead.')
+        self.inputs = 'inline' if value else 'assets'
 
     def _create_client(self):
         """Create the Python APIClient instance"""
@@ -638,7 +648,7 @@ class DOWMLLib:
             cdd_outputdata = cdd.OUTPUT_DATA_REFERENCES
         # Assume we use inline data (i.e. content in the job request)
         cdd_inputdata = cdd.INPUT_DATA
-        if not self.inline:
+        if self.inputs == 'assets':
             # But if we don't want inline data, we have to submit
             # input references instead
             cdd_inputdata = cdd.INPUT_DATA_REFERENCES
@@ -664,7 +674,7 @@ class DOWMLLib:
             params['oaas.timeLimit'] = 1000 * self.timelimit
         self.create_inputs(paths, cdd_inputdata, solve_payload)
         self._logger.debug('Creating the job...')
-        if self.inline:
+        if self.inputs == 'inline':
             self._logger.debug('Data is inline. Let\'s not print the payload...')
         else:
             self._logger.debug(repr(solve_payload))
@@ -685,7 +695,7 @@ class DOWMLLib:
             if basename in names:
                 raise SimilarNamesInJob(basename)
             names.append(basename)
-            if self.inline:
+            if self.inputs == 'inline':
                 input_data = {
                     'id': basename,
                     'content': self.get_file_as_data(path)

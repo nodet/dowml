@@ -82,14 +82,14 @@ dowml> help
 
 Documented commands (type help <topic>):
 ========================================
-cancel  details  help    jobs  output   shell  solve  type     wait
-delete  exit     inline  log   outputs  size   time   version
+cancel  details  help    inputs  log     outputs  size   time  version
+delete  exit     inline  jobs    output  shell    solve  type  wait
 
 dowml> type
 Current model type: cplex. Known types: cplex, cpo, opl, docplex
 dowml> size
 Current size: S. Known sizes: S, M, XL
-dowml> inline yes
+dowml> inputs inline
 dowml> solve examples/afiro.mps
 Job id: d2bac0fc-6a2f-4340-acb3-561982d5e434
 dowml> jobs

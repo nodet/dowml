@@ -162,7 +162,7 @@ Prints default DO version (if no argument) and available ones, or sets the DO ve
         self.lib.do_version = version
 
     def do_inline(self, arg):
-        """inline [yes|no]
+        """inline [yes|no]   --  DEPRECATED: use 'inputs' instead
 Prints whether jobs are created with inline data (if no argument), or sets the
 flag ('yes' or 'no').
 
@@ -181,11 +181,35 @@ the platform as part of the job payload, and not stored as a data asset."""
             print(f'inline: {flag}')
             return
         if arg == 'yes':
-            self.lib.inline = True
+            self.lib.inputs = 'inline'
         elif arg == 'no':
-            self.lib.inline = False
+            self.lib.inputs = 'assets'
         else:
             raise InvalidArgumentForCommand('inline', arg, ['yes', 'no'])
+
+    def do_inputs(self, arg):
+        """inputs [inline|assets]
+Displays (if no argument) or sets (if given an argument) the type of inputs
+that jobs will use.  Possible values are 'inline' and 'assets'.
+
+In 'inputs inline' mode, jobs use inline input data: the files that constitute
+the job are included in the job creation request.
+
+In 'inputs assets' mode, which is the default, jobs use data assets stored on the
+platform for their inputs, rather than uploading the content of files as part of
+each job payload.  If a file name (stripped from its path) matches the name of
+an existing data asset, the content of the file is not uploaded (actually, it's
+ok if the file does not even exist locally) and the content of that data asset is
+used instead. If a file name is prefixed with a '+', the file is always uploaded
+and an existing data asset is replaced with the content of the local file."""
+        if not arg:
+            print(f'inputs: {self.lib.inputs}')
+            return
+        allowed_values = ['inline', 'assets']
+        if arg in allowed_values:
+            self.lib.inputs = arg
+        else:
+            raise InvalidArgumentForCommand('inputs', arg, allowed_values)
 
     def do_outputs(self, arg):
         """outputs [inline|assets]

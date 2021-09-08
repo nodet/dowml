@@ -106,7 +106,7 @@ class TestDetailsAndOutputs(TestCase):
         lib = DOWMLLib()
         lib.outputs = 'assets'
         id_not_inline = lib.solve('../examples/afiro.mps')
-        lib.inline = True
+        lib.inputs = 'inline'
         lib.outputs = 'inline'
         id_inline = lib.solve('../examples/afiro.mps')
         lib.wait_for_job_end(id_not_inline)

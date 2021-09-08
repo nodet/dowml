@@ -302,7 +302,7 @@ class TestSolveUsingDataAssets(TestCase):
         self.assertEqual(i['location']['href'], '/v2/assets/uid_for_created_asset?space_id=space-id')
 
     def test_solve_with_already_existing_data_asset_uploads_the_file(self):
-        # Let's assume no existing asset
+        # Let's assume we have an existing asset
         self.lib._client.data_assets.get_details.return_value = {
             'resources': [
                 {

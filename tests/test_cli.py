@@ -266,6 +266,28 @@ class TestInline(TestCase):
             cli.do_inline('y')
 
 
+class TestInputs(TestCase):
+
+    def setUp(self) -> None:
+        self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
+
+    def test_default_is_not_inline(self):
+        cli = self.cli
+        self.assertEqual('assets', cli.lib.inputs)
+
+    def test_can_set_inputs_to_assets_or_inline(self):
+        cli = self.cli
+        cli.do_inputs('inline')
+        self.assertEqual('inline', cli.lib.inputs)
+        cli.do_inputs('assets')
+        self.assertEqual('assets', cli.lib.inputs)
+
+    def test_cant_set_inputs_to_arbitrary_value(self):
+        cli = self.cli
+        with self.assertRaises(InvalidArgumentForCommand):
+            cli.do_inputs('foo')
+
+
 class TestOutputs(TestCase):
 
     def setUp(self) -> None:
