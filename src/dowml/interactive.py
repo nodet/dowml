@@ -347,7 +347,7 @@ Uses current job if not specified."""
             while self.jobs:
                 job = self.jobs[0]
                 self.delete_one_job(job)
-        elif m := re.fullmatch('(\d+)-(\d+)', job_id):
+        elif m := re.fullmatch('(\\d+)-(\\d+)', job_id):
             n1 = int(m.group(1))
             n2 = int(m.group(2))
             # We must gather the list of all the ids of jobs we want to delete
