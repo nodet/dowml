@@ -112,6 +112,7 @@ class TestDelete(TestCase):
         self.cli.last_job_id = 'b'
         self.cli.do_delete('')
         self.cli.lib.delete_job.assert_called_once_with('b', True)
+        self.assertEqual(1, self.cli.lib.delete_job.call_count)
         self.assertEqual(self.cli.jobs, ['a', 'c'])
         self.assertIsNone(self.cli.last_job_id)
 
@@ -119,6 +120,34 @@ class TestDelete(TestCase):
         self.cli.last_job_id = 'b'
         self.cli.do_delete('c')
         self.assertEqual(self.cli.last_job_id, 'b')
+
+    def test_delete_range(self):
+        self.cli.do_delete('1-2')
+        self.cli.lib.delete_job.assert_has_calls([
+            call('a', True),
+            call('b', True)
+        ], any_order=True)
+        self.assertEqual(2, self.cli.lib.delete_job.call_count)
+
+    def test_delete_range_complete(self):
+        self.cli.do_delete('1-3')
+        self.cli.lib.delete_job.assert_has_calls([
+            call('a', True),
+            call('b', True),
+            call('c', True)
+        ], any_order=True)
+        self.assertEqual(3, self.cli.lib.delete_job.call_count)
+
+    def test_delete_range_empty(self):
+        self.cli.do_delete('2-1')
+        self.cli.lib.delete_job.assert_not_called()
+
+    def test_delete_range_larger(self):
+        self.cli.do_delete('3-5')
+        self.cli.lib.delete_job.assert_has_calls([
+            call('c', True)
+        ], any_order=True)
+        self.assertEqual(1, self.cli.lib.delete_job.call_count)
 
 
 class TestOutput(TestCase):

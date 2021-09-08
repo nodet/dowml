@@ -14,6 +14,7 @@ import argparse
 import logging
 import os
 import pprint
+import re
 import sys
 
 import requests
@@ -335,15 +336,26 @@ job is either a job number or a job id. Uses current job if not specified."""
         printer(details, indent=4, width=120)
 
     def do_delete(self, job_id):
-        """delete [job|*]
-Deletes the job specified. Use '*' to delete all the jobs.
-job is either a job number or a job id. Uses current job if not specified."""
+        """delete [job|*|n-m]
+Deletes the job specified. 'job' is either a job number or a job id.
+Use '*' to delete all the jobs. A range of jobs, specified by their numbers,
+can be deleted using 'n-m'.
+Uses current job if not specified."""
         if job_id == '*':
             # Update the list of jobs before trying to delete them
             self._cache_jobs()
             while self.jobs:
                 job = self.jobs[0]
                 self.delete_one_job(job)
+        elif m := re.fullmatch('(\d+)-(\d+)', job_id):
+            n1 = int(m.group(1))
+            n2 = int(m.group(2))
+            # We must gather the list of all the ids of jobs we want to delete
+            # right from the start, because deleting each job will update the
+            # list while iterating
+            ids = self.jobs[n1-1:n2]
+            for i in ids:
+                self.delete_one_job(i)
         else:
             self.delete_one_job(job_id)
 
