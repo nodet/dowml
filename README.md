@@ -39,10 +39,10 @@ In order to use either of them, you need to provide IBM Cloud credentials.
 Here's a sample session:
 ```
 $ dowml -h
-usage: interactive.py [-h] [--wml-cred-file WML_CRED_FILE] [--verbose]
-                      [--commands [COMMANDS [COMMANDS ...]]] [--input] [--space SPACE]
+usage: dowml [-h] [--wml-cred-file WML_CRED_FILE] [--verbose]
+             [--commands [COMMANDS [COMMANDS ...]]] [--input] [--space SPACE]
 
-Decision Optimization in WML Interactive, version 1.0.0.
+Decision Optimization in WML Interactive, version 1.1.0.
 Submit and manage Decision Optimization models interactively.
 (c) Copyright IBM Corp. 2021
 
@@ -77,6 +77,7 @@ Type ? for a list of commands.
 Most commands need an argument that can be either a job id, or the number
 of the job, as displayed by the 'jobs' command.  If a command requires a
 job id, but none is specified, the last one is used.
+
 
 dowml> help
 
