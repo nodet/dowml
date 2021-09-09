@@ -193,6 +193,20 @@ class DOWMLLib:
             space_id: the id of the space that should be used. If specified, this
             replaces the one in the credentials
             tz: timezone to use to display time, defaults to Python's default timezone"""
+
+        self.model_type = self.MODEL_TYPES[0]
+        """Type of model to solve"""
+        self.tshirt_size = self.TSHIRT_SIZES[0]
+        """Tee-shirt size for the hardware to solve the model"""
+        self.do_version = self.DO_VERSION
+        """DO engines version to use"""
+        self.timelimit = None
+        """Time limit for the solve, in seconds"""
+        self.inputs = 'assets'
+        """Type of inputs that the created jobs should use"""
+        self.outputs = 'inline'
+        """Type of outputs that the created jobs should use"""
+
         self._logger = logging.getLogger(self.__class__.__name__)
 
         cred_provider = _CredentialsProvider(wml_credentials_file)
@@ -217,12 +231,6 @@ class DOWMLLib:
         # expensive operation.
         self._client = None
         self._space_id = None
-        self.model_type = self.MODEL_TYPES[0]
-        self.tshirt_size = self.TSHIRT_SIZES[0]
-        self.do_version = self.DO_VERSION
-        self.timelimit = None
-        self.inputs = 'assets'
-        self.outputs = 'inline'
         self._data_connection = None
         self.tz = tz
 
