@@ -693,7 +693,12 @@ class DOWMLLib:
         if self.outputs == 'assets':
             out = solve_payload[cdd_outputdata][0]
             out['type'] = 'data_asset'
+            # PyCharm assumes that, because we added a string in the dict on
+            # the previous line, we should only add strings in the same dict.
+            # But this is not how WML does...
+            # noinspection PyTypeChecker
             out['connection'] = {}
+            # noinspection PyTypeChecker
             out['location'] = {'name': '${job_id}/${attachment_name}'}
         if self.timelimit:
             params = solve_payload[cdd.SOLVE_PARAMETERS]
