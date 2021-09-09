@@ -256,8 +256,13 @@ class DOWMLLib:
     def _get_or_make_client(self):
         if self._client is None:
             self._client = self._create_client()
-        if self._space_id is None:
+            assert(self._space_id is None)
+            # The client is pretty much useless when it doesn't yet have a
+            # default space. So let's set it immediately.
             self._space_id = self._get_space_id()
+        # It would seem natural to assert that self._space_id is not None.
+        # But this fails when we are in unit-tests and we just set _client to
+        # a mock object from outside, without also setting the _space_id.
         return self._client
 
     def solve(self, paths):
