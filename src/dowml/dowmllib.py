@@ -269,7 +269,6 @@ class DOWMLLib:
     def _get_or_make_client(self):
         if self._client is None:
             self._client = self._create_client()
-            assert(self._space_id is None)
             # The client is pretty much useless when it doesn't yet have a
             # default space. So let's set it immediately.
             self._set_default_space()
