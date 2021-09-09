@@ -253,7 +253,7 @@ class DOWMLLib:
         self._logger.info(f'Creating the client succeeded.  Client version is {client.version}')
         return client
 
-    def _get_space_id(self):
+    def _set_default_space(self):
         if self._space_id:
             return self._space_id
 
@@ -275,7 +275,7 @@ class DOWMLLib:
             assert(self._space_id is None)
             # The client is pretty much useless when it doesn't yet have a
             # default space. So let's set it immediately.
-            self._space_id = self._get_space_id()
+            self._space_id = self._set_default_space()
         # It would seem natural to assert that self._space_id is not None.
         # But this fails when we are in unit-tests and we just set _client to
         # a mock object from outside, without also setting the _space_id.
