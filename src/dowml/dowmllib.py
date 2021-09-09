@@ -254,9 +254,9 @@ class DOWMLLib:
         return client
 
     def _set_default_space(self):
-        space_id = _CredentialsProvider.SPACE_ID
-        if space_id in self._wml_credentials:
-            space_id = self._wml_credentials[space_id]
+        space_id_key = _CredentialsProvider.SPACE_ID
+        if space_id_key in self._wml_credentials:
+            space_id = self._wml_credentials[space_id_key]
             self._logger.debug(f'Using specified space \'{space_id}\'.')
         else:
             space_id = self._find_or_create_space()
