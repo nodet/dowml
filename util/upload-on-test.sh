@@ -34,4 +34,8 @@ fi
 # Upload and tag
 python3 -m twine upload ${PYPI_REPO} dist-checked/dowml-*
 git tag ${TAGNAME} ${GITID}
+# The state of our git repo with respect to tags may not be the latest one:
+# if we run this upload just after a build was done, the 'latest-build' tag was
+# changed by the last build, and we don't know that yet. So let's find out...
+git fetch public -f -t
 git push public --tags
