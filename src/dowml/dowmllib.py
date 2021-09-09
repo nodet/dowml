@@ -382,7 +382,8 @@ class DOWMLLib:
             self.filter_large_chunks_from_details(job_details)
         return job_details
 
-    def client_get_job_details(self, client, job_id, with_filter=None):
+    @staticmethod
+    def client_get_job_details(client, job_id, with_filter=None):
         global the_filter
         global the_old_params
         the_filter = with_filter
