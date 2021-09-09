@@ -253,6 +253,22 @@ class DOWMLLib:
         self._logger.info(f'Creating the client succeeded.  Client version is {client.version}')
         return client
 
+    def _get_space_id(self):
+        if self._space_id:
+            return self._space_id
+
+        space_id = _CredentialsProvider.SPACE_ID
+        if space_id in self._wml_credentials:
+            space_id = self._wml_credentials[space_id]
+            self._logger.debug(f'Using specified space \'{space_id}\'.')
+        else:
+            space_id = self._find_or_create_space()
+
+        self._logger.debug('Setting default space...')
+        self._client.set.default_space(space_id)
+        self._logger.debug('Done.')
+        return space_id
+
     def _get_or_make_client(self):
         if self._client is None:
             self._client = self._create_client()
@@ -852,22 +868,6 @@ class DOWMLLib:
         model_id = client.repository.get_model_id(model_details)
         self._logger.debug('Model id: {model_id}')
         return model_id
-
-    def _get_space_id(self):
-        if self._space_id:
-            return self._space_id
-
-        space_id = _CredentialsProvider.SPACE_ID
-        if space_id in self._wml_credentials:
-            space_id = self._wml_credentials[space_id]
-            self._logger.debug(f'Using specified space \'{space_id}\'.')
-        else:
-            space_id = self._find_or_create_space()
-
-        self._logger.debug('Setting default space...')
-        self._client.set.default_space(space_id)
-        self._logger.debug('Done.')
-        return space_id
 
     def _find_or_create_space(self):
         """Find the Space to use from its name, create it if it doesn't exist"""
