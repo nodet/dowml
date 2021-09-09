@@ -34,7 +34,13 @@ In order to use either of them, you need to provide IBM Cloud credentials.
    }
    ```
    See below for how/where to get these credentials.
-2. As an alternative, you can specify a file name as argument to `DOWMLLib.__init__`. The credentials will then be read from that file instead of the environment variable. Accordingly, the Interactive has a command line option `-w` (or `--wml-cred-file`) that must be followed by the path of the file.
+2. As an alternative, you can specify a file name as argument to 
+`DOWMLLib.__init__`. The credentials will then be read from that file instead 
+of the environment variable. Accordingly, the Interactive has a command line 
+option `-w` (or `--wml-cred-file`) that must be followed by the path of the file.
+3. Finally, if none of the above options are used, the code will look for
+environment variable `DOWML_CREDENTIALS_FILE`. If it exists, it must be the path
+to a file that contains credentials such as the ones above.
 
 Here's a sample session:
 ```
