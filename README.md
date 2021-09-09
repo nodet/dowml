@@ -68,7 +68,7 @@ $
 $
 $ dowml -c help type size 'inline yes' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs output 'shell ls -l *-*-*-*-*'
 
-Decision Optimization in WML Interactive, version 1.0.0.
+Decision Optimization in WML Interactive, version 1.1.0.
 Submit and manage Decision Optimization models interactively.
 (c) Copyright IBM Corp. 2021
 
