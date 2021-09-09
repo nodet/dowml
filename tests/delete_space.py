@@ -14,7 +14,7 @@ def find_space_in_list(client, space_name):
     spaces = client.spaces.get_details()
     logger.debug('Retrieved spaces.')
     resources = spaces['resources']
-    logger.debug('There are {len(resources)} spaces.')
+    logger.debug(f'There are {len(resources)} spaces.')
     for s in resources:
         if s['entity']['name'] == space_name:
             logger.debug(f'Found one with name \'{space_name}\'')
