@@ -743,10 +743,6 @@ class DOWMLLib:
 
     def _get_deployment_id(self):
         """Create deployment if doesn't exist already, return its id"""
-
-        if not self._space_id:
-            self._space_id = self._get_space_id()
-
         self._logger.debug('Getting deployments...')
         client = self._get_or_make_client()
         deployment_details = client.deployments.get_details()
@@ -869,7 +865,7 @@ class DOWMLLib:
         return space_id
 
     def _find_or_create_space(self):
-        """Find the Space to use, create it if it doesn't exist"""
+        """Find the Space to use from its name, create it if it doesn't exist"""
         assert self._client
         client = self._client
         self._logger.debug('Fetching existing spaces...')
