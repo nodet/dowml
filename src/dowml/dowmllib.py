@@ -666,6 +666,53 @@ class DOWMLLib:
         self._logger.debug('Done.')
         return result
 
+    def parse_paths(self, paths):
+        """Expand wildcards that may appear in the input assets list"""
+        self._logger.debug(f'Parsing input list: {paths}')
+        globbed = []
+        for path in paths.split():
+            # Let's first get rid of the 'force' flag that glob
+            # would not understand
+            path, _, force = _get_file_spec(path)
+            files = glob.glob(path)
+            if not files:
+                # If the path doesn't actually match an existing file, this is
+                # not necessarily an error: this name can refer to a data
+                # asset that exists already. So let's keep it.
+                files = [path]
+            if force:
+                # Put back the '+' in front
+                files = [f'+{file}' for file in files]
+            globbed += files
+        self._logger.debug(f'Actual input list: {globbed}')
+        return globbed
+
+    def create_inputs(self, paths, cdd_inputdata, solve_payload):
+        # First deal with wildcards
+        globbed = self.parse_paths(paths)
+        # And let's now create the inputs from these files
+        names = []
+        for path in globbed:
+            path, basename, force = _get_file_spec(path)
+            if basename in names:
+                raise SimilarNamesInJob(basename)
+            names.append(basename)
+            if self.inputs == 'inline':
+                input_data = {
+                    'id': basename,
+                    'content': self.get_file_as_data(path)
+                }
+            else:
+                data_asset_id = self._create_data_asset_if_necessary(path, basename, force)
+                input_data = {
+                    'id': basename,
+                    "type": "data_asset",
+                    "location": {
+                        "href": "/v2/assets/" + data_asset_id + "?space_id=" + self._space_id
+                    }
+                }
+            solve_payload[cdd_inputdata].append(input_data)
+
     def create_job(self, paths, deployment_id):
         """Create a deployment job (aka a run) and return its id"""
         client = self._get_or_make_client()
@@ -717,53 +764,6 @@ class DOWMLLib:
         self._logger.debug(f'Done in {submit_time}. Getting its id...')
         job_id = client.deployments.get_job_uid(job_details)
         return job_id
-
-    def parse_paths(self, paths):
-        """Expand wildcards that may appear in the input assets list"""
-        self._logger.debug(f'Parsing input list: {paths}')
-        globbed = []
-        for path in paths.split():
-            # Let's first get rid of the 'force' flag that glob
-            # would not understand
-            path, _, force = _get_file_spec(path)
-            files = glob.glob(path)
-            if not files:
-                # If the path doesn't actually match an existing file, this is
-                # not necessarily an error: this name can refer to a data
-                # asset that exists already. So let's keep it.
-                files = [path]
-            if force:
-                # Put back the '+' in front
-                files = [f'+{file}' for file in files]
-            globbed += files
-        self._logger.debug(f'Actual input list: {globbed}')
-        return globbed
-
-    def create_inputs(self, paths, cdd_inputdata, solve_payload):
-        # First deal with wildcards
-        globbed = self.parse_paths(paths)
-        # And let's now create the inputs from these files
-        names = []
-        for path in globbed:
-            path, basename, force = _get_file_spec(path)
-            if basename in names:
-                raise SimilarNamesInJob(basename)
-            names.append(basename)
-            if self.inputs == 'inline':
-                input_data = {
-                    'id': basename,
-                    'content': self.get_file_as_data(path)
-                }
-            else:
-                data_asset_id = self._create_data_asset_if_necessary(path, basename, force)
-                input_data = {
-                    'id': basename,
-                    "type": "data_asset",
-                    "location": {
-                        "href": "/v2/assets/" + data_asset_id + "?space_id=" + self._space_id
-                    }
-                }
-            solve_payload[cdd_inputdata].append(input_data)
 
     def _get_deployment_id(self):
         """Create deployment if doesn't exist already, return its id"""
