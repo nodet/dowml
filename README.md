@@ -53,7 +53,7 @@ usage: dowml [-h] [--wml-cred-file WML_CRED_FILE] [--verbose]
 
 Decision Optimization in WML Interactive, version 1.1.0.
 Submit and manage Decision Optimization models interactively.
-(c) Copyright IBM Corp. 2021
+(c) Copyright Xavier Nodet, 2021
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -79,7 +79,7 @@ $ dowml -c help type size 'inputs inline' 'solve examples/afiro.mps' jobs wait j
 
 Decision Optimization in WML Interactive, version 1.1.0.
 Submit and manage Decision Optimization models interactively.
-(c) Copyright IBM Corp. 2021
+(c) Copyright Xavier Nodet, 2021
 
 Type ? for a list of commands.
 
