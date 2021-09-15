@@ -9,7 +9,7 @@ flake8==3.9.2
 ibm-cos-sdk==2.7.0
 ibm-cos-sdk-core==2.7.0
 ibm-cos-sdk-s3transfer==2.7.0
-ibm-watson-machine-learning==1.0.115
+ibm-watson-machine-learning==1.0.135
 idna==2.10
 importlib-metadata==4.6.3
 jmespath==0.10.0
@@ -33,7 +33,7 @@ requests==2.25.1
 requests-toolbelt==0.9.1
 rfc3986==1.5.0
 six==1.15.0
-tabulate==0.8.7
+tabulate==0.8.9
 tomli==1.2.1
 tqdm==4.62.0
 twine==3.4.2
