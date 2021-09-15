@@ -388,6 +388,7 @@ class DOWMLLib:
 
     def get_job_details(self, job_id, with_contents=None):
         """ Get the job details for the given job
+
         :param job_id: The id of the job to look for
         :param with_contents: if 'names', the details returned include
         the input and output files names. If 'full', the content of these files
@@ -462,6 +463,7 @@ class DOWMLLib:
 
     def delete_job(self, job_id, hard=False):
         """ Delete the given job
+
         :param job_id: the job to be deleted
         :param hard: if False, cancel the job. If true, delete it completely
         """
