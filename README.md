@@ -29,7 +29,7 @@ In order to use either of them, you need to provide IBM Cloud credentials.
    {
        'apikey': '<apikey>',
        'url': 'https://us-south.ml.cloud.ibm.com',
-       'cos_resource_crn' = 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9...',
+       'cos_resource_crn': 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9...',
        'ml_instance_crn': 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f...',
    }
    ```
