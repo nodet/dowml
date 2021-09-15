@@ -1,11 +1,6 @@
 User-visible changes
 --------------------
 
-master branch:
-
--
-
-
 V1.1.0:
 
 - [#3]  Accept 'delete 2-5' to delete a range of jobs
