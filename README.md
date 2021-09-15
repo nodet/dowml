@@ -1,6 +1,9 @@
 # dowml
 A library and command line client to use Decision Optimization on WML
 
+*Note that this tool is not an official IBM product, and is not supported by IBM. This is educational material, 
+use at your own risks.*
+
 ## tldr;
 
 ```
