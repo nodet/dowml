@@ -718,6 +718,27 @@ class DOWMLLib:
         job_id = client.deployments.get_job_uid(job_details)
         return job_id
 
+    def parse_paths(self, paths):
+        self._logger.debug(f'Parsing input list: {paths}')
+        # There may be wildcards, so let's deal with them first
+        globbed = []
+        for path in paths.split():
+            # Let's first get rid of the 'force' flag that glob
+            # would not understand
+            path, _, force = _get_file_spec(path)
+            files = glob.glob(path)
+            if not files:
+                # If the path doesn't actually match an existing file, this is
+                # not necessarily an error: this name can refer to a data
+                # asset that exists already. So let's keep it.
+                files = [path]
+            if force:
+                # Put back the '+' in front
+                files = [f'+{file}' for file in files]
+            globbed += files
+        self._logger.debug(f'Actual input list: {globbed}')
+        return globbed
+
     def create_inputs(self, paths, cdd_inputdata, solve_payload):
         # First deal with wildcards
         globbed = self.parse_paths(paths)
@@ -743,27 +764,6 @@ class DOWMLLib:
                     }
                 }
             solve_payload[cdd_inputdata].append(input_data)
-
-    def parse_paths(self, paths):
-        self._logger.debug(f'Parsing input list: {paths}')
-        # There may be wildcards, so let's deal with them first
-        globbed = []
-        for path in paths.split():
-            # Let's first get rid of the 'force' flag that glob
-            # would not understand
-            path, _, force = _get_file_spec(path)
-            files = glob.glob(path)
-            if not files:
-                # If the path doesn't actually match an existing file, this is
-                # not necessarily an error: this name can refer to a data
-                # asset that exists already. So let's keep it.
-                files = [path]
-            if force:
-                # Put back the '+' in front
-                files = [f'+{file}' for file in files]
-            globbed += files
-        self._logger.debug(f'Actual input list: {globbed}')
-        return globbed
 
     def _get_deployment_id(self):
         """Create deployment if doesn't exist already, return its id"""
