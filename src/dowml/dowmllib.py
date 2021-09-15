@@ -719,8 +719,8 @@ class DOWMLLib:
         return job_id
 
     def parse_paths(self, paths):
+        """Expand wildcards that may appear in the input assets list"""
         self._logger.debug(f'Parsing input list: {paths}')
-        # There may be wildcards, so let's deal with them first
         globbed = []
         for path in paths.split():
             # Let's first get rid of the 'force' flag that glob
