@@ -114,7 +114,7 @@ class _CredentialsProvider:
 
     def check_credentials(self, wml_cred_str):
         assert type(wml_cred_str) is str
-        if len(wml_cred_str) == 0:
+        if not wml_cred_str:
             self._logger.error('WML credentials must not be an empty string.')
             self.usage()
             raise InvalidCredentials
@@ -128,7 +128,7 @@ class _CredentialsProvider:
         assert self.URL in wml_credentials
         assert type(wml_credentials[self.URL]) is str
         url = wml_credentials[self.URL]
-        if len(url) == 0:
+        if not url:
             self._logger.error('URL must not be an empty string.')
             raise InvalidCredentials
         if url[-1] == '/':
