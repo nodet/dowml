@@ -58,17 +58,17 @@ class NoCredentialsToCreateSpace(Error):
 #
 # We patch APIClient._params with this function instead
 #
-the_filter = None
-the_old_params = None
+_the_filter = None
+_the_old_params = None
 
 
 def new_params():
-    global the_old_params
-    global the_filter
-    result = the_old_params()
-    if the_filter:
+    global _the_old_params
+    global _the_filter
+    result = _the_old_params()
+    if _the_filter:
         # Beware: the parameter list must not have spaces!
-        result['include'] = the_filter
+        result['include'] = _the_filter
     return result
 
 
@@ -410,15 +410,15 @@ class DOWMLLib:
 
     @staticmethod
     def client_get_job_details(client, job_id, with_filter=None):
-        global the_filter
-        global the_old_params
-        the_filter = with_filter
-        the_old_params = client._params
+        global _the_filter
+        global _the_old_params
+        _the_filter = with_filter
+        _the_old_params = client._params
         client._params = new_params
         try:
             result = client.deployments.get_job_details(job_id)
         finally:
-            client._params = the_old_params
+            client._params = _the_old_params
         return result
 
     @staticmethod
