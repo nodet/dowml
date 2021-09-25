@@ -9,7 +9,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  --------------------------------------------------------------------------
-
+import ast
 import base64
 import csv
 import glob
@@ -133,7 +133,7 @@ class _CredentialsProvider:
             self._logger.error('WML credentials must not be an empty string.')
             self.usage()
             raise InvalidCredentials
-        wml_credentials = eval(wml_cred_str)
+        wml_credentials = ast.literal_eval(wml_cred_str)
         assert type(wml_credentials) is dict
         assert (self.APIKEY in wml_credentials or self.TOKEN in wml_credentials)
         if self.APIKEY in wml_credentials:
