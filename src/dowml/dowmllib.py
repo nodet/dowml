@@ -81,7 +81,8 @@ def new_params():
     result = _the_old_params()
     # Add the filter, if one is required
     if _the_filter:
-        # Beware: the parameter list must not have spaces!
+        # The filter doesn't work correctly if it contains spaces
+        assert(_the_filter.find(' ') == -1)
         result['include'] = _the_filter
     return result
 
