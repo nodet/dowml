@@ -61,7 +61,7 @@ class NoCredentialsToCreateSpace(Error):
 # Python API, and we have to patch the code in order to send the value we want.
 #
 # APIClient._params() is the function that creates the parameters for the REST
-# call.  We replace it with our own function 'new_params' that (1) calls the
+# call.  We replace it with our own function '_new_params' that (1) calls the
 # original function and adds the filter we want, if we want one.
 #
 
@@ -72,9 +72,10 @@ _the_filter = None
 _the_old_params = None
 
 
-def new_params():
-    """Our new function to build a parameter list for the REST call. Called
-    by the instance of APIClient itself."""
+def _new_params():
+    """Our new function to build a parameter list for the REST call.
+
+    Called by the instance of APIClient itself."""
     global _the_old_params
     global _the_filter
     # Use the original code and get its output
@@ -432,7 +433,7 @@ class DOWMLLib:
         # Save the pointer to the original code
         _the_old_params = client._params
         # and replace it with our new function
-        client._params = new_params
+        client._params = _new_params
         try:
             result = client.deployments.get_job_details(job_id)
         finally:
