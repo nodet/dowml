@@ -891,7 +891,7 @@ class DOWMLLib:
             os.remove(path)
         self._logger.debug('Model created.')
         model_id = client.repository.get_model_id(model_details)
-        self._logger.debug('Model id: {model_id}')
+        self._logger.debug(f'Model id: {model_id}')
         return model_id
 
     def _find_or_create_space(self):
