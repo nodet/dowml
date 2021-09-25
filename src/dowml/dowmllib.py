@@ -56,16 +56,30 @@ class NoCredentialsToCreateSpace(Error):
 
 
 #
-# We patch APIClient._params with this function instead
+# The WML API offers a way to choose which entities are returned when asking
+# for job details. Unfortunately, that parameter is not surfaced in the WML
+# Python API, and we have to patch the code in order to send the value we want.
 #
+# APIClient._params() is the function that creates the parameters for the REST
+# call.  We replace it with our own function 'new_params' that (1) calls the
+# original function and adds the filter we want, if we want one.
+#
+
+# The function will not be called with any parameter. So the filter we want to
+# use, if any, must be set in a global variable.
 _the_filter = None
+# Backup of the original function, so that we can call it and restore it later.
 _the_old_params = None
 
 
 def new_params():
+    """Our new function to build a parameter list for the REST call. Called
+    by the instance of APIClient itself."""
     global _the_old_params
     global _the_filter
+    # Use the original code and get its output
     result = _the_old_params()
+    # Add the filter, if one is required
     if _the_filter:
         # Beware: the parameter list must not have spaces!
         result['include'] = _the_filter
@@ -412,12 +426,16 @@ class DOWMLLib:
     def client_get_job_details(client, job_id, with_filter=None):
         global _the_filter
         global _the_old_params
+        # Save the filter in a global variable for our new function to find it
         _the_filter = with_filter
+        # Save the pointer to the original code
         _the_old_params = client._params
+        # and replace it with our new function
         client._params = new_params
         try:
             result = client.deployments.get_job_details(job_id)
         finally:
+            # Put back the original code
             client._params = _the_old_params
         return result
 
