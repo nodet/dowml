@@ -181,7 +181,9 @@ class _CredentialsProvider:
 
 
 def version_is_greater(current, minimum):
-    """returns True is the current version string is greater or equal to the
+    """Compare two 'vv.nn.pp' versions.
+
+    Return True is the current version string is greater or equal to the
 minimum string.  Assumes that each string is of type vv.nn.pp, with vv, nn and
 pp being integers."""
     return version.parse(current) >= version.parse(minimum)
@@ -312,7 +314,7 @@ class DOWMLLib:
         return job_id
 
     def get_log(self, job_id):
-        """Extracts the engine log from the job
+        """Extract the engine log from the job.
 
         :param job_id: The id of the job to get the log from
         :return: The decoded log, or None
@@ -335,7 +337,7 @@ class DOWMLLib:
         return None
 
     def get_output(self, details, csv_as_dataframe=None, tabular_as_csv=False):
-        """"Extracts the outputs from the job
+        """"Extract the outputs from the job.
 
         :param details: The details of the job to get the output from
         :param csv_as_dataframe: Whether the content of a CSV file should be
@@ -482,7 +484,7 @@ class DOWMLLib:
                     self._logger.error('Exception raised while trying to delete the asset', exc_info=True)
 
     def delete_job(self, job_id, hard=False):
-        """ Delete the given job
+        """Delete the given job.
 
         :param job_id: the job to be deleted
         :param hard: if False, cancel the job. If true, delete it completely
@@ -495,7 +497,7 @@ class DOWMLLib:
         self._logger.debug('Done.')
 
     def decode_log(self, output):
-        """ Decode the log from DO4WML
+        """Decode the engine log coming from DO4WML.
 
         :param output: A base-64 encoded text with empty lines
         :return: The decoded text, without empty lines
@@ -508,7 +510,7 @@ class DOWMLLib:
 
     @staticmethod
     def remove_empty_lines(output):
-        """Remove empty lines from the log
+        """Remove empty lines from the log.
 
         :param output: The text to process
         :return: The text, with no empty lines
@@ -569,7 +571,7 @@ class DOWMLLib:
             time.sleep(delay)
 
     def wait_for_job_end(self, job_id, print_activity=False):
-        """Wait for the job to finish, return its status and details as a tuple"""
+        """Wait for the job to finish, return its status and details as a tuple."""
         client = self._get_or_make_client()
         delayer = DOWMLLib.ProgressiveDelay()
         while True:
@@ -599,7 +601,7 @@ class DOWMLLib:
 
     @staticmethod
     def get_file_as_data(path):
-        """Returns the base-64 encoded content of a file"""
+        """Return the base-64 encoded content of a file."""
         with open(path, 'rb') as f:
             data = f.read()
         data = base64.b64encode(data)
@@ -663,7 +665,7 @@ class DOWMLLib:
             return '?'
 
     def get_jobs(self):
-        """Return the list of tuples (status, id, ...) for all jobs in the deployment"""
+        """Return the list of tuples (status, id, ...) for all jobs in the deployment."""
         client = self._get_or_make_client()
         self._logger.debug('Getting job details...')
         job_details = client.deployments.get_job_details()
@@ -687,7 +689,7 @@ class DOWMLLib:
         return result
 
     def parse_paths(self, paths):
-        """Expand wildcards that may appear in the input assets list"""
+        """Expand wildcards that may appear in the input assets list."""
         self._logger.debug(f'Parsing input list: {paths}')
         globbed = []
         for path in paths.split():
@@ -734,7 +736,7 @@ class DOWMLLib:
             solve_payload[cdd_inputdata].append(input_data)
 
     def create_job(self, paths, deployment_id):
-        """Create a deployment job (aka a run) and return its id"""
+        """Create a deployment job (aka a run) and return its id."""
         client = self._get_or_make_client()
         cdd = client.deployments.DecisionOptimizationMetaNames
         assert(self.outputs == 'inline' or self.outputs == 'assets')
@@ -786,7 +788,7 @@ class DOWMLLib:
         return job_id
 
     def _get_deployment_id(self):
-        """Create deployment if doesn't exist already, return its id"""
+        """Create the deployment if doesn't exist already, return its id."""
         self._logger.debug('Getting deployments...')
         client = self._get_or_make_client()
         deployment_details = client.deployments.get_details()
@@ -827,7 +829,7 @@ class DOWMLLib:
         return deployment_id
 
     def _get_model_id(self):
-        """Create an empty model if one doesn't exist, return its id"""
+        """Create an empty model if one doesn't exist, return its id."""
         self._logger.debug('Getting models...')
         client = self._get_or_make_client()
         details = client.repository.get_details()
@@ -848,7 +850,7 @@ class DOWMLLib:
         return model_id
 
     def get_available_versions(self):
-        """Returns list of available DO versions on the platform"""
+        """Return the list of available DO versions on the platform."""
         client = self._get_or_make_client()
         target_version = "1.0.92"
         if not version_is_greater(client.version, target_version):
@@ -893,7 +895,7 @@ class DOWMLLib:
         return model_id
 
     def _find_or_create_space(self):
-        """Find the Space to use from its name, create it if it doesn't exist"""
+        """Find the Space to use from its name, create it if it doesn't exist."""
         assert self._client
         client = self._client
         self._logger.debug('Fetching existing spaces...')
@@ -941,7 +943,7 @@ class DOWMLLib:
         return space_id
 
     def _get_asset_details(self):
-        """This function returns the list of all the data assets in the space"""
+        """Return the list of all the data assets in the space."""
         client = self._get_or_make_client()
         # This is the first version where data_assets.get_details() works
         assert(version_is_greater(client.version, "1.0.95.1"))
@@ -958,7 +960,7 @@ class DOWMLLib:
         return None
 
     def create_asset(self, path, basename):
-        """Create a data asset with the given name
+        """Create a data asset with the given name.
 
         A Watson Studio data asset is an entity that mimicks a file."""
         client = self._get_or_make_client()
@@ -966,7 +968,7 @@ class DOWMLLib:
         return asset_details['metadata']['guid']
 
     def delete_asset(self, uid):
-        """Delete an existing asset. Return True if ok, False if not"""
+        """Delete an existing asset. Return True if ok, False if not."""
         client = self._get_or_make_client()
         status = client.data_assets.delete(uid)
         return status == "SUCCESS"
