@@ -5,7 +5,7 @@ V1.1.0:
 
 - [#27] Catch timeout errors in the Interactive so that the session is
         not interrupted.
-- [#3]  Accept 'delete 2-5' to delete a range of jobs
+- [#3]  Accept 'delete 2-5' to delete a range of jobs.
 - [#25] Replace 'inline' command (resp. attribute) in the Interactive
         (resp. library) with 'inputs'.  Deprecate 'inline'.
 - [#4]  Introduce 'outputs' command to change the type of
