@@ -395,8 +395,7 @@ Runs the specified command in a shell."""
         return 0
 
 
-def main_loop(wml_cred_file, space_id, commands, prompt_at_the_end):
-    instance = DOWMLInteractive(wml_cred_file, space_id)
+def main_loop(instance, commands, prompt_at_the_end):
     # By default, we want to run the command loop
     loop = True
     for c in commands:
@@ -511,7 +510,8 @@ def interactive():
         # logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
 
     try:
-        main_loop(args.wml_cred_file, args.space, args.commands, args.input)
+        instance = DOWMLInteractive(args.wml_cred_file, args.space)
+        main_loop(instance, args.commands, args.input)
     except InvalidCredentials:
         print('\nERROR: credentials not found!\n')
         parser.print_help()
