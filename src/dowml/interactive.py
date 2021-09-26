@@ -421,7 +421,8 @@ def main_loop(instance, commands, prompt_at_the_end):
             # This happens when an invalid job id is specified. We want
             # to keep running.
             loop = True
-        except requests.exceptions.ConnectionError as e:
+        except (requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout) as e:
             print(e)
             loop = True
         except CommandNeedsJobID:
