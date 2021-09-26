@@ -1,10 +1,14 @@
 User-visible changes
 --------------------
 
-V1.1.0:
+V1.1.1:
 
 - [#27] Catch timeout errors in the Interactive so that the session is
         not interrupted.
+
+
+V1.1.0:
+
 - [#3]  Accept 'delete 2-5' to delete a range of jobs.
 - [#25] Replace 'inline' command (resp. attribute) in the Interactive
         (resp. library) with 'inputs'.  Deprecate 'inline'.
