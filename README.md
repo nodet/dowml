@@ -232,8 +232,8 @@ are optional.
    'Create an IBM Cloud API key' on the right.
 
 2. The `url` is the base URL for the REST calls to WML.  The possible values are
-   found in https://cloud.ibm.com/apidocs/machine-learning, and depend on which
-   region you want to use.
+   found in https://cloud.ibm.com/apidocs/machine-learning#endpoint-url, 
+   and depend on which region you want to use.
 
 ### Optional items
 
