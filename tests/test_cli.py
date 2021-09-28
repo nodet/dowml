@@ -1,4 +1,6 @@
+import os
 import pprint
+import sys
 from collections import namedtuple
 from logging import Logger
 from unittest import TestCase, main, mock
@@ -11,6 +13,16 @@ from dowml.dowmllib import DOWMLLib, version_is_greater
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
 EXPECTED = 'expected'
+
+
+class HiddenPrints:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
 
 
 class TestNumberToId(TestCase):
@@ -216,8 +228,10 @@ class TestOutput(TestCase):
         mock_mkdir = Mock()
         with mock.patch('os.mkdir', mock_mkdir):
             with mock.patch('builtins.open', mock_open):
-                self.cli.save_content('id', 'name1', write_data)
-                self.cli.save_content('id', 'name2', write_data)
+                with HiddenPrints():
+                    self.cli.lib._logger = Mock(spec=Logger)
+                    self.cli.save_content('id', 'name1', write_data)
+                    self.cli.save_content('id', 'name2', write_data)
         mock_mkdir.assert_has_calls([call('id'), call('id')])
 
 
