@@ -212,9 +212,14 @@ class TestOutput(TestCase):
         write_data = b'content'
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
-        with mock.patch('os.mkdir', mock_mkdir):
-            with mock.patch('builtins.open', mock_open):
-                self.cli.save_content('id', 'name', write_data)
+        # It is necessary to create the HiddenPrint first, because that action
+        # calls the built-in 'open'. And if that one is mocked first, not only
+        # will the HiddenPrint not really work as expected, but the test will
+        # fail as mock_open will have been called twice instead of once.
+        with HiddenPrints(), \
+                mock.patch('os.mkdir', mock_mkdir), \
+                mock.patch('builtins.open', mock_open):
+            self.cli.save_content('id', 'name', write_data)
         mock_mkdir.assert_called_once_with('id')
         mock_open.assert_called_once_with('id/name', 'wb')
         # noinspection PyArgumentList
@@ -226,12 +231,12 @@ class TestOutput(TestCase):
         write_data = b'content'
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
-        with mock.patch('os.mkdir', mock_mkdir):
-            with mock.patch('builtins.open', mock_open):
-                with HiddenPrints():
-                    self.cli.lib._logger = Mock(spec=Logger)
-                    self.cli.save_content('id', 'name1', write_data)
-                    self.cli.save_content('id', 'name2', write_data)
+        with HiddenPrints(), \
+                mock.patch('os.mkdir', mock_mkdir), \
+                mock.patch('builtins.open', mock_open):
+            self.cli.lib._logger = Mock(spec=Logger)
+            self.cli.save_content('id', 'name1', write_data)
+            self.cli.save_content('id', 'name2', write_data)
         mock_mkdir.assert_has_calls([call('id'), call('id')])
 
 
