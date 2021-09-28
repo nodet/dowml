@@ -1,5 +1,6 @@
 import pprint
 from collections import namedtuple
+from logging import Logger
 from unittest import TestCase, main, mock
 from unittest.mock import Mock, ANY, call
 
@@ -292,7 +293,9 @@ class TestInline(TestCase):
 
     def test_default_is_not_inline(self):
         cli = self.cli
+        self.cli.lib._logger = Mock(spec=Logger)
         self.assertFalse(cli.lib.inline)
+        self.cli.lib._logger.warning.assert_called_once()
 
     def test_yes_or_no_only(self):
         cli = self.cli
