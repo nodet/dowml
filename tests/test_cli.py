@@ -3,9 +3,10 @@ from collections import namedtuple
 from unittest import TestCase, main, mock
 from unittest.mock import Mock, ANY, call
 
+from dowml import VERSION
 from dowml.interactive import DOWMLInteractive, \
     CommandNeedsJobID, CommandNeedsNonNullInteger, InvalidArgumentForCommand
-from dowml.dowmllib import DOWMLLib
+from dowml.dowmllib import DOWMLLib, version_is_greater
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
 EXPECTED = 'expected'
@@ -284,6 +285,10 @@ class TestInline(TestCase):
 
     def setUp(self) -> None:
         self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
+
+    def test_remove_after_deprecation(self):
+        self.assertFalse(version_is_greater(VERSION, "2.0"),
+                         "'inline' was deprecated long enough and should be removed")
 
     def test_default_is_not_inline(self):
         cli = self.cli
