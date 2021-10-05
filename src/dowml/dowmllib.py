@@ -61,7 +61,7 @@ class NoCredentialsToCreateSpace(Error):
 # Python API, and we have to patch the code in order to send the value we want.
 #
 # APIClient._params() is the function that creates the parameters for the REST
-# call.  We replace it with our own function '_new_params' that calls the
+# call.  We replace it with our own function '_new_params' that (1) calls the
 # original function and adds the filter we want, if we want one.
 #
 
@@ -82,6 +82,8 @@ def _new_params():
     result = _the_old_params()
     # Add the filter, if one is required
     if _the_filter:
+        # The filter doesn't work correctly if it contains spaces
+        assert(_the_filter.find(' ') == -1)
         result['include'] = _the_filter
     return result
 
@@ -415,7 +417,7 @@ class DOWMLLib:
         self._logger.debug('Fetching output...')
         output_filter = None
         if not with_contents:
-            output_filter = 'solve_parameters, solve_state, status'
+            output_filter = 'solve_parameters,solve_state,status'
         elif with_contents == 'log':
             output_filter = 'output_data'
         job_details = self.client_get_job_details(client, job_id, output_filter)
