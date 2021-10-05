@@ -515,6 +515,7 @@ class TestWait(TestCase):
         lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
         lib._logger = Mock(spec=Logger)
         lib._client = Mock(spec=APIClient)
+        lib._client.version = "0.0.0"
         lib._client.set = Mock(spec=Set)
         lib._client.deployments = Mock(spec=Deployments)
         lib._client.spaces = Mock(spec=Spaces)
@@ -564,6 +565,7 @@ class TestLog(TestCase):
         lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
         lib._logger = Mock(spec=Logger)
         lib._client = Mock(spec=APIClient)
+        lib._client.version = "0.0.0"
         lib._client.set = Mock(spec=Set)
         lib._client.deployments = Mock(spec=Deployments)
         lib._client.spaces = Mock(spec=Spaces)

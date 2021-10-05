@@ -428,19 +428,22 @@ class DOWMLLib:
 
     @staticmethod
     def client_get_job_details(client, job_id, with_filter=None):
-        global _the_filter
-        global _the_old_params
-        # Save the filter in a global variable for our new function to find it
-        _the_filter = with_filter
-        # Save the pointer to the original code
-        _the_old_params = client._params
-        # and replace it with our new function
-        client._params = _new_params
-        try:
-            result = client.deployments.get_job_details(job_id)
-        finally:
-            # Put back the original code
-            client._params = _the_old_params
+        if version_is_greater(client.version, "1.0.154"):
+            result = client.deployments.get_job_details(job_id, with_filter)
+        else:
+            global _the_filter
+            global _the_old_params
+            # Save the filter in a global variable for our new function to find it
+            _the_filter = with_filter
+            # Save the pointer to the original code
+            _the_old_params = client._params
+            # and replace it with our new function
+            client._params = _new_params
+            try:
+                result = client.deployments.get_job_details(job_id)
+            finally:
+                # Put back the original code
+                client._params = _the_old_params
         return result
 
     @staticmethod
