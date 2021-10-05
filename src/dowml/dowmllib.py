@@ -82,8 +82,6 @@ def _new_params():
     result = _the_old_params()
     # Add the filter, if one is required
     if _the_filter:
-        # The filter doesn't work correctly if it contains spaces
-        assert(_the_filter.find(' ') == -1)
         result['include'] = _the_filter
     return result
 
@@ -428,6 +426,8 @@ class DOWMLLib:
 
     @staticmethod
     def client_get_job_details(client, job_id, with_filter=None):
+        # The filter doesn't work correctly if it contains spaces
+        assert(not with_filter or (with_filter.find(' ') == -1))
         if version_is_greater(client.version, "1.0.154"):
             result = client.deployments.get_job_details(job_id, with_filter)
         else:

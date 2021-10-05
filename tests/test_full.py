@@ -101,6 +101,12 @@ class TestDetailsAndOutputs(TestCase):
     def assertNoOutputData(self, details):
         self.assertNotIn('output_data', details['entity']['decision_optimization'])
 
+    def assertHasSolveState(self, details):
+        self.assertIn('solve_state', details['entity']['decision_optimization'])
+
+    def assertHasStatus(self, details):
+        self.assertIn('status', details['entity']['decision_optimization'])
+
     @classmethod
     def setUpClass(cls) -> None:
         lib = DOWMLLib()
@@ -119,6 +125,26 @@ class TestDetailsAndOutputs(TestCase):
     def tearDownClass(cls) -> None:
         cls.lib.delete_job(cls.id_inline, hard=True)
         cls.lib.delete_job(cls.id_not_inline, hard=True)
+
+    def test_default_details_have_solve_state(self):
+        lib = self.lib
+        details = lib.get_job_details(self.id_inline)
+        self.assertHasSolveState(details)
+
+    def test_default_details_have_status(self):
+        lib = self.lib
+        details = lib.get_job_details(self.id_inline)
+        self.assertHasStatus(details)
+
+    def test_full_details_have_solve_state(self):
+        lib = self.lib
+        details = lib.get_job_details(self.id_inline, with_contents='full')
+        self.assertHasSolveState(details)
+
+    def test_full_details_have_status(self):
+        lib = self.lib
+        details = lib.get_job_details(self.id_inline, with_contents='full')
+        self.assertHasStatus(details)
 
     def test_inline_details_dont_have_inputs_or_outputs_by_default(self):
         lib = self.lib
