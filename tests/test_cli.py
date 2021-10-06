@@ -177,9 +177,10 @@ class TestOutput(TestCase):
         self.cli.lib.get_output_assets.return_value = {}
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
-        with mock.patch('os.mkdir', mock_mkdir):
-            with mock.patch('builtins.open', mock_open):
-                self.cli.do_output('1')
+        with HiddenPrints(), \
+                mock.patch('os.mkdir', mock_mkdir), \
+                mock.patch('builtins.open', mock_open):
+            self.cli.do_output('1')
 
     def test_output_asks_for_tabular_outputs_as_csv(self):
         mock_get_output = Mock()
