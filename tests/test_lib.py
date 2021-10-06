@@ -536,6 +536,12 @@ class TestWait(TestCase):
         self.assertEqual(input_job_details, job_details)
 
     def test_wait_sleeps_as_long_as_job_not_complete_yet(self):
+        no_status_yet = {
+            'entity': {'decision_optimization': {
+                'status': {'state': 'queued'},
+            }},
+            'metadata': {'id': 'job_id'}
+        }
         not_complete_yet = {
             'entity': {'decision_optimization': {
                 'status': {'state': 'running'},
@@ -551,12 +557,12 @@ class TestWait(TestCase):
             }},
             'metadata': {'id': 'job_id'}
         }
-        return_values = [not_complete_yet for _ in range(nb_not_complete_calls)] + [finished]
+        return_values = [no_status_yet] + [not_complete_yet for _ in range(nb_not_complete_calls)] + [finished]
         self.lib._client.deployments.get_job_details.side_effect = return_values
         with patch('time.sleep', return_value=None) as patched_time_sleep:
             _, _ = self.lib.wait_for_job_end('job_id', print_activity=True)
-        self.assertEqual(nb_not_complete_calls, patched_time_sleep.call_count)
-        self.assertEqual(nb_not_complete_calls + 1, self.lib._client.deployments.get_job_details.call_count)
+        self.assertEqual(nb_not_complete_calls + 1, patched_time_sleep.call_count)
+        self.assertEqual(nb_not_complete_calls + 2, self.lib._client.deployments.get_job_details.call_count)
 
 
 class TestLog(TestCase):
