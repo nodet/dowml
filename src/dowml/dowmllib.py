@@ -421,10 +421,9 @@ class DOWMLLib:
         instead
         :param tabular_as_csv: Whether tabular outputs should be returned as
         CSV file content instead of Pandas dataframe
-        :return: A list of outputs. Each output is a tuple (name, content)
-        where the name is, well, the name of the output, and content is the
-        decoded content, as bytes. We don't assume that the content is actually
-        text.
+        :return: A dict of outputs, with the names of the assets as keys, and
+        the content as value, as bytes. We don't assume that the content is
+        actually text.
         """
         if csv_as_dataframe is not None:
             # We have a non-default value for this deprecated parameter
