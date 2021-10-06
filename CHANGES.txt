@@ -1,6 +1,12 @@
 User-visible changes
 --------------------
 
+master:
+
+- [#31] The 'log' command wouldn't work if the job used 'outputs assets'.
+        Fix that.
+
+
 V1.1.1:
 
 - [#27] Catch timeout errors in the Interactive so that the session is
