@@ -572,6 +572,10 @@ class TestLog(TestCase):
         lib._client.spaces.get_details.return_value = {'resources': []}
         self.lib = lib
 
+    def test_get_log_return_none_if_no_do_structure(self):
+        self.lib._client.deployments.get_job_details.return_value = {}
+        self.assertIsNone(self.lib.get_log('1'))
+
     def test_get_log_return_none_if_no_output(self):
         self.lib._client.deployments.get_job_details.return_value = {'entity': {'decision_optimization': {}}}
         self.assertIsNone(self.lib.get_log('1'))
