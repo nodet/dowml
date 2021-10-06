@@ -594,6 +594,24 @@ class TestLog(TestCase):
         # Let's confirm that empty lines were removed
         self.assertEqual('line 1\nline 2', self.lib.get_log('1'))
 
+    def test_get_log_fetches_asset_if_necessary(self):
+        self.lib._client.deployments.get_job_details.return_value = {'entity': {'decision_optimization': {
+            'output_data_references': [{
+                'connection': {},
+                'id': 'log.txt',
+                'location': {
+                    'href': 'https://api.eu-de.dataplatform.cloud.ibm.com/v2/assets/id1?space_id=id2',
+                    'id': 'id1'
+                },
+                'type': 'data_asset'
+            }]
+        }}}
+        self.lib._client.data_assets = Mock(spec=Assets)
+        self.lib._client.data_assets.download.return_value = 'path'
+        content = 'content of log'
+        with mock.patch('builtins.open', mock.mock_open(read_data=content)):
+            self.assertEqual(content, self.lib.get_log('1'))
+
 
 class TestDeleteJob(TestCase):
 

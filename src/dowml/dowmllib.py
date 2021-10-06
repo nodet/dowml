@@ -29,6 +29,8 @@ from packaging import version
 
 from ibm_watson_machine_learning import APIClient
 
+LOGNAME = 'log.txt'
+
 
 class Error(Exception):
     """Base class for all errors in this script"""
@@ -313,7 +315,7 @@ class DOWMLLib:
 
     def _get_log_from_outputs(self, job_id, outputs):
         for output_data in outputs:
-            if output_data['id'] == 'log.txt':
+            if output_data['id'] == LOGNAME:
                 if 'content' not in output_data:
                     self._logger.error(f'Log without content for job {job_id}')
                     continue
