@@ -351,15 +351,21 @@ class DOWMLLib:
 
         def _get_log_from_output_references(references):
             self._logger.debug(f'Looking for {LOGNAME} in output_data_references...')
-            try:
-                for ref in references:
-                    if ref['id'] == LOGNAME:
-                        self._logger.debug(f'Found it.')
+            for ref in references:
+                if ref.get('type') != 'data_asset':
+                    continue
+                if 'id' not in ref:
+                    self._logger.warning(f'Ignoring data asset with no id')
+                    continue
+                if ref['id'] == LOGNAME:
+                    self._logger.debug(f'Found it.')
+                    try:
                         asset_id = ref['location']['id']
-                        self._logger.debug(f'This is asset {asset_id}.')
-                        return _get_asset_content(asset_id)
-            except KeyError:
-                self._logger.error(f'Unexpected content in output_data_references for job {job_id}')
+                    except KeyError:
+                        self._logger.error('Log data asset has no location/id information')
+                        break
+                    self._logger.debug(f'This is asset {asset_id}.')
+                    return _get_asset_content(asset_id)
             return None
 
         def _get_log_from_outputs(outputs):

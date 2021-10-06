@@ -600,21 +600,58 @@ class TestLog(TestCase):
 
     def test_get_log_fetches_asset_if_necessary(self):
         self.lib._client.deployments.get_job_details.return_value = {'entity': {'decision_optimization': {
-            'output_data_references': [{
-                'connection': {},
-                'id': 'log.txt',
-                'location': {
-                    'href': 'https://api.eu-de.dataplatform.cloud.ibm.com/v2/assets/id1?space_id=id2',
-                    'id': 'id1'
+            'output_data_references': [
+                {
+                    'type': 'unknown'
                 },
-                'type': 'data_asset'
-            }]
+                {
+                    'type': 'data_asset'
+                },
+                {
+                    'id': 'log.txt',
+                    'location': {
+                        'id': 'id1'
+                    },
+                    'type': 'data_asset'
+                }
+            ]
         }}}
         self.lib._client.data_assets = Mock(spec=Assets)
         self.lib._client.data_assets.download.return_value = 'path'
         content = 'content of log'
         with mock.patch('builtins.open', mock.mock_open(read_data=content)):
             self.assertEqual(content, self.lib.get_log('1'))
+
+    def test_get_log_stops_if_log_asset_misses_location(self):
+        self.lib._client.deployments.get_job_details.return_value = {'entity': {'decision_optimization': {
+            'output_data_references': [
+                {
+                    'id': 'log.txt',
+                    'type': 'data_asset'
+                }
+            ]
+        }}}
+        self.assertIsNone(self.lib.get_log('1'))
+
+    def test_get_log_stops_if_log_asset_misses_location_id(self):
+        self.lib._client.deployments.get_job_details.return_value = {'entity': {'decision_optimization': {
+            'output_data_references': [
+                {
+                    'id': 'log.txt',
+                    'location': {},
+                    'type': 'data_asset'
+                }
+            ]
+        }}}
+        self.assertIsNone(self.lib.get_log('1'))
+
+    def test_get_log_deals_with_not_finding_log_asset(self):
+        self.lib._client.deployments.get_job_details.return_value = {'entity': {'decision_optimization': {
+            'output_data_references': [
+                {}
+            ]
+        }}}
+        self.assertIsNone(self.lib.get_log('1'))
 
 
 class TestDeleteJob(TestCase):
