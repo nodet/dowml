@@ -779,6 +779,14 @@ class TestOutput(TestCase):
         }}})
         self.assertDictEqual(result, {'log.txt': 'id1'})
 
+    def test_get_output_data_ref_deals_with_lack_of_info(self):
+        result = self.lib.get_output_assets({'entity': {'decision_optimization': {}}})
+        self.assertDictEqual(result, {})
+        result = self.lib.get_output_assets({'entity': {}})
+        self.assertDictEqual(result, {})
+        result = self.lib.get_output_assets({})
+        self.assertDictEqual(result, {})
+
 
 class TestVersionComparison(TestCase):
 
