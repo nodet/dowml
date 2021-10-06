@@ -3,6 +3,7 @@ User-visible changes
 
 master:
 
+- [#32] 'output' downloads the output data assets, not just inline outputs
 - [#31] The 'log' command wouldn't work if the job used 'outputs assets'.
         Fix that.
 
