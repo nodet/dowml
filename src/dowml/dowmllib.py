@@ -311,18 +311,7 @@ class DOWMLLib:
         self._logger.info(f'Job id: {job_id}')
         return job_id
 
-    def get_log(self, job_id):
-        """Extract the engine log from the job.
-
-        :param job_id: The id of the job to get the log from
-        :return: The decoded log, or None
-        """
-        job_details = self.get_job_details(job_id, with_contents='log')
-        try:
-            outputs = job_details['entity']['decision_optimization']['output_data']
-        except KeyError:
-            self._logger.warning('No output structure available for this job')
-            return None
+    def _get_log_from_outputs(self, job_id, outputs):
         for output_data in outputs:
             if output_data['id'] == 'log.txt':
                 if 'content' not in output_data:
@@ -333,6 +322,29 @@ class DOWMLLib:
                 output = self.remove_empty_lines(output)
                 return output
         return None
+
+    def _get_log_from_output_references(self, job_id, references):
+        return None
+
+    def get_log(self, job_id):
+        """Extract the engine log from the job.
+
+        :param job_id: The id of the job to get the log from
+        :return: The decoded log, or None
+        """
+        job_details = self.get_job_details(job_id, with_contents='log')
+        try:
+            do = job_details['entity']['decision_optimization']
+        except KeyError:
+            self._logger.warning('No decision_optimization structure available for this job')
+            return None
+        if 'output_data' in do:
+            return self._get_log_from_outputs(job_id, do['output_data'])
+        elif 'output_data_references' in do:
+            return self._get_log_from_output_references(job_id, do['output_data_references'])
+        else:
+            self._logger.warning('No output_data or output_data_references structure available for this job')
+            return None
 
     def get_output(self, details, csv_as_dataframe=None, tabular_as_csv=False):
         """"Extract the outputs from the job.
