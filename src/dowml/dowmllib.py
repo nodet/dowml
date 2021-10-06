@@ -17,9 +17,11 @@ import io
 import logging
 import os
 import re
+import sys
 import tempfile
 import time
 from collections import namedtuple
+from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
 from operator import attrgetter
@@ -189,6 +191,18 @@ pp being integers."""
     return version.parse(current) >= version.parse(minimum)
 
 
+@contextmanager
+def suppress_stdout():
+    """"Sometimes it's nicer to not get printed output from APIClient"""
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
+
+
 class DOWMLLib:
     """A Python client to run DO models on WML"""
 
@@ -314,18 +328,43 @@ class DOWMLLib:
         return job_id
 
     def _get_log_from_outputs(self, job_id, outputs):
+        self._logger.debug(f'Looking for {LOGNAME} in output_data...')
         for output_data in outputs:
             if output_data['id'] == LOGNAME:
                 if 'content' not in output_data:
                     self._logger.error(f'Log without content for job {job_id}')
                     continue
+                self._logger.debug('Found it. Decoding it...')
                 output = output_data['content']
                 output = self.decode_log(output)
                 output = self.remove_empty_lines(output)
+                self._logger.debug('Decoded the log.')
                 return output
         return None
 
+    def _get_asset_content(self, asset_id):
+        with tempfile.TemporaryDirectory() as temp_dir_name:
+            filename = os.path.join(temp_dir_name, f'{asset_id}-log.txt')
+            self._logger.debug(f'Downloading asset {asset_id} in {filename}...')
+            with suppress_stdout():
+                # The return value is useless when filename is an absolute paths
+                _ = self._client.data_assets.download(asset_id, filename)
+            self._logger.debug(f'Done.')
+            with open(filename) as f:
+                content = f.read()
+                return content
+
     def _get_log_from_output_references(self, job_id, references):
+        self._logger.debug(f'Looking for {LOGNAME} in output_data_references...')
+        try:
+            for ref in references:
+                if ref['id'] == LOGNAME:
+                    self._logger.debug(f'Found it.')
+                    asset_id = ref['location']['id']
+                    self._logger.debug(f'This is asset {asset_id}.')
+                    return self._get_asset_content(asset_id)
+        except KeyError:
+            self._logger.error(f'Unexpected content in output_data_references for job {job_id}')
         return None
 
     def get_log(self, job_id):
@@ -340,7 +379,8 @@ class DOWMLLib:
         except KeyError:
             self._logger.warning('No decision_optimization structure available for this job')
             return None
-        if 'output_data' in do:
+        # When we have references in the job, the 'output_data' may be an empty list
+        if 'output_data' in do and do['output_data']:
             return self._get_log_from_outputs(job_id, do['output_data'])
         elif 'output_data_references' in do:
             return self._get_log_from_output_references(job_id, do['output_data_references'])
@@ -431,7 +471,7 @@ class DOWMLLib:
         if not with_contents:
             output_filter = 'solve_parameters,solve_state,status'
         elif with_contents == 'log':
-            output_filter = 'output_data'
+            output_filter = 'output_data,output_data_references'
         job_details = self.client_get_job_details(client, job_id, output_filter)
         self._logger.debug('Done.')
         if with_contents != 'full' and with_contents != 'log':
