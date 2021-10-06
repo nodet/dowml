@@ -715,6 +715,26 @@ class TestDeleteJob(TestCase):
         self.assertEqual(2, delete_asset.call_count)
 
 
+class TestOutput(TestCase):
+
+    def setUp(self) -> None:
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
+        lib.tz = datetime.timezone(datetime.timedelta(hours=2))
+        lib._logger = Mock(spec=Logger)
+        lib._client = Mock(spec=APIClient)
+        self.lib = lib
+
+    def test_get_output_data_ref_finds_one_asset(self):
+        result = self.lib.get_output_assets({'entity': {'decision_optimization': {
+            'output_data_references': [{
+                'id': 'log.txt',
+                'location': {'id': 'id1'},
+                'type': 'data_asset'
+            }]
+        }}})
+        self.assertDictEqual(result, {'log.txt': 'id1'})
+
+
 class TestVersionComparison(TestCase):
 
     def test_1_0_95_greater_than_1_0_95(self):
