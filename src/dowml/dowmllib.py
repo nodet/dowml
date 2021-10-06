@@ -407,6 +407,10 @@ class DOWMLLib:
             self._logger.debug('No output references structure available for this job')
             return result
         for ref in refs:
+            type = ref.get('type')
+            if type != 'data_asset':
+                self._logger.debug(f'Ignoring asset of unkown type \'{type}\'.')
+                continue
             name = ref['id']
             self._logger.debug(f'Found a data asset named {name}.')
             result[name] = ref['location']['id']

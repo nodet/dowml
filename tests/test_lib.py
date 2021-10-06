@@ -724,13 +724,17 @@ class TestOutput(TestCase):
         lib._client = Mock(spec=APIClient)
         self.lib = lib
 
-    def test_get_output_data_ref_finds_one_asset(self):
+    def test_get_output_data_ref_ignores_non_assets(self):
         result = self.lib.get_output_assets({'entity': {'decision_optimization': {
-            'output_data_references': [{
-                'id': 'log.txt',
-                'location': {'id': 'id1'},
-                'type': 'data_asset'
-            }]
+            'output_data_references': [
+                {'type': 'unknown'},
+                {},
+                {
+                    'id': 'log.txt',
+                    'location': {'id': 'id1'},
+                    'type': 'data_asset'
+                }
+            ]
         }}})
         self.assertDictEqual(result, {'log.txt': 'id1'})
 
