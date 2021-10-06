@@ -327,7 +327,7 @@ class DOWMLLib:
         self._logger.info(f'Job id: {job_id}')
         return job_id
 
-    def _client_data_asset_download(self, asset_id, filename):
+    def client_data_asset_download(self, asset_id, filename):
         self._logger.debug(f'Downloading asset {asset_id} in {filename}...')
         with suppress_stdout():
             # The return value is useless when filename is an absolute path
@@ -344,7 +344,7 @@ class DOWMLLib:
         def _get_asset_content(asset_id):
             with tempfile.TemporaryDirectory() as temp_dir_name:
                 filename = os.path.join(temp_dir_name, f'{asset_id}-log.txt')
-                self._client_data_asset_download(asset_id, filename)
+                self.client_data_asset_download(asset_id, filename)
                 with open(filename) as f:
                     content = f.read()
                     return content
@@ -391,6 +391,26 @@ class DOWMLLib:
         else:
             self._logger.warning('No output_data or output_data_references structure available for this job')
             return None
+
+    def get_output_assets(self, details):
+        """"Extract the output data asset ids from the job.
+
+        :param details: The details of the job to get the output from
+        :return: A list of outputs. Each output is a tuple (name, id)
+        where the name is, well, the name of the output, and id is the
+        id of the corresponding data asset.
+        """
+        result = {}
+        try:
+            refs = details['entity']['decision_optimization']['output_data_references']
+        except KeyError:
+            self._logger.debug('No output references structure available for this job')
+            return result
+        for ref in refs:
+            name = ref['id']
+            self._logger.debug(f'Found a data asset named {name}.')
+            result[name] = ref['location']['id']
+        return result
 
     def get_output(self, details, csv_as_dataframe=None, tabular_as_csv=False):
         """"Extract the outputs from the job.

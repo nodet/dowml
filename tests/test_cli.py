@@ -173,7 +173,8 @@ class TestOutput(TestCase):
         self.cli.jobs = ['a', 'b', 'c']
 
     def test_command_exists(self):
-        self.cli.lib.get_output.return_value = []
+        self.cli.lib.get_output.return_value = {}
+        self.cli.lib.get_output_assets.return_value = {}
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
         with mock.patch('os.mkdir', mock_mkdir):
@@ -184,6 +185,7 @@ class TestOutput(TestCase):
         mock_get_output = Mock()
         mock_get_output.return_value = {}
         self.cli.lib.get_output = mock_get_output
+        self.cli.lib.get_output_assets.return_value = {}
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
         with mock.patch('os.mkdir', mock_mkdir):
@@ -196,6 +198,7 @@ class TestOutput(TestCase):
             'out1': b'content-a',
             'out2': b'content-b'
         }
+        self.cli.lib.get_output_assets.return_value = {}
         self.cli.save_content = Mock()
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
@@ -238,6 +241,23 @@ class TestOutput(TestCase):
             self.cli.save_content('id', 'name1', write_data)
             self.cli.save_content('id', 'name2', write_data)
         mock_mkdir.assert_has_calls([call('id'), call('id')])
+
+    def test_download_assets(self):
+        self.cli.lib.get_output.return_value = {}
+        self.cli.lib.get_output_assets.return_value = {
+            'name1': 'id1',
+            'name2': 'id2'
+        }
+        mock_open = mock.mock_open()
+        mock_mkdir = Mock()
+        with HiddenPrints(), \
+                mock.patch('os.mkdir', mock_mkdir), \
+                mock.patch('builtins.open', mock_open):
+            self.cli.do_output('a')
+        self.cli.lib.client_data_asset_download.assert_has_calls([
+            call('id1', 'a/name1'),
+            call('id2', 'a/name2')
+        ], any_order=True)
 
 
 class TestOneJobShouldBeCurrent(TestCase):

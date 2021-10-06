@@ -307,14 +307,27 @@ job is either a job number or a job id. Uses current job if not specified."""
 Downloads all the outputs of a job, as well as the details/status of the job.
 job is either a job number or a job id. Uses current job if not specified."""
 
-        def store_inline_outputs(details):
-            outputs = self.lib.get_output(details, tabular_as_csv=True)
+        def store_inline_outputs(job_details):
+            outputs = self.lib.get_output(job_details, tabular_as_csv=True)
             for name in outputs:
                 self.save_content(job_id, name, outputs[name])
+
+        def download_output_data_assets(job_details):
+            outputs = self.lib.get_output_assets(job_details)
+            for name in outputs:
+                try:
+                    os.mkdir(job_id)
+                except FileExistsError:
+                    pass
+                asset_id = outputs[name]
+                filename = f'{job_id}/{name}'
+                print(f'Storing {filename}')
+                self.lib.client_data_asset_download(asset_id, filename)
 
         job_id = self._get_and_remember_job_id(job_id)
         details = self.lib.get_job_details(job_id, with_contents='full')
         store_inline_outputs(details)
+        download_output_data_assets(details)
         # We don't want to store all the outputs in the details themselves
         self.lib.filter_large_chunks_from_details(details)
         details = pprint.pformat(details)
