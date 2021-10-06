@@ -307,14 +307,14 @@ job is either a job number or a job id. Uses current job if not specified."""
 Downloads all the outputs of a job, as well as the details/status of the job.
 job is either a job number or a job id. Uses current job if not specified."""
 
-        def output_regular_files(details):
+        def store_inline_outputs(details):
             outputs = self.lib.get_output(details, tabular_as_csv=True)
             for name in outputs:
                 self.save_content(job_id, name, outputs[name])
 
         job_id = self._get_and_remember_job_id(job_id)
         details = self.lib.get_job_details(job_id, with_contents='full')
-        output_regular_files(details)
+        store_inline_outputs(details)
         # We don't want to store all the outputs in the details themselves
         self.lib.filter_large_chunks_from_details(details)
         details = pprint.pformat(details)
