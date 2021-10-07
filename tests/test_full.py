@@ -1,12 +1,21 @@
+import os
+import shutil
+
 from pandas import DataFrame
 
 from dowml.dowmllib import DOWMLLib
 from unittest import TestCase, main
 
+from dowml.interactive import DOWMLInteractive
+
 
 class TestDetailsAndOutputs(TestCase):
     """"This class runs two CPLEX models, one inline, the other by reference.
     And it checks that the details and outputs are as expected"""
+
+    lib = None
+    id_not_inline = None
+    id_inline = None
 
     def assertOutputIsMentionedButNoContent(self, details, name):
         output = details['entity']['decision_optimization']['output_data']
@@ -125,6 +134,15 @@ class TestDetailsAndOutputs(TestCase):
     def tearDownClass(cls) -> None:
         cls.lib.delete_job(cls.id_inline, hard=True)
         cls.lib.delete_job(cls.id_not_inline, hard=True)
+
+        def remove_if_exists(name):
+            try:
+                shutil.rmtree(name)
+            except FileNotFoundError:
+                pass
+
+        remove_if_exists(cls.id_inline)
+        remove_if_exists(cls.id_not_inline)
 
     def test_default_details_have_solve_state(self):
         lib = self.lib
@@ -254,6 +272,16 @@ class TestDetailsAndOutputs(TestCase):
         # There exists at least one line with 'job.coresCount' in the 'Name'
         # column, and that line has '1' in the 'Value' column
         self.assertEqual(1, csv.loc[csv['Name'] == 'job.coresCount']['Value'].values[0])
+
+    def check_stored_files(self, cli, job_id, files):
+        cli.do_output(job_id)
+        for f in files:
+            self.assertTrue(os.path.isfile(f'{job_id}/{f}'))
+        self.assertEqual(len(files), len(os.listdir(job_id)))
+
+    def test_output_for_inline_has_expected_files(self):
+        cli = DOWMLInteractive(wml_cred_file=None)
+        self.check_stored_files(cli, self.id_inline, ['solution.json', 'stats.csv', 'log.txt', 'details.json'])
 
 
 if __name__ == '__main__':
