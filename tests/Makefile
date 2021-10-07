@@ -1,4 +1,4 @@
-export PYTHONPATH=$PYTHONPATH:../src
+export PYTHONPATH=$PYTHONPATH:../src:..
 
 quick_tests = test_lib.py test_cli.py test_bugs.py
 slow_tests = test_full.py

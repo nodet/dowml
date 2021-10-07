@@ -7,6 +7,7 @@ from dowml.dowmllib import DOWMLLib
 from unittest import TestCase, main
 
 from dowml.interactive import DOWMLInteractive
+from tests.test_cli import HiddenPrints
 
 
 class TestDetailsAndOutputs(TestCase):
@@ -274,7 +275,8 @@ class TestDetailsAndOutputs(TestCase):
         self.assertEqual(1, csv.loc[csv['Name'] == 'job.coresCount']['Value'].values[0])
 
     def check_stored_files(self, cli, job_id, files):
-        cli.do_output(job_id)
+        with HiddenPrints():
+            cli.do_output(job_id)
         for f in files:
             self.assertTrue(os.path.isfile(f'{job_id}/{f}'))
         self.assertEqual(len(files), len(os.listdir(job_id)))
