@@ -280,7 +280,7 @@ class TestDetailsAndOutputs(TestCase):
         self.assertEqual(len(files), len(os.listdir(job_id)))
 
     def test_output_for_inline_has_expected_files(self):
-        cli = DOWMLInteractive(wml_cred_file=None)
+        cli = DOWMLInteractive()
         self.check_stored_files(cli, self.id_inline, ['solution.json', 'stats.csv', 'log.txt', 'details.json'])
 
 
