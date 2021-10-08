@@ -433,6 +433,20 @@ class DOWMLLib:
             return {}
         return self.parse_asset_references(refs)
 
+    def get_input_assets(self, details):
+        """"Extract the input data asset ids from the job.
+
+        :param details: The details of the job to get the output from
+        :return: A dict of inputs. Keys are the names of the inputs,
+        and the corresponding value for each key is the id of the asset.
+        """
+        try:
+            refs = details['entity']['decision_optimization']['input_data_references']
+        except KeyError:
+            self._logger.debug('No input references structure available for this job')
+            return {}
+        return self.parse_asset_references(refs)
+
     def get_output(self, details, csv_as_dataframe=None, tabular_as_csv=False):
         """"Extract the outputs from the job.
 

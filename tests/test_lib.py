@@ -762,7 +762,7 @@ class TestDeleteJob(TestCase):
         self.assertEqual(2, delete_asset.call_count)
 
 
-class TestOutput(TestCase):
+class TestInputAndOutputGathering(TestCase):
 
     def setUp(self) -> None:
         lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
@@ -792,6 +792,18 @@ class TestOutput(TestCase):
         self.assertDictEqual(result, {})
         result = self.lib.get_output_assets({})
         self.assertDictEqual(result, {})
+
+    def test_get_input_data_references(self):
+        result = self.lib.get_input_assets({'entity': {'decision_optimization': {
+            'input_data_references': [
+                {
+                    'id': 'afiro.mps',
+                    'location': {'id': 'id1'},
+                    'type': 'data_asset'
+                }
+            ]
+        }}})
+        self.assertDictEqual(result, {'afiro.mps': 'id1'})
 
 
 class TestVersionComparison(TestCase):
