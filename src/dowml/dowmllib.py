@@ -690,7 +690,6 @@ class DOWMLLib:
                 return self
 
             def __exit__(self, exc_type, exc_val, exc_tb):
-                print('', flush=True)
                 pass
 
         client = self._get_or_make_client()
@@ -701,7 +700,8 @@ class DOWMLLib:
                 do = job_details['entity']['decision_optimization']
                 status = self._get_job_status_from_details(job_details)
                 self._logger.info(f'Job status: {status}')
-                status_logger.log_state(f'Job is {status}.')
+                if print_activity:
+                    status_logger.log_state(f'Job is {status}.')
                 if status in ['completed', 'failed', 'canceled']:
                     break
                 if print_activity:
@@ -721,6 +721,9 @@ class DOWMLLib:
                         # This must mean that no activity is available yet
                         pass
                 delayer.wait()
+        if print_activity:
+            # The status_logger printed something, but didn't end the line yet
+            print('')
         return status, job_details
 
     @staticmethod
