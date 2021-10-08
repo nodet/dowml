@@ -285,6 +285,10 @@ class TestDetailsAndOutputs(TestCase):
         cli = DOWMLInteractive()
         self.check_stored_files(cli, self.id_inline, ['solution.json', 'stats.csv', 'log.txt', 'details.json'])
 
+    def test_output_for_non_inline_has_expected_files(self):
+        cli = DOWMLInteractive()
+        self.check_stored_files(cli, self.id_not_inline, ['solution.json', 'stats.csv', 'log.txt', 'details.json'])
+
 
 if __name__ == '__main__':
     main()
