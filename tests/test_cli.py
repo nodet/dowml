@@ -173,6 +173,7 @@ class TestOutput(TestCase):
         self.cli.jobs = ['a', 'b', 'c']
 
     def test_command_exists(self):
+        self.cli.lib.get_inputs.return_value = {}
         self.cli.lib.get_outputs.return_value = {}
         self.cli.lib.get_output_assets.return_value = {}
         self.cli.lib.get_input_assets.return_value = {}
@@ -187,6 +188,7 @@ class TestOutput(TestCase):
         mock_get_output = Mock()
         mock_get_output.return_value = {}
         self.cli.lib.get_outputs = mock_get_output
+        self.cli.lib.get_inputs.return_value = {}
         self.cli.lib.get_output_assets.return_value = {}
         self.cli.lib.get_input_assets.return_value = {}
         mock_open = mock.mock_open()
@@ -201,6 +203,7 @@ class TestOutput(TestCase):
             'out1': b'content-a',
             'out2': b'content-b'
         }
+        self.cli.lib.get_inputs.return_value = {}
         self.cli.lib.get_output_assets.return_value = {}
         self.cli.lib.get_input_assets.return_value = {}
         self.cli.save_content = Mock()
@@ -247,6 +250,7 @@ class TestOutput(TestCase):
         mock_mkdir.assert_has_calls([call('id'), call('id')])
 
     def test_download_assets(self):
+        self.cli.lib.get_inputs.return_value = {}
         self.cli.lib.get_outputs.return_value = {}
         self.cli.lib.get_output_assets.return_value = {
             'name1': 'id1',

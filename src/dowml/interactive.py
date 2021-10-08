@@ -308,6 +308,11 @@ job is either a job number or a job id. Uses current job if not specified."""
 Downloads all the inputs and outputs of a job, as well as the details/status of the job.
 job is either a job number or a job id. Uses current job if not specified."""
 
+        def store_inline_inputs(job_details):
+            inputs = self.lib.get_inputs(job_details, tabular_as_csv=True)
+            for name in inputs:
+                self.save_content(job_id, name, inputs[name])
+
         def store_inline_outputs(job_details):
             outputs = self.lib.get_outputs(job_details, tabular_as_csv=True)
             for name in outputs:
@@ -326,6 +331,7 @@ job is either a job number or a job id. Uses current job if not specified."""
 
         job_id = self._get_and_remember_job_id(job_id)
         details = self.lib.get_job_details(job_id, with_contents='full')
+        store_inline_inputs(details)
         store_inline_outputs(details)
         download_data_assets(self.lib.get_output_assets(details))
         download_data_assets(self.lib.get_input_assets(details))
