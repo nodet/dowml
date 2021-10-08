@@ -2,12 +2,14 @@ User-visible changes
 --------------------
 
 master:
-- [#33] Print status of job while waiting for completion
+- [#34] 'output' also stores the inputs of the job, so that
+        all the data is readily available.
+- [#33] Print status of job while waiting for completion.
 
 
 V1.2.0:
 
-- [#32] 'output' downloads the output data assets, not just inline outputs
+- [#32] 'output' downloads the output data assets, not just inline outputs.
 - [#31] The 'log' command wouldn't work if the job used 'outputs assets'.
         Fix that.
 
