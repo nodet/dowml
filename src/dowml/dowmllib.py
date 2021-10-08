@@ -670,30 +670,57 @@ class DOWMLLib:
 
     def wait_for_job_end(self, job_id, print_activity=False):
         """Wait for the job to finish, return its status and details as a tuple."""
+
+        class StatusLogger:
+            def __init__(self, initial_state):
+                self.last_state = initial_state
+                print(initial_state, end='', flush=True)
+
+            def log_state(self, state):
+                if state == self.last_state:
+                    print('.', end='', flush=True)
+                else:
+                    if self.last_state != '':
+                        print('')
+                    # else: if state was empty, no need to end the line
+                    print(state, end='', flush=True)
+                    self.last_state = state
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                print('', flush=True)
+                pass
+
         client = self._get_or_make_client()
         delayer = DOWMLLib.ProgressiveDelay()
-        while True:
-            job_details = self.client_get_job_details(client, job_id, with_filter='solve_state,status')
-            do = job_details['entity']['decision_optimization']
-            status = self._get_job_status_from_details(job_details)
-            self._logger.info(f'Job status: {status}')
-            if status in ['completed', 'failed', 'canceled']:
-                break
-            if print_activity:
-                # There may be a bit of log to look at
-                try:
-                    activity = do['solve_state']['latest_engine_activity']
-                    if activity:
-                        # We are joining the lines in the activity with a CR,
-                        # only to remove them if they were already included...
-                        # FIXME: what a waste!
-                        act = '\n'.join(activity)
-                        act = self.remove_empty_lines(act)
-                        print(act)
-                except KeyError:
-                    # This must mean that no activity is available yet
-                    pass
-            delayer.wait()
+        with StatusLogger('') as status_logger:
+            while True:
+                job_details = self.client_get_job_details(client, job_id, with_filter='solve_state,status')
+                do = job_details['entity']['decision_optimization']
+                status = self._get_job_status_from_details(job_details)
+                self._logger.info(f'Job status: {status}')
+                status_logger.log_state(f'Job is {status}.')
+                if status in ['completed', 'failed', 'canceled']:
+                    break
+                if print_activity:
+                    # There may be a bit of log to look at
+                    try:
+                        activity = do['solve_state']['latest_engine_activity']
+                        if activity:
+                            # Because of the StatusLogger, we're not at the beginning of a line
+                            print('')
+                            # We are joining the lines in the activity with a CR,
+                            # only to remove them if they were already included...
+                            # FIXME: what a waste!
+                            act = '\n'.join(activity)
+                            act = self.remove_empty_lines(act)
+                            print(act)
+                    except KeyError:
+                        # This must mean that no activity is available yet
+                        pass
+                delayer.wait()
         return status, job_details
 
     @staticmethod
