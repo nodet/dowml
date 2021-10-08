@@ -20,6 +20,7 @@ import re
 import sys
 import tempfile
 import time
+import urllib.parse
 from collections import namedtuple
 from contextlib import contextmanager
 from datetime import datetime
@@ -407,6 +408,21 @@ class DOWMLLib:
             return None
 
     def parse_asset_references(self, refs):
+
+        def find_id_in_href(loc):
+            href = loc.get('href') if loc else None
+            if not href:
+                return None
+            path = urllib.parse.urlparse(href).path
+            s = re.search('/v2/assets/(.*)', path)
+            if s:
+               return s.group(1)
+            self._logger.warning(f'Could not decode href for asset \'{name}\'')
+            return None
+
+        def find_id_in_id(loc):
+            return loc.get('id') if loc else None
+
         result = {}
         for ref in refs:
             asset_type = ref.get('type')
@@ -415,7 +431,12 @@ class DOWMLLib:
                 continue
             name = ref['id']
             self._logger.debug(f'Found a data asset named {name}.')
-            result[name] = ref['location']['id']
+            location = ref.get('location')
+            asset_id = find_id_in_id(location) or find_id_in_href(location)
+            if asset_id:
+                result[name] = asset_id
+            else:
+                self._logger.warning(f'Could not find asset id for asset \'{name}\'')
         return result
 
     def get_output_assets(self, details):

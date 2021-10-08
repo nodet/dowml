@@ -798,12 +798,49 @@ class TestInputAndOutputGathering(TestCase):
             'input_data_references': [
                 {
                     'id': 'afiro.mps',
+                    # We can handle ids alone
                     'location': {'id': 'id1'},
+                    'type': 'data_asset'
+                },
+                {
+                    'id': 'foo.prm',
+                    # We can handle hrefs alone
+                    'location': {'href': '/v2/assets/asset-id?space_id=space-id'},
+                    'type': 'data_asset'
+                },
+                {
+                    'id': 'bar',
+                    # When faced with both, id is used
+                    'location': {
+                        'href': '/v2/assets/asset-id?space_id=space-id',
+                        'id': 'the-real-asset-id'
+                    },
+                    'type': 'data_asset'
+                },
+                {
+                    'id': 'baz',
+                    # We ignore assets which we can't locate
+                    'location': {},
+                    'type': 'data_asset'
+                },
+                {
+                    'id': 'bazz',
+                    # This one will be ignored because of incorrect href
+                    'location': {'href': 'bogus'},
+                    'type': 'data_asset'
+                },
+                {
+                    'id': 'bazzz',
+                    # This one doesn't even have a location
                     'type': 'data_asset'
                 }
             ]
         }}})
-        self.assertDictEqual(result, {'afiro.mps': 'id1'})
+        self.assertDictEqual(result, {
+            'afiro.mps': 'id1',
+            'foo.prm': 'asset-id',
+            'bar': 'the-real-asset-id'
+        })
 
 
 class TestVersionComparison(TestCase):
