@@ -175,6 +175,7 @@ class TestOutput(TestCase):
     def test_command_exists(self):
         self.cli.lib.get_output.return_value = {}
         self.cli.lib.get_output_assets.return_value = {}
+        self.cli.lib.get_input_assets.return_value = {}
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
         with HiddenPrints(), \
@@ -187,6 +188,7 @@ class TestOutput(TestCase):
         mock_get_output.return_value = {}
         self.cli.lib.get_output = mock_get_output
         self.cli.lib.get_output_assets.return_value = {}
+        self.cli.lib.get_input_assets.return_value = {}
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
         with mock.patch('os.mkdir', mock_mkdir):
@@ -200,6 +202,7 @@ class TestOutput(TestCase):
             'out2': b'content-b'
         }
         self.cli.lib.get_output_assets.return_value = {}
+        self.cli.lib.get_input_assets.return_value = {}
         self.cli.save_content = Mock()
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
@@ -249,6 +252,9 @@ class TestOutput(TestCase):
             'name1': 'id1',
             'name2': 'id2'
         }
+        self.cli.lib.get_input_assets.return_value = {
+            'name3': 'id3'
+        }
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
         with HiddenPrints(), \
@@ -257,7 +263,8 @@ class TestOutput(TestCase):
             self.cli.do_output('a')
         self.cli.lib.client_data_asset_download.assert_has_calls([
             call('id1', 'a/name1'),
-            call('id2', 'a/name2')
+            call('id2', 'a/name2'),
+            call('id3', 'a/name3')
         ], any_order=True)
 
 

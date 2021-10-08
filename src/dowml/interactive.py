@@ -305,7 +305,7 @@ job is either a job number or a job id. Uses current job if not specified."""
 
     def do_output(self, job_id):
         """output [job]
-Downloads all the outputs of a job, as well as the details/status of the job.
+Downloads all the inputs and outputs of a job, as well as the details/status of the job.
 job is either a job number or a job id. Uses current job if not specified."""
 
         def store_inline_outputs(job_details):
@@ -313,14 +313,13 @@ job is either a job number or a job id. Uses current job if not specified."""
             for name in outputs:
                 self.save_content(job_id, name, outputs[name])
 
-        def download_output_data_assets(job_details):
-            outputs = self.lib.get_output_assets(job_details)
-            for name in outputs:
+        def download_data_assets(assets):
+            for name in assets:
                 try:
                     os.mkdir(job_id)
                 except FileExistsError:
                     pass
-                asset_id = outputs[name]
+                asset_id = assets[name]
                 filename = f'{job_id}/{name}'
                 print(f'Storing {filename}')
                 self.lib.client_data_asset_download(asset_id, filename)
@@ -328,7 +327,8 @@ job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._get_and_remember_job_id(job_id)
         details = self.lib.get_job_details(job_id, with_contents='full')
         store_inline_outputs(details)
-        download_output_data_assets(details)
+        download_data_assets(self.lib.get_output_assets(details))
+        download_data_assets(self.lib.get_input_assets(details))
         # We don't want to store all the outputs in the details themselves
         self.lib.filter_large_chunks_from_details(details)
         details = pprint.pformat(details)
