@@ -422,9 +422,8 @@ class DOWMLLib:
         """"Extract the output data asset ids from the job.
 
         :param details: The details of the job to get the output from
-        :return: A list of outputs. Each output is a tuple (name, id)
-        where the name is, well, the name of the output, and id is the
-        id of the corresponding data asset.
+        :return: A dict of outputs. Keys are the names of the outputs,
+        and the corresponding value for each key is the id of the asset.
         """
         try:
             refs = details['entity']['decision_optimization']['output_data_references']
