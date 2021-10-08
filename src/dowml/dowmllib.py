@@ -474,7 +474,12 @@ class DOWMLLib:
         """Deprecated. Use get_outputs instead"""
         return self.get_outputs(details, csv_as_dataframe, tabular_as_csv)
 
-    def _extract_inline_files(self, files, tabular_as_csv):
+    def _extract_inline_files_from_details(self, details, key, tabular_as_csv):
+        try:
+            files = details['entity']['decision_optimization'][key]
+        except KeyError:
+            self._logger.debug(f'No \'{key}\' structure available for this job.')
+            return {}
         result = {}
         for output_data in files:
             name = output_data['id']
@@ -515,13 +520,7 @@ class DOWMLLib:
             assert(tabular_as_csv is False)
             # Now we can replace it with the correct value
             tabular_as_csv = not csv_as_dataframe
-        result = {}
-        try:
-            outputs = details['entity']['decision_optimization']['output_data']
-        except KeyError:
-            self._logger.warning('No output structure available for this job.')
-            return {}
-        return self._extract_inline_files(outputs, tabular_as_csv)
+        return self._extract_inline_files_from_details(details, 'output_data', tabular_as_csv)
 
     def get_inputs(self, details, tabular_as_csv=False):
         """"Extract the inline inputs from the job.
@@ -533,13 +532,7 @@ class DOWMLLib:
         the content as value, as bytes. We don't assume that the content is
         actually text.
         """
-        result = {}
-        try:
-            inputs = details['entity']['decision_optimization']['input_data']
-        except KeyError:
-            self._logger.warning('No input structure available for this job.')
-            return {}
-        return self._extract_inline_files(inputs, tabular_as_csv)
+        return self._extract_inline_files_from_details(details, 'input_data', tabular_as_csv)
 
     @staticmethod
     def _extract_csv_file(output_data, tabular_as_csv):
