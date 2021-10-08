@@ -471,9 +471,34 @@ class DOWMLLib:
         return self.parse_asset_references(refs)
 
     def get_output(self, details, csv_as_dataframe=None, tabular_as_csv=False):
-        """"Extract the outputs from the job.
+        """Deprecated. Use get_outputs instead"""
+        return self.get_outputs(details, csv_as_dataframe, tabular_as_csv)
 
-        :param details: The details of the job to get the output from
+    def _extract_inline_files(self, files, tabular_as_csv):
+        result = {}
+        for output_data in files:
+            name = output_data['id']
+            if 'content' in output_data:
+                # What we have here is a regular file, encoded
+                self._logger.debug(f'Found a regular file named {name}.')
+                content = self._extract_regular_file(output_data)
+                result[name] = content
+            elif ('values' in output_data and
+                  'fields' in output_data and
+                  name.lower().endswith('.csv')):
+                self._logger.debug(f'Found a CSV file named {name}.')
+                content = self._extract_csv_file(output_data, tabular_as_csv)
+                result[name] = content
+            else:
+                self._logger.warning(f'Found an unknown file named {name}.')
+                content = output_data
+                result[name] = content
+        return result
+
+    def get_outputs(self, details, csv_as_dataframe=None, tabular_as_csv=False):
+        """"Extract the inline outputs from the job.
+
+        :param details: The details of the job to get the outputs from
         :param csv_as_dataframe: Whether the content of a CSV file should be
         returned as a Pandas DataFrame or not. Deprecated: use tabular_as_csv
         instead
@@ -495,25 +520,26 @@ class DOWMLLib:
             outputs = details['entity']['decision_optimization']['output_data']
         except KeyError:
             self._logger.warning('No output structure available for this job.')
-            return result
-        for output_data in outputs:
-            name = output_data['id']
-            if 'content' in output_data:
-                # What we have here is a regular file, encoded
-                self._logger.debug(f'Found a regular file named {name}.')
-                content = self._extract_regular_file(output_data)
-                result[name] = content
-            elif ('values' in output_data and
-                  'fields' in output_data and
-                  name.lower().endswith('.csv')):
-                self._logger.debug(f'Found a CSV file named {name}.')
-                content = self._extract_csv_file(output_data, tabular_as_csv)
-                result[name] = content
-            else:
-                self._logger.warning(f'Found an unknown file named {name}.')
-                content = output_data
-                result[name] = content
-        return result
+            return {}
+        return self._extract_inline_files(outputs, tabular_as_csv)
+
+    def get_inputs(self, details, tabular_as_csv=False):
+        """"Extract the inline inputs from the job.
+
+        :param details: The details of the job to get the inputs from
+        :param tabular_as_csv: Whether tabular inputs should be returned as
+        CSV file content instead of Pandas dataframe
+        :return: A dict of inputs, with the names of the assets as keys, and
+        the content as value, as bytes. We don't assume that the content is
+        actually text.
+        """
+        result = {}
+        try:
+            inputs = details['entity']['decision_optimization']['input_data']
+        except KeyError:
+            self._logger.warning('No input structure available for this job.')
+            return {}
+        return self._extract_inline_files(inputs, tabular_as_csv)
 
     @staticmethod
     def _extract_csv_file(output_data, tabular_as_csv):

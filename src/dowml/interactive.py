@@ -309,7 +309,7 @@ Downloads all the inputs and outputs of a job, as well as the details/status of 
 job is either a job number or a job id. Uses current job if not specified."""
 
         def store_inline_outputs(job_details):
-            outputs = self.lib.get_output(job_details, tabular_as_csv=True)
+            outputs = self.lib.get_outputs(job_details, tabular_as_csv=True)
             for name in outputs:
                 self.save_content(job_id, name, outputs[name])
 

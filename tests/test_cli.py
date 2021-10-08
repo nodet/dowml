@@ -173,7 +173,7 @@ class TestOutput(TestCase):
         self.cli.jobs = ['a', 'b', 'c']
 
     def test_command_exists(self):
-        self.cli.lib.get_output.return_value = {}
+        self.cli.lib.get_outputs.return_value = {}
         self.cli.lib.get_output_assets.return_value = {}
         self.cli.lib.get_input_assets.return_value = {}
         mock_open = mock.mock_open()
@@ -186,7 +186,7 @@ class TestOutput(TestCase):
     def test_output_asks_for_tabular_outputs_as_csv(self):
         mock_get_output = Mock()
         mock_get_output.return_value = {}
-        self.cli.lib.get_output = mock_get_output
+        self.cli.lib.get_outputs = mock_get_output
         self.cli.lib.get_output_assets.return_value = {}
         self.cli.lib.get_input_assets.return_value = {}
         mock_open = mock.mock_open()
@@ -197,7 +197,7 @@ class TestOutput(TestCase):
         mock_get_output.assert_called_once_with({}, tabular_as_csv=True)
 
     def test_store_files(self):
-        self.cli.lib.get_output.return_value = {
+        self.cli.lib.get_outputs.return_value = {
             'out1': b'content-a',
             'out2': b'content-b'
         }
@@ -247,7 +247,7 @@ class TestOutput(TestCase):
         mock_mkdir.assert_has_calls([call('id'), call('id')])
 
     def test_download_assets(self):
-        self.cli.lib.get_output.return_value = {}
+        self.cli.lib.get_outputs.return_value = {}
         self.cli.lib.get_output_assets.return_value = {
             'name1': 'id1',
             'name2': 'id2'

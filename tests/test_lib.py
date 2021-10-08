@@ -176,7 +176,7 @@ class TestSolveInline(TestCase):
 
     def test_get_no_output(self):
         details = {'entity': {'decision_optimization': {}}}
-        output = self.lib.get_output(details)
+        output = self.lib.get_outputs(details)
         self.assertIsInstance(output, dict)
         self.assertEqual(0, len(output))
 
@@ -190,7 +190,7 @@ class TestSolveInline(TestCase):
               ]
         }]}}}
         # We use the deprecated parameter, to confirm it's still there
-        output = self.lib.get_output(details, csv_as_dataframe=False)
+        output = self.lib.get_outputs(details, csv_as_dataframe=False)
         self.assertIsInstance(output, dict)
         self.assertEqual(1, len(output))
         self.assertIn('results.csv', output)
@@ -210,10 +210,10 @@ class TestSolveInline(TestCase):
                  ['a,b', 'c d']
               ]
         }]}}}
-        output = self.lib.get_output(details, tabular_as_csv=True)
+        output = self.lib.get_outputs(details, tabular_as_csv=True)
         self.assertEqual(type(b''), type(output['results.csv']))
 
-    def test_get_regular_file(self):
+    def test_get_regular_output_file(self):
         name = 'one-var.lp'
         details = {'entity': {
             'decision_optimization': {
@@ -223,7 +223,24 @@ class TestSolveInline(TestCase):
                 }]
             }
         }}
-        output = self.lib.get_output(details)
+        output = self.lib.get_outputs(details)
+        self.assertIsInstance(output, dict)
+        self.assertEqual(1, len(output))
+        self.assertIn(name, output)
+        lines = output[name].decode().split('\n')
+        self.assertEqual('minimize x', lines[0])
+
+    def test_get_regular_input_file(self):
+        name = 'one-var.lp'
+        details = {'entity': {
+            'decision_optimization': {
+                'input_data': [{
+                    'id': name,
+                    'content': 'bWluaW1pemUgeApzdAogICB4ID49IDIKZW5k'
+                }]
+            }
+        }}
+        output = self.lib.get_inputs(details)
         self.assertIsInstance(output, dict)
         self.assertEqual(1, len(output))
         self.assertIn(name, output)
@@ -239,7 +256,7 @@ class TestSolveInline(TestCase):
         details = {
             'entity': {'decision_optimization': {'output_data': [content]}}
         }
-        output = self.lib.get_output(details)
+        output = self.lib.get_outputs(details)
         # We get back the raw content
         self.assertEqual(content, output[name])
 

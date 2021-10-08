@@ -252,21 +252,21 @@ class TestDetailsAndOutputs(TestCase):
     def test_inline_log_is_correctly_decoded(self):
         lib = self.lib
         details = lib.get_job_details(self.id_inline, with_contents='full')
-        outputs = lib.get_output(details)
+        outputs = lib.get_outputs(details)
         log = self.find_output_with_id(outputs, 'log.txt')
         self.assertEqual(b'CPLEX version', log[29:42])
 
     def test_inline_csv_is_correctly_decoded(self):
         lib = self.lib
         details = lib.get_job_details(self.id_inline, with_contents='full')
-        outputs = lib.get_output(details, tabular_as_csv=True)
+        outputs = lib.get_outputs(details, tabular_as_csv=True)
         csv = self.find_output_with_id(outputs, 'stats.csv')
         self.assertEqual(b'Name,Value\r\n', csv[0:12])
 
     def test_inline_csv_is_correctly_decoded_as_dataframe(self):
         lib = self.lib
         details = lib.get_job_details(self.id_inline, with_contents='full')
-        outputs = lib.get_output(details)
+        outputs = lib.get_outputs(details)
         csv = self.find_output_with_id(outputs, 'stats.csv')
         self.assertEqual(DataFrame, type(csv))
         self.assertEqual(['Name', 'Value'], list(csv.columns))
