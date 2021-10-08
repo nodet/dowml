@@ -406,20 +406,8 @@ class DOWMLLib:
             self._logger.warning('No output_data or output_data_references structure available for this job')
             return None
 
-    def get_output_assets(self, details):
-        """"Extract the output data asset ids from the job.
-
-        :param details: The details of the job to get the output from
-        :return: A list of outputs. Each output is a tuple (name, id)
-        where the name is, well, the name of the output, and id is the
-        id of the corresponding data asset.
-        """
+    def parse_asset_references(self, refs):
         result = {}
-        try:
-            refs = details['entity']['decision_optimization']['output_data_references']
-        except KeyError:
-            self._logger.debug('No output references structure available for this job')
-            return result
         for ref in refs:
             asset_type = ref.get('type')
             if asset_type != 'data_asset':
@@ -429,6 +417,21 @@ class DOWMLLib:
             self._logger.debug(f'Found a data asset named {name}.')
             result[name] = ref['location']['id']
         return result
+
+    def get_output_assets(self, details):
+        """"Extract the output data asset ids from the job.
+
+        :param details: The details of the job to get the output from
+        :return: A list of outputs. Each output is a tuple (name, id)
+        where the name is, well, the name of the output, and id is the
+        id of the corresponding data asset.
+        """
+        try:
+            refs = details['entity']['decision_optimization']['output_data_references']
+        except KeyError:
+            self._logger.debug('No output references structure available for this job')
+            return {}
+        return self.parse_asset_references(refs)
 
     def get_output(self, details, csv_as_dataframe=None, tabular_as_csv=False):
         """"Extract the outputs from the job.
