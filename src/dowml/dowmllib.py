@@ -679,21 +679,20 @@ class DOWMLLib:
             self._logger.info(f'Job status: {status}')
             if status in ['completed', 'failed', 'canceled']:
                 break
-            else:
-                if print_activity:
-                    # There may be a bit of log to look at
-                    try:
-                        activity = do['solve_state']['latest_engine_activity']
-                        if activity:
-                            # We are joining the lines in the activity with a CR,
-                            # only to remove them if they were already included...
-                            # FIXME: what a waste!
-                            act = '\n'.join(activity)
-                            act = self.remove_empty_lines(act)
-                            print(act)
-                    except KeyError:
-                        # This must mean that no activity is available yet
-                        pass
+            if print_activity:
+                # There may be a bit of log to look at
+                try:
+                    activity = do['solve_state']['latest_engine_activity']
+                    if activity:
+                        # We are joining the lines in the activity with a CR,
+                        # only to remove them if they were already included...
+                        # FIXME: what a waste!
+                        act = '\n'.join(activity)
+                        act = self.remove_empty_lines(act)
+                        print(act)
+                except KeyError:
+                    # This must mean that no activity is available yet
+                    pass
             delayer.wait()
         return status, job_details
 
