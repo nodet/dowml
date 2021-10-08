@@ -1,6 +1,10 @@
 User-visible changes
 --------------------
 
+master:
+- [#33] Print status of job while waiting for completion
+
+
 V1.2.0:
 
 - [#32] 'output' downloads the output data assets, not just inline outputs
