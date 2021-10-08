@@ -286,7 +286,7 @@ class DOWMLLib:
         self._logger.debug('Creating the WML client...')
         # http://ibm-wml-api-pyclient.mybluemix.net/#api-for-ibm-cloud
         client = APIClient(self._wml_credentials)
-        self._logger.info(f'Creating the client succeeded.  Client version is {client.version}')
+        self._logger.info(f'Creating the client succeeded.  Client version is {client.version}.')
         return client
 
     def _set_default_space(self):
@@ -364,14 +364,14 @@ class DOWMLLib:
                 if ref.get('type') != 'data_asset':
                     continue
                 if 'id' not in ref:
-                    self._logger.warning(f'Ignoring data asset with no id')
+                    self._logger.warning(f'Ignoring data asset with no id.')
                     continue
                 if ref['id'] == LOGNAME:
                     self._logger.debug(f'Found it.')
                     try:
                         asset_id = ref['location']['id']
                     except KeyError:
-                        self._logger.error('Log data asset has no location/id information')
+                        self._logger.error('Log data asset has no location/id information.')
                         break
                     self._logger.debug(f'This is asset {asset_id}.')
                     return _get_asset_content(asset_id)
@@ -382,7 +382,7 @@ class DOWMLLib:
             for output_data in outputs:
                 if output_data['id'] == LOGNAME:
                     if 'content' not in output_data:
-                        self._logger.error(f'Log without content for job {job_id}')
+                        self._logger.error(f'Log without content for job {job_id}.')
                         continue
                     self._logger.debug('Found it. Decoding it...')
                     output = output_data['content']
@@ -396,7 +396,7 @@ class DOWMLLib:
         try:
             do = job_details['entity']['decision_optimization']
         except KeyError:
-            self._logger.warning('No decision_optimization structure available for this job')
+            self._logger.warning('No decision_optimization structure available for this job.')
             return None
         # When we have references in the job, the 'output_data' may be an empty list
         if 'output_data' in do and do['output_data']:
@@ -404,7 +404,7 @@ class DOWMLLib:
         elif 'output_data_references' in do:
             return _get_log_from_output_references(do['output_data_references'])
         else:
-            self._logger.warning('No output_data or output_data_references structure available for this job')
+            self._logger.warning('No output_data or output_data_references structure available for this job.')
             return None
 
     def parse_asset_references(self, refs):
@@ -417,7 +417,7 @@ class DOWMLLib:
             s = re.search('/v2/assets/(.*)', path)
             if s:
                return s.group(1)
-            self._logger.warning(f'Could not decode href for asset \'{name}\'')
+            self._logger.warning(f'Could not decode href for asset \'{name}\'.')
             return None
 
         def find_id_in_id(loc):
@@ -431,7 +431,7 @@ class DOWMLLib:
                 continue
             name = ref.get('id')
             if not name:
-                self._logger.warning(f'Found a data asset with no name')
+                self._logger.warning(f'Found a data asset with no name.')
                 continue
             self._logger.debug(f'Found a data asset named {name}.')
             location = ref.get('location')
@@ -439,7 +439,7 @@ class DOWMLLib:
             if asset_id:
                 result[name] = asset_id
             else:
-                self._logger.warning(f'Could not find asset id for asset \'{name}\'')
+                self._logger.warning(f'Could not find asset id for asset \'{name}\'.')
         return result
 
     def get_output_assets(self, details):
@@ -452,7 +452,7 @@ class DOWMLLib:
         try:
             refs = details['entity']['decision_optimization']['output_data_references']
         except KeyError:
-            self._logger.debug('No output references structure available for this job')
+            self._logger.debug('No output references structure available for this job.')
             return {}
         return self.parse_asset_references(refs)
 
@@ -494,23 +494,23 @@ class DOWMLLib:
         try:
             outputs = details['entity']['decision_optimization']['output_data']
         except KeyError:
-            self._logger.warning('No output structure available for this job')
+            self._logger.warning('No output structure available for this job.')
             return result
         for output_data in outputs:
             name = output_data['id']
             if 'content' in output_data:
                 # What we have here is a regular file, encoded
-                self._logger.debug(f'Found a regular file named {name}')
+                self._logger.debug(f'Found a regular file named {name}.')
                 content = self._extract_regular_file(output_data)
                 result[name] = content
             elif ('values' in output_data and
                   'fields' in output_data and
                   name.lower().endswith('.csv')):
-                self._logger.debug(f'Found a CSV file named {name}')
+                self._logger.debug(f'Found a CSV file named {name}.')
                 content = self._extract_csv_file(output_data, tabular_as_csv)
                 result[name] = content
             else:
-                self._logger.warning(f'Found an unknown file named {name}')
+                self._logger.warning(f'Found an unknown file named {name}.')
                 content = output_data
                 result[name] = content
         return result
@@ -609,9 +609,9 @@ class DOWMLLib:
             if output.get('type') != 'data_asset':
                 continue
             if 'location' not in output:
-                self._logger.error(f'Missing \'location\' in details for job {job_id}')
+                self._logger.error(f'Missing \'location\' in details for job {job_id}.')
             elif 'id' not in output['location']:
-                self._logger.error(f'Missing \'location.id\' in details for job {job_id}')
+                self._logger.error(f'Missing \'location.id\' in details for job {job_id}.')
             else:
                 data_asset_id = output['location']['id']
                 self._logger.debug(f'Deleting data asset {data_asset_id}...')
@@ -619,7 +619,7 @@ class DOWMLLib:
                     self._client.data_assets.delete(data_asset_id)
                     self._logger.debug('Done.')
                 except WMLClientError:
-                    self._logger.error('Exception raised while trying to delete the asset', exc_info=True)
+                    self._logger.error('Exception raised while trying to delete the asset.', exc_info=True)
 
     def delete_job(self, job_id, hard=False):
         """Delete the given job.
@@ -1009,7 +1009,7 @@ class DOWMLLib:
         self._logger.debug('Done.')
         resources = details['models']['resources']
         model_name = f'{self.MODEL_NAME}-{self.model_type}-{self.do_version}'
-        self._logger.debug(f'Got the list. Looking for model named \'{model_name}\'')
+        self._logger.debug(f'Got the list. Looking for model named \'{model_name}\'...')
         model_id = None
         for r in resources:
             if r['metadata']['name'] == model_name:
@@ -1074,7 +1074,7 @@ class DOWMLLib:
         self._logger.debug('Fetching existing spaces...')
         space_details = client.spaces.get_details()
         resources = space_details['resources']
-        self._logger.debug(f'Got the list. Looking for space named \'{self.space_name}\'')
+        self._logger.debug(f'Got the list. Looking for space named \'{self.space_name}\'...')
         space_id = None
         for r in resources:
             if r['entity']['name'] == self.space_name:
@@ -1166,5 +1166,5 @@ class DOWMLLib:
             if self.delete_asset(asset_to_delete):
                 self._logger.debug('Done.')
             else:
-                self._logger.warning('Could not delete pre-existing asset')
+                self._logger.warning('Could not delete pre-existing asset.')
         return data_asset_id
