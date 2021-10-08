@@ -407,7 +407,7 @@ class DOWMLLib:
             self._logger.warning('No output_data or output_data_references structure available for this job.')
             return None
 
-    def parse_asset_references(self, refs):
+    def parse_asset_references(self, details, key):
 
         def find_id_in_href(loc):
             href = loc.get('href') if loc else None
@@ -423,6 +423,11 @@ class DOWMLLib:
         def find_id_in_id(loc):
             return loc.get('id') if loc else None
 
+        try:
+            refs = details['entity']['decision_optimization'][key]
+        except KeyError:
+            self._logger.debug(f'No \'{key}\' structure available for this job.')
+            return {}
         result = {}
         for ref in refs:
             asset_type = ref.get('type')
@@ -449,12 +454,7 @@ class DOWMLLib:
         :return: A dict of outputs. Keys are the names of the outputs,
         and the corresponding value for each key is the id of the asset.
         """
-        try:
-            refs = details['entity']['decision_optimization']['output_data_references']
-        except KeyError:
-            self._logger.debug('No output references structure available for this job.')
-            return {}
-        return self.parse_asset_references(refs)
+        return self.parse_asset_references(details, 'output_data_references')
 
     def get_input_assets(self, details):
         """"Extract the input data asset ids from the job.
@@ -463,12 +463,7 @@ class DOWMLLib:
         :return: A dict of inputs. Keys are the names of the inputs,
         and the corresponding value for each key is the id of the asset.
         """
-        try:
-            refs = details['entity']['decision_optimization']['input_data_references']
-        except KeyError:
-            self._logger.debug('No input references structure available for this job')
-            return {}
-        return self.parse_asset_references(refs)
+        return self.parse_asset_references(details, 'input_data_references')
 
     def get_output(self, details, csv_as_dataframe=None, tabular_as_csv=False):
         """Deprecated. Use get_outputs instead"""
