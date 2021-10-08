@@ -256,7 +256,8 @@ Wildcards (* and ?) are accepted (but no ~)."""
 Waits until the job is finished, printing activity. Hit Ctrl-C to interrupt.
 job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._get_and_remember_job_id(job_id)
-        self.lib.wait_for_job_end(job_id, True)
+        status, _ = self.lib.wait_for_job_end(job_id, True)
+        print(f'Job has finished with status \'{status}\'.')
 
     def _cache_jobs(self):
         jobs = self.lib.get_jobs()
