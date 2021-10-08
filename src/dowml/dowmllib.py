@@ -668,6 +668,12 @@ class DOWMLLib:
             assert(2 <= delay <= 30)
             time.sleep(delay)
 
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            pass
+
     def wait_for_job_end(self, job_id, print_activity=False):
         """Wait for the job to finish, return its status and details as a tuple."""
 
@@ -693,8 +699,8 @@ class DOWMLLib:
                 pass
 
         client = self._get_or_make_client()
-        delayer = DOWMLLib.ProgressiveDelay()
-        with StatusLogger('') as status_logger:
+        with StatusLogger('') as status_logger, \
+                DOWMLLib.ProgressiveDelay() as delayer:
             while True:
                 job_details = self.client_get_job_details(client, job_id, with_filter='solve_state,status')
                 do = job_details['entity']['decision_optimization']
