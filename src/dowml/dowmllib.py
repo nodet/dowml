@@ -407,7 +407,7 @@ class DOWMLLib:
             self._logger.warning('No output_data or output_data_references structure available for this job.')
             return None
 
-    def parse_asset_references(self, details, key):
+    def _parse_asset_references(self, details, key):
 
         def find_id_in_href(loc):
             href = loc.get('href') if loc else None
@@ -416,7 +416,7 @@ class DOWMLLib:
             path = urllib.parse.urlparse(href).path
             s = re.search('/v2/assets/(.*)', path)
             if s:
-               return s.group(1)
+                return s.group(1)
             self._logger.warning(f'Could not decode href for asset \'{name}\'.')
             return None
 
@@ -454,7 +454,7 @@ class DOWMLLib:
         :return: A dict of outputs. Keys are the names of the outputs,
         and the corresponding value for each key is the id of the asset.
         """
-        return self.parse_asset_references(details, 'output_data_references')
+        return self._parse_asset_references(details, 'output_data_references')
 
     def get_input_assets(self, details):
         """"Extract the input data asset ids from the job.
@@ -463,7 +463,7 @@ class DOWMLLib:
         :return: A dict of inputs. Keys are the names of the inputs,
         and the corresponding value for each key is the id of the asset.
         """
-        return self.parse_asset_references(details, 'input_data_references')
+        return self._parse_asset_references(details, 'input_data_references')
 
     def get_output(self, details, csv_as_dataframe=None, tabular_as_csv=False):
         """Deprecated. Use get_outputs instead"""
