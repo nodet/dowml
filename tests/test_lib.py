@@ -777,6 +777,10 @@ class TestInputAndOutputGathering(TestCase):
                 {'type': 'unknown'},
                 {},
                 {
+                    # No name for this data-asset
+                    'type': 'data_asset'
+                },
+                {
                     'id': 'log.txt',
                     'location': {'id': 'id1'},
                     'type': 'data_asset'

@@ -429,7 +429,10 @@ class DOWMLLib:
             if asset_type != 'data_asset':
                 self._logger.debug(f'Ignoring asset of unknown type \'{asset_type}\'.')
                 continue
-            name = ref['id']
+            name = ref.get('id')
+            if not name:
+                self._logger.warning(f'Found a data asset with no name')
+                continue
             self._logger.debug(f'Found a data asset named {name}.')
             location = ref.get('location')
             asset_id = find_id_in_id(location) or find_id_in_href(location)
