@@ -170,13 +170,13 @@ class TestOutput(TestCase):
         self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
         self.cli.lib = Mock(spec=DOWMLLib)
         self.cli.lib.get_job_details.return_value = {}
-        self.cli.jobs = ['a', 'b', 'c']
-
-    def test_command_exists(self):
         self.cli.lib.get_inputs.return_value = {}
         self.cli.lib.get_outputs.return_value = {}
         self.cli.lib.get_output_assets.return_value = {}
         self.cli.lib.get_input_assets.return_value = {}
+        self.cli.jobs = ['a', 'b', 'c']
+
+    def test_command_exists(self):
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
         with HiddenPrints(), \
@@ -185,10 +185,6 @@ class TestOutput(TestCase):
             self.cli.do_output('1')
 
     def test_dump_command_exists(self):
-        self.cli.lib.get_inputs.return_value = {}
-        self.cli.lib.get_outputs.return_value = {}
-        self.cli.lib.get_output_assets.return_value = {}
-        self.cli.lib.get_input_assets.return_value = {}
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
         with HiddenPrints(), \
@@ -200,9 +196,6 @@ class TestOutput(TestCase):
         mock_get_output = Mock()
         mock_get_output.return_value = {}
         self.cli.lib.get_outputs = mock_get_output
-        self.cli.lib.get_inputs.return_value = {}
-        self.cli.lib.get_output_assets.return_value = {}
-        self.cli.lib.get_input_assets.return_value = {}
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
         with mock.patch('os.mkdir', mock_mkdir):
@@ -215,9 +208,6 @@ class TestOutput(TestCase):
             'out1': b'content-a',
             'out2': b'content-b'
         }
-        self.cli.lib.get_inputs.return_value = {}
-        self.cli.lib.get_output_assets.return_value = {}
-        self.cli.lib.get_input_assets.return_value = {}
         self.cli.save_content = Mock()
         mock_open = mock.mock_open()
         mock_mkdir = Mock()
@@ -262,8 +252,6 @@ class TestOutput(TestCase):
         mock_mkdir.assert_has_calls([call('id'), call('id')])
 
     def test_download_assets(self):
-        self.cli.lib.get_inputs.return_value = {}
-        self.cli.lib.get_outputs.return_value = {}
         self.cli.lib.get_output_assets.return_value = {
             'name1': 'id1',
             'name2': 'id2'
