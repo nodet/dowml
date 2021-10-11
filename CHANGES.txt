@@ -1,7 +1,8 @@
 User-visible changes
 --------------------
 
-master:
+V1.3.0:
+
 - [#34] 'dump' downloads and stores all the inputs and outputs of a job,
         so that all the data is readily available. Replaces 'output', which
         is now deprecated.
