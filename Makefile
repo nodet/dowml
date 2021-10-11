@@ -7,8 +7,7 @@ tests:
 SRC=src/dowml/*.py
 
 lint: $(SRC)
-	flake8 $(SRC) tests/*.py > lint
-	cat lint
+	flake8 $(SRC) tests/*.py
 
 DISTRIB=dist/dowml-*-py3-none-any.whl
 
