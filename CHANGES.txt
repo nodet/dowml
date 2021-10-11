@@ -2,8 +2,9 @@ User-visible changes
 --------------------
 
 master:
-- [#34] 'output' also stores the inputs of the job, so that
-        all the data is readily available.
+- [#34] 'dump' downloads and stores all the inputs and outputs of a job,
+        so that all the data is readily available. Replaces 'output', which
+        is now deprecated.
 - [#33] Print status of job while waiting for completion.
 
 
