@@ -364,10 +364,10 @@ class DOWMLLib:
                 if ref.get('type') != 'data_asset':
                     continue
                 if 'id' not in ref:
-                    self._logger.warning(f'Ignoring data asset with no id.')
+                    self._logger.warning('Ignoring data asset with no id.')
                     continue
                 if ref['id'] == LOGNAME:
-                    self._logger.debug(f'Found it.')
+                    self._logger.debug('Found it.')
                     try:
                         asset_id = ref['location']['id']
                     except KeyError:
@@ -436,7 +436,7 @@ class DOWMLLib:
                 continue
             name = ref.get('id')
             if not name:
-                self._logger.warning(f'Found a data asset with no name.')
+                self._logger.warning('Found a data asset with no name.')
                 continue
             self._logger.debug(f'Found a data asset named {name}.')
             location = ref.get('location')
