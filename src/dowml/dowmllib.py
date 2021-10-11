@@ -447,8 +447,8 @@ class DOWMLLib:
                 self._logger.warning(f'Could not find asset id for asset \'{name}\'.')
         return result
 
-    def get_output_assets(self, details):
-        """"Extract the output data asset ids from the job.
+    def get_output_asset_ids(self, details):
+        """"Extract the output data asset ids from the job details.
 
         :param details: The details of the job to get the output from
         :return: A dict of outputs. Keys are the names of the outputs,
@@ -456,8 +456,8 @@ class DOWMLLib:
         """
         return self._parse_asset_references(details, 'output_data_references')
 
-    def get_input_assets(self, details):
-        """"Extract the input data asset ids from the job.
+    def get_input_asset_ids(self, details):
+        """"Extract the input data asset ids from the job details.
 
         :param details: The details of the job to get the output from
         :return: A dict of inputs. Keys are the names of the inputs,
@@ -496,7 +496,7 @@ class DOWMLLib:
         return result
 
     def get_outputs(self, details, csv_as_dataframe=None, tabular_as_csv=False):
-        """"Extract the inline outputs from the job.
+        """"Extract the inline outputs from the job details.
 
         :param details: The details of the job to get the outputs from
         :param csv_as_dataframe: Whether the content of a CSV file should be
@@ -518,7 +518,7 @@ class DOWMLLib:
         return self._extract_inline_files_from_details(details, 'output_data', tabular_as_csv)
 
     def get_inputs(self, details, tabular_as_csv=False):
-        """"Extract the inline inputs from the job.
+        """"Extract the inline inputs from the job details.
 
         :param details: The details of the job to get the inputs from
         :param tabular_as_csv: Whether tabular inputs should be returned as

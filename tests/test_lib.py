@@ -789,7 +789,7 @@ class TestInputAndOutputGathering(TestCase):
         self.lib = lib
 
     def test_get_output_data_ref_ignores_non_assets(self):
-        result = self.lib.get_output_assets({'entity': {'decision_optimization': {
+        result = self.lib.get_output_asset_ids({'entity': {'decision_optimization': {
             'output_data_references': [
                 {'type': 'unknown'},
                 {},
@@ -807,15 +807,15 @@ class TestInputAndOutputGathering(TestCase):
         self.assertDictEqual(result, {'log.txt': 'id1'})
 
     def test_get_output_data_ref_deals_with_lack_of_info(self):
-        result = self.lib.get_output_assets({'entity': {'decision_optimization': {}}})
+        result = self.lib.get_output_asset_ids({'entity': {'decision_optimization': {}}})
         self.assertDictEqual(result, {})
-        result = self.lib.get_output_assets({'entity': {}})
+        result = self.lib.get_output_asset_ids({'entity': {}})
         self.assertDictEqual(result, {})
-        result = self.lib.get_output_assets({})
+        result = self.lib.get_output_asset_ids({})
         self.assertDictEqual(result, {})
 
     def test_get_input_data_references(self):
-        result = self.lib.get_input_assets({'entity': {'decision_optimization': {
+        result = self.lib.get_input_asset_ids({'entity': {'decision_optimization': {
             'input_data_references': [
                 {
                     'id': 'afiro.mps',

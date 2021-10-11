@@ -172,8 +172,8 @@ class TestOutput(TestCase):
         self.cli.lib.get_job_details.return_value = {}
         self.cli.lib.get_inputs.return_value = {}
         self.cli.lib.get_outputs.return_value = {}
-        self.cli.lib.get_output_assets.return_value = {}
-        self.cli.lib.get_input_assets.return_value = {}
+        self.cli.lib.get_output_asset_ids.return_value = {}
+        self.cli.lib.get_input_asset_ids.return_value = {}
         self.cli.jobs = ['a', 'b', 'c']
 
     def test_command_exists(self):
@@ -252,11 +252,11 @@ class TestOutput(TestCase):
         mock_mkdir.assert_has_calls([call('id'), call('id')])
 
     def test_download_assets(self):
-        self.cli.lib.get_output_assets.return_value = {
+        self.cli.lib.get_output_asset_ids.return_value = {
             'name1': 'id1',
             'name2': 'id2'
         }
-        self.cli.lib.get_input_assets.return_value = {
+        self.cli.lib.get_input_asset_ids.return_value = {
             'name3': 'id3'
         }
         mock_open = mock.mock_open()

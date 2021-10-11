@@ -337,11 +337,11 @@ job is either a job number or a job id. Uses current job if not specified."""
         details = self.lib.get_job_details(job_id, with_contents='full')
         store_inline_inputs(details)
         store_inline_outputs(details)
-        download_data_assets(self.lib.get_output_assets(details))
+        download_data_assets(self.lib.get_output_asset_ids(details))
         # It's important that the input assets are stored last. This allows
         # the user to cancel the transfer of these items, which probably would
         # be the largest for a job, after the others have been stored.
-        download_data_assets(self.lib.get_input_assets(details))
+        download_data_assets(self.lib.get_input_asset_ids(details))
         # We don't want to store all the outputs in the details themselves
         self.lib.filter_large_chunks_from_details(details)
         details = pprint.pformat(details)
