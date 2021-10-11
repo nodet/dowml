@@ -184,6 +184,18 @@ class TestOutput(TestCase):
                 mock.patch('builtins.open', mock_open):
             self.cli.do_output('1')
 
+    def test_dump_command_exists(self):
+        self.cli.lib.get_inputs.return_value = {}
+        self.cli.lib.get_outputs.return_value = {}
+        self.cli.lib.get_output_assets.return_value = {}
+        self.cli.lib.get_input_assets.return_value = {}
+        mock_open = mock.mock_open()
+        mock_mkdir = Mock()
+        with HiddenPrints(), \
+                mock.patch('os.mkdir', mock_mkdir), \
+                mock.patch('builtins.open', mock_open):
+            self.cli.do_dump('1')
+
     def test_output_asks_for_tabular_outputs_as_csv(self):
         mock_get_output = Mock()
         mock_get_output.return_value = {}

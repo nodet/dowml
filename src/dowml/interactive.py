@@ -304,8 +304,12 @@ job is either a job number or a job id. Uses current job if not specified."""
             f.write(content)
 
     def do_output(self, job_id):
-        """output [job]
-Downloads all the inputs and outputs of a job, as well as the details/status of the job.
+        """Deprecated. Use 'dump' instead."""
+        self.do_dump(job_id)
+
+    def do_dump(self, job_id):
+        """dump [job]
+Downloads and stores all the inputs and outputs of a job, as well as the details/status of the job.
 job is either a job number or a job id. Uses current job if not specified."""
 
         def store_inline_inputs(job_details):
