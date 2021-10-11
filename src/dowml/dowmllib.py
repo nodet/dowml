@@ -711,7 +711,9 @@ class DOWMLLib:
         return names
 
     def wait_for_job_end(self, job_id, print_activity=False):
-        """Wait for the job to finish, return its status and details as a tuple."""
+        """Wait for the job to finish, return its status and details as a tuple.
+
+        If print_activity is True, some information is printed in the console."""
 
         class ProgressiveDelay:
             def __init__(self):
