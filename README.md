@@ -296,13 +296,17 @@ To create a new space, the DOWML client will need both `cos_resource_crn` and
 
 The DOWML library has two modes of operation with respect to sending the models
 to the WML service: inline data, or using data assets in Watson Studio.  By default,
-data assets are used. This can be changed with the `inline` command.
+data assets are used for inputs, while inline data is used for outputs. 
+This can be changed with the `inputs` and `outputs` commands.
 
 With inline data, the model is sent directly to the WML service in the _solve_
-request itself.  This is the simplest, but it has a number of drawbacks:
+request itself, and the output is part of the job details that are downloaded when
+asking for information about the job.  
+This is the simplest, but it has a number of drawbacks:
 
 - Sending a large model may take a long time, because of network throughput.  Sending
-a very large REST request is not at all guaranteed to succeed.
+a very large REST request is not at all guaranteed to succeed.  Similarly, if your
+job has large outputs, the job may fail while trying to process them.
 
 - When solving several times the same model (e.g. to evaluate different parameters),
 the model has to be sent each time.
@@ -310,7 +314,7 @@ the model has to be sent each time.
 - In order to display the names of the files that were sent, the _jobs_ command
 needs to request this information, and it comes with the content of the files
   themselves.  In other words, every _jobs_ command requires downloading the content
-  of all the files for all the jobs that exist in the space.
+  of all the inline data files for all the jobs that exist in the space.
 
 Using data assets in Watson Studio as an intermediate step alleviate all these issues:
 
