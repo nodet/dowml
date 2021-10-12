@@ -1,6 +1,11 @@
 User-visible changes
 --------------------
 
+V1.3.1:
+
+- Update the documentation in README.md
+- Update the sample session in README.md
+
 V1.3.0:
 
 - [#34] 'dump' downloads and stores all the inputs and outputs of a job,
