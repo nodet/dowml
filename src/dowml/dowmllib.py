@@ -617,7 +617,8 @@ class DOWMLLib:
             # GH-1: This happens when the job failed
             pass
 
-    def _delete_data_assets(self, job_id, job_details):
+    def _delete_data_assets(self, job_details):
+        job_id = job_details['metadata']['id']
         odr = job_details['entity']['decision_optimization'].get('output_data_references', [])
         for output in odr:
             if output.get('type') != 'data_asset':
@@ -645,7 +646,7 @@ class DOWMLLib:
         job_details = None
         if hard:
             job_details = self.get_job_details(job_id, with_contents='names')
-            self._delete_data_assets(job_id, job_details)
+            self._delete_data_assets(job_details)
         self._logger.debug(f'Deleting job {job_id}...')
 
         # If only calling

@@ -705,6 +705,9 @@ class TestDeleteJob(TestCase):
             'entity': {'decision_optimization': {
                 'output_data_references': []
             }},
+            'metadata': {
+                'id': job_id
+            },
         }
         self.lib.delete_job(job_id, hard=True)
         self.lib._client.deployments.delete_job.assert_called_once_with(job_id, True)
@@ -733,6 +736,9 @@ class TestDeleteJob(TestCase):
                     },
                 ]
             }},
+            'metadata': {
+                'id': job_id
+            },
         }
         delete_job = self.lib._client.deployments.delete_job
         get_job_details = self.lib.get_job_details
@@ -774,6 +780,9 @@ class TestDeleteJob(TestCase):
                     },
                 ]
             }},
+            'metadata': {
+                'id': job_id
+            },
         }
         delete_asset = self.lib._client.data_assets.delete
         delete_asset.side_effect = WMLClientError("delete assets failed")
