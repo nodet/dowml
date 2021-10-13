@@ -1,6 +1,11 @@
 User-visible changes
 --------------------
 
+master:
+
+- [#36] Don't leave the Watson Studio runs dangling when deleting a job.
+
+
 V1.3.1:
 
 - Update the documentation in README.md
