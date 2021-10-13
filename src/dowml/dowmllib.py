@@ -27,6 +27,7 @@ from datetime import datetime
 from functools import lru_cache
 from operator import attrgetter
 
+import requests
 from ibm_watson_machine_learning.wml_client_error import WMLClientError
 from packaging import version
 
@@ -645,7 +646,30 @@ class DOWMLLib:
         if hard:
             self._delete_data_assets(job_id)
         self._logger.debug(f'Deleting job {job_id}...')
-        client.deployments.delete_job(job_id, hard)
+
+        # If only calling
+        #    client.deployments.delete_job(job_id, hard)
+        # the 'run' of the 'platform job' on the Watson Studio side is left,
+        # and it will never be deleted.
+        # On the other hand, deleting the run on the WS side also deletes the
+        # deployment job on the WML side. So let's do that.
+        wml_url = self._wml_credentials['url']
+        ws_url = client.PLATFORM_URLS_MAP.get(wml_url)
+        if not ws_url:
+            self._logger.warning('Could not find the Watson Studio URL'
+                                 f'for {wml_url}.  The WS run will not be deleted.')
+            client.deployments.delete_job(job_id, hard)
+        else:
+            job_details = self.get_job_details(job_id)
+            job_id = job_details['entity']['platform_job']['job_id']
+            run_id = job_details['entity']['platform_job']['run_id']
+            url = f'{ws_url}/v2/jobs/{job_id}/runs/{run_id}?space_id={self._space_id}'
+
+            r = requests.delete(url, headers={'Authorization': f'Bearer {client.service_instance._get_token()}',
+                                              'Content-Type': 'application/json',
+                                              'cache-control': 'no-cache'})
+            if r.status_code != 204:
+                self._logger.error(f'Error when trying to delete the Watson Studio run. {r.text}')
         self._logger.debug('Done.')
 
     def decode_log(self, output):

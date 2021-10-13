@@ -688,6 +688,7 @@ class TestDeleteJob(TestCase):
         lib._client.spaces = Mock(spec=Spaces)
         lib._client.data_assets = Mock(spec=Assets)
         lib._client.spaces.get_details.return_value = {'resources': []}
+        lib._client.PLATFORM_URLS_MAP = {}
         lib.get_job_details = Mock()
         self.lib = lib
 
