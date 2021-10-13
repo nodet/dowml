@@ -636,19 +636,8 @@ class DOWMLLib:
                 except WMLClientError:
                     self._logger.error('Exception raised while trying to delete the asset.', exc_info=True)
 
-    def delete_job(self, job_id, hard=False):
-        """Delete the given job.
-
-        :param job_id: the job to be deleted
-        :param hard: if False, cancel the job. If true, delete it completely
-        """
+    def _client_deployments_delete_job(self, job_id, hard, job_details):
         client = self._get_or_make_client()
-        job_details = None
-        if hard:
-            job_details = self.get_job_details(job_id, with_contents='names')
-            self._delete_data_assets(job_details)
-        self._logger.debug(f'Deleting job {job_id}...')
-
         # If only calling
         #    client.deployments.delete_job(job_id, hard)
         # the 'run' of the 'platform job' on the Watson Studio side is left,
@@ -663,9 +652,9 @@ class DOWMLLib:
             everything_ok_so_far = False
         if everything_ok_so_far:
             try:
-                job_id = job_details['entity']['platform_job']['job_id']
-                run_id = job_details['entity']['platform_job']['run_id']
-                url = f'{ws_url}/v2/jobs/{job_id}/runs/{run_id}?space_id={self._space_id}'
+                platform_job_id = job_details['entity']['platform_job']['job_id']
+                platform_run_id = job_details['entity']['platform_job']['run_id']
+                url = f'{ws_url}/v2/jobs/{platform_job_id}/runs/{platform_run_id}?space_id={self._space_id}'
             except KeyError:
                 everything_ok_so_far = False
         if everything_ok_so_far:
@@ -678,8 +667,22 @@ class DOWMLLib:
         if not everything_ok_so_far:
             if hard:
                 self._logger.error('Could not delete the Watson Studio run. Deleting the WML job deployment instead...')
-            # else: we just wanted to cancel the job, so there's nothing to warn against
+            # else:
+            #   we just wanted to cancel the job, so there's nothing to warn against
             client.deployments.delete_job(job_id, hard)
+
+    def delete_job(self, job_id, hard=False):
+        """Delete the given job.
+
+        :param job_id: the job to be deleted
+        :param hard: if False, cancel the job. If true, delete it completely
+        """
+        job_details = None
+        if hard:
+            job_details = self.get_job_details(job_id, with_contents='names')
+            self._delete_data_assets(job_details)
+        self._logger.debug(f'Deleting job {job_id}...')
+        self._client_deployments_delete_job(job_id, hard, job_details)
         self._logger.debug('Done.')
 
     def decode_log(self, output):
