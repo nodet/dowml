@@ -617,8 +617,7 @@ class DOWMLLib:
             # GH-1: This happens when the job failed
             pass
 
-    def _delete_data_assets(self, job_id):
-        job_details = self.get_job_details(job_id, with_contents='names')
+    def _delete_data_assets(self, job_id, job_details):
         odr = job_details['entity']['decision_optimization'].get('output_data_references', [])
         for output in odr:
             if output.get('type') != 'data_asset':
@@ -643,8 +642,10 @@ class DOWMLLib:
         :param hard: if False, cancel the job. If true, delete it completely
         """
         client = self._get_or_make_client()
+        job_details = None
         if hard:
-            self._delete_data_assets(job_id)
+            job_details = self.get_job_details(job_id, with_contents='names')
+            self._delete_data_assets(job_id, job_details)
         self._logger.debug(f'Deleting job {job_id}...')
 
         # If only calling
@@ -654,22 +655,30 @@ class DOWMLLib:
         # On the other hand, deleting the run on the WS side also deletes the
         # deployment job on the WML side. So let's do that.
         wml_url = self._wml_credentials['url']
+        # We don't want to (try to) delete the WS run if we only cancel the job
+        everything_ok_so_far = hard
         ws_url = client.PLATFORM_URLS_MAP.get(wml_url)
         if not ws_url:
-            self._logger.warning('Could not find the Watson Studio URL'
-                                 f'for {wml_url}.  The WS run will not be deleted.')
-            client.deployments.delete_job(job_id, hard)
-        else:
-            job_details = self.get_job_details(job_id)
-            job_id = job_details['entity']['platform_job']['job_id']
-            run_id = job_details['entity']['platform_job']['run_id']
-            url = f'{ws_url}/v2/jobs/{job_id}/runs/{run_id}?space_id={self._space_id}'
-
+            everything_ok_so_far = False
+        if everything_ok_so_far:
+            try:
+                job_id = job_details['entity']['platform_job']['job_id']
+                run_id = job_details['entity']['platform_job']['run_id']
+                url = f'{ws_url}/v2/jobs/{job_id}/runs/{run_id}?space_id={self._space_id}'
+            except KeyError:
+                everything_ok_so_far = False
+        if everything_ok_so_far:
             r = requests.delete(url, headers={'Authorization': f'Bearer {client.service_instance._get_token()}',
                                               'Content-Type': 'application/json',
                                               'cache-control': 'no-cache'})
             if r.status_code != 204:
                 self._logger.error(f'Error when trying to delete the Watson Studio run. {r.text}')
+                everything_ok_so_far = False
+        if not everything_ok_so_far:
+            if hard:
+                self._logger.error('Could not delete the Watson Studio run. Deleting the WML job deployment instead...')
+            # else: we just wanted to cancel the job, so there's nothing to warn against
+            client.deployments.delete_job(job_id, hard)
         self._logger.debug('Done.')
 
     def decode_log(self, output):

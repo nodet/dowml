@@ -690,6 +690,7 @@ class TestDeleteJob(TestCase):
         lib._client.spaces.get_details.return_value = {'resources': []}
         lib._client.PLATFORM_URLS_MAP = {}
         lib.get_job_details = Mock()
+        lib.get_job_details.return_value = {}
         self.lib = lib
 
     def test_delete_soft_doesnt_look_for_job_details(self):
