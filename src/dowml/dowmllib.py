@@ -640,13 +640,16 @@ class DOWMLLib:
                     self._logger.error('Exception raised while trying to delete the asset.', exc_info=True)
 
     def _client_deployments_delete_job(self, job_id, hard, job_details):
+        """Deletes the platform run, so that the deployment job is deleted as well.
+
+        If only calling
+           client.deployments.delete_job(job_id, hard)
+        the 'run' of the 'platform job' on the Watson Studio side is left,
+        and it will never be deleted.
+        On the other hand, deleting the run on the WS side also deletes the
+        deployment job on the WML side. So let's do that.
+        """
         client = self._get_or_make_client()
-        # If only calling
-        #    client.deployments.delete_job(job_id, hard)
-        # the 'run' of the 'platform job' on the Watson Studio side is left,
-        # and it will never be deleted.
-        # On the other hand, deleting the run on the WS side also deletes the
-        # deployment job on the WML side. So let's do that.
         wml_url = self._wml_credentials['url']
         # We don't want to (try to) delete the WS run if we only cancel the job
         everything_ok_so_far = hard
