@@ -619,7 +619,10 @@ class DOWMLLib:
 
     def _delete_data_assets(self, job_details):
         job_id = job_details['metadata']['id']
-        odr = job_details['entity']['decision_optimization'].get('output_data_references', [])
+        try:
+            odr = job_details['entity']['decision_optimization']['output_data_references']
+        except KeyError:
+            odr = []
         for output in odr:
             if output.get('type') != 'data_asset':
                 continue

@@ -688,7 +688,8 @@ class TestDeleteJob(TestCase):
         lib._client.spaces = Mock(spec=Spaces)
         lib._client.data_assets = Mock(spec=Assets)
         lib._client.spaces.get_details.return_value = {'resources': []}
-        lib._client.PLATFORM_URLS_MAP = {}
+        lib._client.PLATFORM_URLS_MAP = {'https://eu-de.ml.cloud.ibm.com': 'https://the.ws.url.ibm.com'}
+        lib._wml_credentials['url'] = 'https://eu-de.ml.cloud.ibm.com'
         lib.get_job_details = Mock()
         lib.get_job_details.return_value = {}
         self.lib = lib
@@ -788,6 +789,64 @@ class TestDeleteJob(TestCase):
         delete_asset.side_effect = WMLClientError("delete assets failed")
         self.lib.delete_job(job_id, hard=True)
         self.assertEqual(2, delete_asset.call_count)
+
+    def test_delete_deletes_the_platform_job(self):
+        self.lib._client.service_instance = Mock()
+        job_id = 'job_id'
+        self.lib.get_job_details.return_value = {
+            'entity': {
+                'platform_job': {
+                    'job_id': 'platform-job-id',
+                    'run_id': 'platform-run-id'
+                }
+            },
+            'metadata': {
+                'id': job_id
+            },
+        }
+        mock_response = Mock()
+        mock_response.status_code = 204
+        mock_delete = Mock()
+        mock_delete.return_value = mock_response
+        with mock.patch('requests.delete', mock_delete):
+            self.lib.delete_job(job_id, hard=True)
+        mock_delete.assert_called_once()
+        args, _ = mock_delete.call_args_list[0]
+        self.assertEqual('https://the.ws.url.ibm.com/v2/jobs/platform-job-id/runs/platform-run-id?space_id=None',
+                         args[0])
+
+    def test_delete_deals_with_absent_platform_job_information(self):
+        job_id = 'job_id'
+        self.lib.get_job_details.return_value = {
+            # But we don't give any info about a platform job
+            'metadata': {
+                'id': job_id
+            },
+        }
+        self.lib.delete_job(job_id, hard=True)
+        self.lib._client.deployments.delete_job.assert_called_once_with(job_id, True)
+
+    def test_delete_deals_with_error_when_deleting_platform_job(self):
+        self.lib._client.service_instance = Mock()
+        job_id = 'job_id'
+        self.lib.get_job_details.return_value = {
+            'entity': {
+                'platform_job': {
+                    'job_id': 'platform-job-id',
+                    'run_id': 'platform-run-id'
+                }
+            },
+            'metadata': {
+                'id': job_id
+            },
+        }
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_delete = Mock()
+        mock_delete.return_value = mock_response
+        with mock.patch('requests.delete', mock_delete):
+            self.lib.delete_job(job_id, hard=True)
+        self.lib._client.deployments.delete_job.assert_called_once_with(job_id, True)
 
 
 class TestInputAndOutputGathering(TestCase):
