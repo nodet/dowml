@@ -118,6 +118,14 @@ class TestCredentials(TestCase):
             with self.assertRaises(InvalidCredentials):
                 _ = DOWMLLib()
 
+    def test_error_if_both_region_and_url_are_specified(self):
+        with mock.patch.dict(os.environ,
+                             {'DOWML_CREDENTIALS':
+                                  f"{{'apikey': '<apikey>', "
+                                  f"'url': 'https://us-south.ml.cloud.ibm.com', 'region': 'eu-gb'}}"}):
+            with self.assertRaises(InvalidCredentials):
+                _ = DOWMLLib()
+
 
 class TestSolveInline(TestCase):
 
