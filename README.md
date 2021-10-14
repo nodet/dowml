@@ -27,21 +27,21 @@ dowml> exit
 The class `DOWMLLib` provides an API to upload Decision Optimization models (CPLEX, CP Optimizer, OPL or docplex) to WML, check their status, and download results.  The script `dowml.py` is an interactive program on top of that library.
 
 In order to use either of them, you need to provide IBM Cloud credentials.
-1. By default, `DOWMLLib` (and therefore the Interactive) look for these credentials in an environment variable named `DOWML_CREDENTIALS`. This variable shoud have a value looking like
-   ```
-   {
-       'apikey': '<apikey>',
-       'url': 'https://us-south.ml.cloud.ibm.com',
-       'cos_resource_crn': 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9...',
-       'ml_instance_crn': 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f...',
-   }
-   ```
-   See below for how/where to get these credentials.
-2. As an alternative, you can specify a file name as argument to 
+- By default, `DOWMLLib` (and therefore the Interactive) look for these credentials in an environment variable named `DOWML_CREDENTIALS`. This variable shoud have a value looking like
+```
+{
+    'apikey': '<apikey>',
+    'url': 'https://us-south.ml.cloud.ibm.com',
+    'cos_resource_crn': 'crn:v1:bluemix:public:cloud-object-storage:global:a/76260f9...',
+    'ml_instance_crn': 'crn:v1:bluemix:public:pm-20:eu-de:a/76260f...',
+}
+```
+See below for how/where to get these credentials.
+- As an alternative, you can specify a file name as argument to 
 `DOWMLLib.__init__`. The credentials will then be read from that file instead 
 of the environment variable. Accordingly, the Interactive has a command line 
 option `-w` (or `--wml-cred-file`) that must be followed by the path of the file.
-3. Finally, if none of the above options are used, the code will look for
+- Finally, if none of the above options are used, the code will look for
 environment variable `DOWML_CREDENTIALS_FILE`. If it exists, it must be the path
 to a file that contains credentials such as the ones above.
 
@@ -250,21 +250,21 @@ are optional.
 
 ### Required items
 
-1. The `apikey` is a secret that identifies the IBM Cloud user. One typically creates
-   one key per application or service, in order to be able to revoke them individually
-   if needed.
-   To generate such a key, open https://cloud.ibm.com/iam/apikeys, and click the blue
-   'Create an IBM Cloud API key' on the right.
+- The `apikey` is a secret that identifies the IBM Cloud user. One typically creates
+  one key per application or service, in order to be able to revoke them individually
+  if needed.
+  To generate such a key, open https://cloud.ibm.com/iam/apikeys, and click the blue
+  'Create an IBM Cloud API key' on the right.
 
-2. The `url` is the base URL for the REST calls to WML.  The possible values are
-   found in https://cloud.ibm.com/apidocs/machine-learning#endpoint-url, 
-   and depend on which region you want to use.
+- The `url` is the base URL for the REST calls to WML.  The possible values are
+  found in https://cloud.ibm.com/apidocs/machine-learning#endpoint-url, 
+  and depend on which region you want to use.
 
-3. As an alternative to the `url` value, you can use a more user-friendly and 
-   easier to remember `region`, with a value that is either `us-south`, `eu-de`,
-   `eu-gb` or `jp-tok`.  From this value, _dowml_ will deduce the correct URL to use.
-   To avoid ambiguities or duplications, it is not allowed to use both `url` and
-   `region`.
+- As an alternative to the `url` value, you can use a more user-friendly and 
+  easier to remember `region`, with a value that is either `us-south`, `eu-de`,
+  `eu-gb` or `jp-tok`.  From this value, _dowml_ will deduce the correct URL to use.
+  To avoid ambiguities or duplications, it is not allowed to use both `url` and
+  `region`.
 
 ### Optional items
 
@@ -280,32 +280,32 @@ _DOWMLClient-space_, and will try to create such a space if one doesn't exist.
 To create a new space, the DOWML client will need both `cos_resource_crn` and
 `ml_instance_crn` to have been specified in the credentials.
 
-3. `space_id`: identifier of an existing space to connect to.  Navigate to the 
-   'Spaces' tab of your Watson Studio site (e.g. 
-   https://eu-de.dataplatform.cloud.ibm.com/ml-runtime/spaces if you are using
-   the instance in Germany), right-click on the name of an existing space to
-   copy the link. The id of the space is the string of numbers, letters and dashes
-   between the last `/` and the `?`.
+- `space_id`: identifier of an existing space to connect to.  Navigate to the 
+  'Spaces' tab of your Watson Studio site (e.g. 
+  https://eu-de.dataplatform.cloud.ibm.com/ml-runtime/spaces if you are using
+  the instance in Germany), right-click on the name of an existing space to
+  copy the link. The id of the space is the string of numbers, letters and dashes
+  between the last `/` and the `?`.
 
-3. `cos_resource_crn`: WML needs to store some data in a Cloud Object Storage 
-   instance.  Open
-   https://cloud.ibm.com/resources and locate the 'Storage' section.  Create an
-   instance of the Cloud Object Storage service if needed. Once it's listed on
-   the resource page, click anywhere on the line for that service, except on its
-   name.  This will open a pane on the right which lists the CRN.  Click on the
-   symbol at the right to copy this information.  This item is required only for 
-   the DOWML client to be able to create a space.  If you specified a `space_id`,
-   it is not required.
+- `cos_resource_crn`: WML needs to store some data in a Cloud Object Storage 
+  instance.  Open
+  https://cloud.ibm.com/resources and locate the 'Storage' section.  Create an
+  instance of the Cloud Object Storage service if needed. Once it's listed on
+  the resource page, click anywhere on the line for that service, except on its
+  name.  This will open a pane on the right which lists the CRN.  Click on the
+  symbol at the right to copy this information.  This item is required only for 
+  the DOWML client to be able to create a space.  If you specified a `space_id`,
+  it is not required.
    
-4. `ml_instance_crn`: similarly, you need to identify an instance of Machine 
-   Learning service to use
-   to solve your jobs.  In the same page https://cloud.ibm.com/resources, open the
-   'Services' section.  The 'Product' columns tells you the type of service.  If
-   you don't have a 'Machine Learning' instance already, create one.  Then click
-   on the corresponding line anywhere except on the name, and copy the CRN displayed
-   in the pane that open on the right.  This item is required only for 
-   the DOWML client to be able to create a space.  If you specified a `space_id`,
-   it is not required.
+- `ml_instance_crn`: similarly, you need to identify an instance of Machine 
+  Learning service to use
+  to solve your jobs.  In the same page https://cloud.ibm.com/resources, open the
+  'Services' section.  The 'Product' columns tells you the type of service.  If
+  you don't have a 'Machine Learning' instance already, create one.  Then click
+  on the corresponding line anywhere except on the name, and copy the CRN displayed
+  in the pane that open on the right.  This item is required only for 
+  the DOWML client to be able to create a space.  If you specified a `space_id`,
+  it is not required.
 
 ## Using data assets in Watson Studio
 
