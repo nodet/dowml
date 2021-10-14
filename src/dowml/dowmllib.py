@@ -254,14 +254,20 @@ class DOWMLLib:
                  url=None,
                  region=None,
                  tz=datetime.utcnow().astimezone().tzinfo):
-        """Read and validate the WML credentials
+        f"""Read and validate the WML credentials
 
         Args:
             wml_credentials_file: path to the file that contains the WML credentials.
             If None, they are read from the environment.
             space_id: the id of the space that should be used. If specified, this
-            replaces the one in the credentials
-            tz: timezone to use to display time, defaults to Python's default timezone"""
+            replaces the one in the credentials.
+            url: the URL for the Machine Learning service to use. If specified, this
+            replaces the one in the credentials. url and region can't be both specified.
+            region: An alternative way to specify the URL for the Machine Learning service 
+            to use. If specified, the URL will be deduced from the region. This
+            replaces the one in the credentials. url and region can't be both specified.
+            Possible values for the region are {list(_CredentialsProvider.REGION_TO_URL.keys())}
+            tz: timezone to use to display time, defaults to Python's default timezone."""
 
         self.model_type = self.MODEL_TYPES[0]
         """Type of model to solve"""
