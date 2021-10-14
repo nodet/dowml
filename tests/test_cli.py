@@ -421,6 +421,11 @@ class TestUrlAndRegionArguments(TestCase):
         cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME, region='eu-de')
         self.assertEqual(cli.lib._wml_credentials['url'], 'https://eu-de.ml.cloud.ibm.com')
 
+    def test_interactive_understands_a_url_argument(self):
+        url = 'https://my.own.url.ibm.com'
+        cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME, url=url)
+        self.assertEqual(cli.lib._wml_credentials['url'], url)
+
 
 if __name__ == '__main__':
     main()
