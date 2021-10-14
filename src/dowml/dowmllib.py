@@ -624,6 +624,7 @@ class DOWMLLib:
             # Save the filter in a global variable for our new function to find it
             _the_filter = with_filter
             # Save the pointer to the original code
+            # noinspection PyProtectedMember
             _the_old_params = client._params
             # and replace it with our new function
             client._params = _new_params
@@ -694,6 +695,7 @@ class DOWMLLib:
         ws_url = client.PLATFORM_URLS_MAP.get(wml_url)
         if not ws_url:
             everything_ok_so_far = False
+        url = None  # Only required to silence the editor's warning
         if everything_ok_so_far:
             try:
                 platform_job_id = job_details['entity']['platform_job']['job_id']
@@ -702,6 +704,7 @@ class DOWMLLib:
             except KeyError:
                 everything_ok_so_far = False
         if everything_ok_so_far:
+            # noinspection PyProtectedMember
             r = requests.delete(url, headers={'Authorization': f'Bearer {client.service_instance._get_token()}',
                                               'Content-Type': 'application/json',
                                               'cache-control': 'no-cache'})
