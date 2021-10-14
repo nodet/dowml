@@ -48,10 +48,11 @@ to a file that contains credentials such as the ones above.
 Here's a sample session:
 ```
 $ dowml -h
-usage: dowml [-h] [--wml-cred-file WML_CRED_FILE] [--verbose]
-             [--commands [COMMANDS [COMMANDS ...]]] [--input] [--space SPACE]
+usage: interactive.py [-h] [--wml-cred-file WML_CRED_FILE] [--verbose]
+                      [--commands [COMMANDS [COMMANDS ...]]] [--input] [--space SPACE] [--url URL]
+                      [--region REGION]
 
-Decision Optimization in WML Interactive, version 1.1.0.
+Decision Optimization in WML Interactive, version 1.3.2.
 Submit and manage Decision Optimization models interactively.
 (c) Copyright Xavier Nodet, 2021
 
@@ -73,6 +74,14 @@ optional arguments:
   --space SPACE, -s SPACE
                         Id of the space to connect to. Takes precedence over the one specified in
                         the credentials under the 'space_id' key, if any.
+  --url URL, -u URL     URL to use for the Machine Learning service. Takes precedence over the one
+                        specified in the credentials under the 'url' key, if any. Incompatible
+                        with --region argument.
+  --region REGION, -r REGION
+                        Region to use for the Machine Learning service. Takes precedence over the
+                        region or URL specified in the credentials, if any. Incompatible with
+                        --url argument. Possible values for the region are ['us-south', 'eu-de',
+                        'eu-gb', 'jp-tok'].
 $
 $
 $ dowml -c help type size 'inputs inline' 'solve examples/afiro.mps' jobs wait jobs log 'type docplex' 'solve examples/markshare.py examples/markshare1.mps.gz' wait jobs dump 'shell ls -l *-*-*-*-*' 'delete *'
