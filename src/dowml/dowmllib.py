@@ -156,11 +156,16 @@ class _CredentialsProvider:
         else:
             assert type(wml_credentials[self.TOKEN]) is str
         if self.REGION in wml_credentials:
+            region = wml_credentials[self.REGION]
             # if self.URL in wml_credentials:
             #     self._logger.error(f"WML credentials must not have both '{self.URL}' and '{self.REGION}'.")
             #     self.usage()
             #     raise InvalidCredentials
-            wml_credentials[self.URL] = self.REGION_TO_URL[wml_credentials[self.REGION]]
+            try:
+                wml_credentials[self.URL] = self.REGION_TO_URL[region]
+            except KeyError:
+                self._logger.error(f"Unknown region '{region}'.")
+                raise InvalidCredentials
             wml_credentials.pop(self.REGION)
         assert self.URL in wml_credentials
         assert type(wml_credentials[self.URL]) is str

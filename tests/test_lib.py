@@ -112,6 +112,12 @@ class TestCredentials(TestCase):
             lib = DOWMLLib()
             self.assertNotIn('region', lib._wml_credentials)
 
+    def test_error_if_unkown_region(self):
+        with mock.patch.dict(os.environ,
+                             {'DOWML_CREDENTIALS': f"{{'apikey': '<apikey>', 'region': 'unknown'}}"}):
+            with self.assertRaises(InvalidCredentials):
+                _ = DOWMLLib()
+
 
 class TestSolveInline(TestCase):
 
