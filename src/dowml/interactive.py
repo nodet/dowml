@@ -63,9 +63,9 @@ job id, but none is specified, the last one is used.
 
 ''')
 
-    def __init__(self, wml_cred_file=None, space_id=None):
+    def __init__(self, wml_cred_file=None, space_id=None, url=None, region=None):
         super().__init__()
-        self.lib = DOWMLLib(wml_cred_file, space_id)
+        self.lib = DOWMLLib(wml_cred_file, space_id, url=url, region=region)
         self.jobs = []
         self.last_job_id = None
 

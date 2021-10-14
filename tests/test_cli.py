@@ -415,5 +415,12 @@ class TestShellCommand(TestCase):
         self.assertEqual(0, self.cli.do_shell(''))
 
 
+class TestUrlAndRegionArguments(TestCase):
+
+    def test_interactive_understands_a_region_argument(self):
+        cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME, region='eu-de')
+        self.assertEqual(cli.lib._wml_credentials['url'], 'https://eu-de.ml.cloud.ibm.com')
+
+
 if __name__ == '__main__':
     main()
