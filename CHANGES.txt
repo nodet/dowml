@@ -1,7 +1,7 @@
 User-visible changes
 --------------------
 
-master:
+V1.4.0:
 
 - [#37] Allow to override the URL in the credentials with a command-line
         argument (in the Interactive) or a constructor argument (in the
