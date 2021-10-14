@@ -158,6 +158,7 @@ class _CredentialsProvider:
             #     self.usage()
             #     raise InvalidCredentials
             wml_credentials[self.URL] = self.REGION_TO_URL[wml_credentials[self.REGION]]
+            wml_credentials.pop(self.REGION)
         assert self.URL in wml_credentials
         assert type(wml_credentials[self.URL]) is str
         url = wml_credentials[self.URL]

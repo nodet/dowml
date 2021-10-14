@@ -106,6 +106,12 @@ class TestCredentials(TestCase):
             lib = DOWMLLib()
             self.assertEqual('https://us-south.ml.cloud.ibm.com', lib._wml_credentials['url'])
 
+    def test_region_is_removed_from_credentials(self):
+        with mock.patch.dict(os.environ,
+                             {'DOWML_CREDENTIALS': f"{{'apikey': '<apikey>', 'region': 'us-south'}}"}):
+            lib = DOWMLLib()
+            self.assertNotIn('region', lib._wml_credentials)
+
 
 class TestSolveInline(TestCase):
 
