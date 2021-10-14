@@ -221,6 +221,7 @@ class DOWMLLib:
 
     def __init__(self, wml_credentials_file=None,
                  space_id=None,
+                 url=None,
                  tz=datetime.utcnow().astimezone().tzinfo):
         """Read and validate the WML credentials
 
@@ -261,6 +262,11 @@ class DOWMLLib:
         # over the one, if any, defined in the credentials
         if space_id:
             wml_credentials[cred_provider.SPACE_ID] = space_id
+
+        # The url specified here takes precedence
+        # over the one, if any, defined in the credentials
+        if url:
+            wml_credentials[cred_provider.URL] = url
 
         self._wml_credentials = wml_credentials
 

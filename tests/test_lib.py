@@ -88,6 +88,18 @@ class TestCredentials(TestCase):
             os.environ['DOWML_CREDENTIALS_FILE'] = TEST_CREDENTIALS_FILE_NAME
             _ = DOWMLLib()
 
+    def test_url_in_constructor_overrides_credentials(self):
+        default_url = 'htts://cloud.ibm.com'
+        non_default_url = 'htts://non.default.url.ibm.com'
+        with mock.patch.dict(os.environ,
+                             {'DOWML_CREDENTIALS': f"{{'apikey': '<apikey>', 'url': '{default_url}'}}"}
+                             ):
+            lib = DOWMLLib()
+            self.assertEqual(default_url, lib._wml_credentials['url'])
+            # And now we change the default
+            lib = DOWMLLib(url=non_default_url)
+            self.assertEqual(non_default_url, lib._wml_credentials['url'])
+
 
 class TestSolveInline(TestCase):
 
