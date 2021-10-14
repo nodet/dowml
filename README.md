@@ -260,6 +260,12 @@ are optional.
    found in https://cloud.ibm.com/apidocs/machine-learning#endpoint-url, 
    and depend on which region you want to use.
 
+3. As an alternative to the `url` value, you can use a more user-friendly and 
+   easier to remember `region`, with a value that is either `us-south`, `eu-de`,
+   `eu-gb` or `jp-tok`.  From this value, _dowml_ will deduce the correct URL to use.
+   To avoid ambiguities or duplications, it is not allowed to use both `url` and
+   `region`.
+
 ### Optional items
 
 Watson Studio and Watson Machine Learning use _spaces_ to group together, and
