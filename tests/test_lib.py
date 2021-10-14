@@ -108,7 +108,7 @@ class TestCredentials(TestCase):
 
     def test_region_is_removed_from_credentials(self):
         with mock.patch.dict(os.environ,
-                             {'DOWML_CREDENTIALS': f"{{'apikey': '<apikey>', 'region': 'us-south'}}"}):
+                             {'DOWML_CREDENTIALS': f"{{'apikey': '<apikey>', 'region': 'eu-de'}}"}):
             lib = DOWMLLib()
             self.assertNotIn('region', lib._wml_credentials)
 

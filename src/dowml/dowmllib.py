@@ -121,6 +121,9 @@ class _CredentialsProvider:
     ML_CRN = 'ml_instance_crn'
     REGION_TO_URL = {
         'us-south': 'https://us-south.ml.cloud.ibm.com',
+        'eu-de': 'https://eu-de.ml.cloud.ibm.com',
+        'eu-gb': 'https://eu-gb.ml.cloud.ibm.com',
+        'jp-tok': 'https://jp-tok.ml.cloud.ibm.com',
     }
 
     def __init__(self, wml_credentials_file=None, wml_credentials_str=None):
