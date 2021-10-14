@@ -89,8 +89,8 @@ class TestCredentials(TestCase):
             _ = DOWMLLib()
 
     def test_url_in_constructor_overrides_credentials(self):
-        default_url = 'htts://cloud.ibm.com'
-        non_default_url = 'htts://non.default.url.ibm.com'
+        default_url = 'https://cloud.ibm.com'
+        non_default_url = 'https://non.default.url.ibm.com'
         with mock.patch.dict(os.environ,
                              {'DOWML_CREDENTIALS': f"{{'apikey': '<apikey>', 'url': '{default_url}'}}"}
                              ):
