@@ -552,9 +552,8 @@ def interactive():
     try:
         instance = DOWMLInteractive(args.wml_cred_file, args.space, url=args.url, region=args.region)
         main_loop(instance, args.commands, args.input)
-    except InvalidCredentials:
-        print('\nERROR: credentials not found!\n')
-        parser.print_help()
+    except InvalidCredentials as e:
+        logging.getLogger().error(f"ERROR: {e.__doc__}", exc_info=True)
         sys.exit(1)
 
 

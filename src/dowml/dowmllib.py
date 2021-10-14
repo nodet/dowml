@@ -54,11 +54,6 @@ class SimilarNamesInJob(Error):
     pass
 
 
-class ConnectionIdNotFound(Error):
-    """Using Cloud Object Storage requires a connection, but none was found"""
-    pass
-
-
 class NoCredentialsToCreateSpace(Error):
     """Need to create a space, but credentials are incomplete to allow that"""
     pass
@@ -145,9 +140,7 @@ class _CredentialsProvider:
     def check_credentials(self, wml_cred_str, url, region):
         assert type(wml_cred_str) is str
         if not wml_cred_str:
-            self._logger.error('WML credentials must not be an empty string.')
-            self.usage()
-            raise InvalidCredentials
+            raise InvalidCredentials('WML credentials must not be an empty string.')
         wml_credentials = ast.literal_eval(wml_cred_str)
         assert type(wml_credentials) is dict
         assert (self.APIKEY in wml_credentials or self.TOKEN in wml_credentials)
@@ -157,8 +150,7 @@ class _CredentialsProvider:
             assert type(wml_credentials[self.TOKEN]) is str
         if region:
             if url:
-                self._logger.error(f"You must not specify both '{self.URL}' and '{self.REGION}'.")
-                raise InvalidCredentials
+                raise InvalidCredentials(f"You must not specify both '{self.URL}' and '{self.REGION}'.")
             wml_credentials[self.REGION] = region
             # Setting a region must clear the URL, otherwise there will be an
             # ambiguity (and therefore an error) just below
@@ -166,14 +158,11 @@ class _CredentialsProvider:
         if self.REGION in wml_credentials:
             region = wml_credentials[self.REGION]
             if self.URL in wml_credentials:
-                self._logger.error(f"WML credentials must not have both '{self.URL}' and '{self.REGION}'.")
-                self.usage()
-                raise InvalidCredentials
+                raise InvalidCredentials(f"WML credentials must not have both '{self.URL}' and '{self.REGION}'.")
             try:
                 wml_credentials[self.URL] = self.REGION_TO_URL[region]
             except KeyError:
-                self._logger.error(f"Unknown region '{region}'.")
-                raise InvalidCredentials
+                raise InvalidCredentials(f"Unknown region '{region}'.")
             wml_credentials.pop(self.REGION)
         if url:
             # The url specified takes priority over the one in the credentials, if any.
@@ -182,8 +171,7 @@ class _CredentialsProvider:
         assert type(wml_credentials[self.URL]) is str
         url = wml_credentials[self.URL]
         if not url:
-            self._logger.error('URL must not be an empty string.')
-            raise InvalidCredentials
+            raise InvalidCredentials('URL must not be an empty string.')
         if url[-1] == '/':
             self._logger.warning('URL should not have a \'/\' at the end.')
             wml_credentials[self.URL] = url[:-1]
@@ -203,9 +191,7 @@ class _CredentialsProvider:
             self._logger.debug(f'Looking for credentials file name in environment variable {var_file_name}...')
             wml_cred_str = self._read_wml_credentials_from_file(os.environ[var_file_name])
         else:
-            print(f'Environment variables ${var_name} or ${var_file_name} not found.')
-            self.usage()
-            raise InvalidCredentials
+            raise InvalidCredentials(f'Environment variables ${var_name} or ${var_file_name} not found.')
 
         return wml_cred_str
 
