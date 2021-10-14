@@ -126,6 +126,21 @@ class TestCredentials(TestCase):
             with self.assertRaises(InvalidCredentials):
                 _ = DOWMLLib()
 
+    def test_region_in_constructor_overrides_credentials(self):
+        default_url = 'htts://cloud.ibm.com'
+        with mock.patch.dict(os.environ,
+                             {'DOWML_CREDENTIALS': f"{{'apikey': '<apikey>', 'url': '{default_url}'}}"}
+                             ):
+            lib = DOWMLLib()
+            self.assertEqual(default_url, lib._wml_credentials['url'])
+            # And now we change the default
+            lib = DOWMLLib(region='jp-tok')
+            self.assertEqual('https://jp-tok.ml.cloud.ibm.com', lib._wml_credentials['url'])
+
+    def test_region_and_url_not_both_in_constructor(self):
+        with self.assertRaises(InvalidCredentials):
+            _ = DOWMLLib(url='https://jp-tok.ml.cloud.ibm.com', region='eu-de')
+
 
 class TestSolveInline(TestCase):
 

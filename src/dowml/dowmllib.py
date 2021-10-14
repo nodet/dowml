@@ -126,7 +126,7 @@ class _CredentialsProvider:
         'jp-tok': 'https://jp-tok.ml.cloud.ibm.com',
     }
 
-    def __init__(self, wml_credentials_file=None, wml_credentials_str=None, url=None):
+    def __init__(self, wml_credentials_file=None, wml_credentials_str=None, url=None, region=None):
         self._logger = logging.getLogger(self.__class__.__name__)
 
         if wml_credentials_str is None:
@@ -135,14 +135,14 @@ class _CredentialsProvider:
             else:
                 wml_credentials_str = self._read_wml_credentials_from_env()
             self._logger.debug('Found credential string.')
-        self.credentials = self.check_credentials(wml_credentials_str, url)
+        self.credentials = self.check_credentials(wml_credentials_str, url, region)
 
     def usage(self):
         print(f'${self.ENVIRONMENT_VARIABLE_NAME} should contain credentials as a Python dict of the form:')
         print(f'  {{\'{self.APIKEY}\': \'<apikey>\', \'{self.URL}\': \'https://us-south.ml.cloud.ibm.com\'}}')
         print(f'Or set ${self.ENVIRONMENT_VARIABLE_NAME_FILE} to the path to a file containing the same information.')
 
-    def check_credentials(self, wml_cred_str, url):
+    def check_credentials(self, wml_cred_str, url, region):
         assert type(wml_cred_str) is str
         if not wml_cred_str:
             self._logger.error('WML credentials must not be an empty string.')
@@ -155,6 +155,14 @@ class _CredentialsProvider:
             assert type(wml_credentials[self.APIKEY]) is str
         else:
             assert type(wml_credentials[self.TOKEN]) is str
+        if region:
+            if url:
+                self._logger.error(f"You must not specify both '{self.URL}' and '{self.REGION}'.")
+                raise InvalidCredentials
+            wml_credentials[self.REGION] = region
+            # Setting a region must clear the URL, otherwise there will be an
+            # ambiguity (and therefore an error) just below
+            wml_credentials.pop(self.URL)
         if self.REGION in wml_credentials:
             region = wml_credentials[self.REGION]
             if self.URL in wml_credentials:
@@ -244,6 +252,7 @@ class DOWMLLib:
     def __init__(self, wml_credentials_file=None,
                  space_id=None,
                  url=None,
+                 region=None,
                  tz=datetime.utcnow().astimezone().tzinfo):
         """Read and validate the WML credentials
 
@@ -269,7 +278,7 @@ class DOWMLLib:
 
         self._logger = logging.getLogger(self.__class__.__name__)
 
-        cred_provider = _CredentialsProvider(wml_credentials_file, url=url)
+        cred_provider = _CredentialsProvider(wml_credentials_file, url=url, region=region)
         wml_credentials = cred_provider.credentials
 
         # A space name in the credentials changes the default
