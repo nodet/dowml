@@ -3,6 +3,10 @@ User-visible changes
 
 master:
 
+- [#37] Allow to override the URL in the credentials with a command-line
+        argument (in the Interactive) or a constructor argument (in the
+        library). Also, allows to specify a region instead of a URL (for
+        the known regions).
 - [#36] Don't leave the Watson Studio runs dangling when deleting a job.
 
 
@@ -10,6 +14,7 @@ V1.3.1:
 
 - Update the documentation in README.md
 - Update the sample session in README.md
+
 
 V1.3.0:
 
