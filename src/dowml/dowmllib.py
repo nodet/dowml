@@ -116,8 +116,12 @@ class _CredentialsProvider:
     SPACE_ID = 'space_id'
     SPACE_NAME = 'space_name'
     URL = 'url'
+    REGION = 'region'
     COS_CRN = 'cos_resource_crn'
     ML_CRN = 'ml_instance_crn'
+    REGION_TO_URL = {
+        'us-south': 'https://us-south.ml.cloud.ibm.com',
+    }
 
     def __init__(self, wml_credentials_file=None, wml_credentials_str=None):
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -148,6 +152,12 @@ class _CredentialsProvider:
             assert type(wml_credentials[self.APIKEY]) is str
         else:
             assert type(wml_credentials[self.TOKEN]) is str
+        if self.REGION in wml_credentials:
+            # if self.URL in wml_credentials:
+            #     self._logger.error(f"WML credentials must not have both '{self.URL}' and '{self.REGION}'.")
+            #     self.usage()
+            #     raise InvalidCredentials
+            wml_credentials[self.URL] = self.REGION_TO_URL[wml_credentials[self.REGION]]
         assert self.URL in wml_credentials
         assert type(wml_credentials[self.URL]) is str
         url = wml_credentials[self.URL]

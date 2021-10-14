@@ -100,6 +100,12 @@ class TestCredentials(TestCase):
             lib = DOWMLLib(url=non_default_url)
             self.assertEqual(non_default_url, lib._wml_credentials['url'])
 
+    def test_region_in_credentials_define_a_url(self):
+        with mock.patch.dict(os.environ,
+                             {'DOWML_CREDENTIALS': f"{{'apikey': '<apikey>', 'region': 'us-south'}}"}):
+            lib = DOWMLLib()
+            self.assertEqual('https://us-south.ml.cloud.ibm.com', lib._wml_credentials['url'])
+
 
 class TestSolveInline(TestCase):
 
