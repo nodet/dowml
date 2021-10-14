@@ -514,6 +514,17 @@ def interactive():
                         help=f'Id of the space to connect to. Takes precedence over '
                              f'the one specified in the credentials under the '
                              f'\'{_CredentialsProvider.SPACE_ID}\' key, if any.')
+    parser.add_argument('--url', '-u', default=None,
+                        help=f'URL to use for the Machine Learning service. Takes precedence over '
+                             f'the one specified in the credentials under the '
+                             f'\'{_CredentialsProvider.URL}\' key, if any. '
+                             f'Incompatible with --region argument.')
+    regions = list(_CredentialsProvider.REGION_TO_URL.keys())
+    parser.add_argument('--region', '-r', default=None,
+                        help=f'Region to use for the Machine Learning service. Takes precedence over '
+                             f'the region or URL specified in the credentials, if any. '
+                             f'Incompatible with --url argument. '
+                             f'Possible values for the region are {regions}.')
     args = parser.parse_args()
 
     # Last logging level repeated as many times as necessary to accommodate
@@ -539,7 +550,7 @@ def interactive():
         # logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
 
     try:
-        instance = DOWMLInteractive(args.wml_cred_file, args.space)
+        instance = DOWMLInteractive(args.wml_cred_file, args.space, url=args.url, region=args.region)
         main_loop(instance, args.commands, args.input)
     except InvalidCredentials:
         print('\nERROR: credentials not found!\n')
