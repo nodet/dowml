@@ -135,7 +135,7 @@ class _CredentialsProvider:
             else:
                 wml_credentials_str = self._read_wml_credentials_from_env()
             self._logger.debug('Found credential string.')
-        self.credentials = self.check_credentials(wml_credentials_str, url, region)
+        self.credentials = self.check_credentials(wml_credentials_str, url=url, region=region)
 
     def usage(self):
         print(f'${self.ENVIRONMENT_VARIABLE_NAME} should contain credentials as a Python dict of the form:')
@@ -263,7 +263,7 @@ class DOWMLLib:
             replaces the one in the credentials.
             url: the URL for the Machine Learning service to use. If specified, this
             replaces the one in the credentials. url and region can't be both specified.
-            region: An alternative way to specify the URL for the Machine Learning service 
+            region: An alternative way to specify the URL for the Machine Learning service
             to use. If specified, the URL will be deduced from the region. This
             replaces the one in the credentials. url and region can't be both specified.
             Possible values for the region are {list(_CredentialsProvider.REGION_TO_URL.keys())}

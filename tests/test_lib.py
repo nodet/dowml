@@ -30,9 +30,8 @@ class TestCredentials(TestCase):
             _ = _CredentialsProvider(wml_credentials_str='{\'apikey\': \'<apikey>\', \'url\': \'\'}')
 
     def test_space_name_has_default(self):
-        with mock.patch.dict(os.environ,
-                             {'DOWML_CREDENTIALS':
-                              "{'apikey': '<apikey>', 'url': 'https://us-south.ml.cloud.ibm.com'}"}):
+        with mock.patch.dict(os.environ, {
+                'DOWML_CREDENTIALS': "{'apikey': '<apikey>', 'url': 'https://us-south.ml.cloud.ibm.com'}"}):
             default_space_name = 'dowml-space'
             # Let's check the default value is correct
             lib = DOWMLLib()
@@ -55,11 +54,10 @@ class TestCredentials(TestCase):
         non_default_space_id = 'foo'
         # Let's make sure we are really testing something: by default, we don't
         # have a space_id in the credentials
-        with mock.patch.dict(os.environ,
-                             {'DOWML_CREDENTIALS':
-                              "{'apikey': '<apikey>',"
-                              " 'url': 'https://us-south.ml.cloud.ibm.com',"
-                              " 'space_id': 'bar'}"}):
+        with mock.patch.dict(os.environ, {
+            'DOWML_CREDENTIALS': "{'apikey': '<apikey>',"
+                                 " 'url': 'https://us-south.ml.cloud.ibm.com',"
+                                 " 'space_id': 'bar'}"}):
             lib = DOWMLLib()
             self.assertNotEqual(non_default_space_id, lib._wml_credentials['space_id'])
             # And now we change the default
@@ -102,27 +100,26 @@ class TestCredentials(TestCase):
 
     def test_region_in_credentials_define_a_url(self):
         with mock.patch.dict(os.environ,
-                             {'DOWML_CREDENTIALS': f"{{'apikey': '<apikey>', 'region': 'us-south'}}"}):
+                             {'DOWML_CREDENTIALS': "{'apikey': '<apikey>', 'region': 'us-south'}"}):
             lib = DOWMLLib()
             self.assertEqual('https://us-south.ml.cloud.ibm.com', lib._wml_credentials['url'])
 
     def test_region_is_removed_from_credentials(self):
         with mock.patch.dict(os.environ,
-                             {'DOWML_CREDENTIALS': f"{{'apikey': '<apikey>', 'region': 'eu-de'}}"}):
+                             {'DOWML_CREDENTIALS': "{'apikey': '<apikey>', 'region': 'eu-de'}"}):
             lib = DOWMLLib()
             self.assertNotIn('region', lib._wml_credentials)
 
     def test_error_if_unkown_region(self):
         with mock.patch.dict(os.environ,
-                             {'DOWML_CREDENTIALS': f"{{'apikey': '<apikey>', 'region': 'unknown'}}"}):
+                             {'DOWML_CREDENTIALS': "{'apikey': '<apikey>', 'region': 'unknown'}"}):
             with self.assertRaises(InvalidCredentials):
                 _ = DOWMLLib()
 
     def test_error_if_both_region_and_url_are_specified(self):
-        with mock.patch.dict(os.environ,
-                             {'DOWML_CREDENTIALS':
-                                  f"{{'apikey': '<apikey>', "
-                                  f"'url': 'https://us-south.ml.cloud.ibm.com', 'region': 'eu-gb'}}"}):
+        with mock.patch.dict(os.environ, {
+            'DOWML_CREDENTIALS': "{'apikey': '<apikey>', "
+                                 "'url': 'https://us-south.ml.cloud.ibm.com', 'region': 'eu-gb'}"}):
             with self.assertRaises(InvalidCredentials):
                 _ = DOWMLLib()
 
@@ -218,7 +215,7 @@ class TestSolveInline(TestCase):
         create_job_mock.assert_called_once()
         params = self.get_params(create_job_mock)
         self.assertIn('oaas.timeLimit', params)
-        self.assertEqual(params['oaas.timeLimit'], 1000*lim)
+        self.assertEqual(params['oaas.timeLimit'], 1000 * lim)
 
     def test_solve_defaults_with_zero_limit(self):
         self.lib.timelimit = 0
@@ -235,12 +232,12 @@ class TestSolveInline(TestCase):
 
     def test_get_csv_file(self):
         details = {'entity': {'decision_optimization': {'output_data': [{
-              'fields': ['i', 'f'],
-              'id': 'results.csv',
-              'values': [
-                 [0, 0],
-                 ['a,b', 'c d']
-              ]
+            'fields': ['i', 'f'],
+            'id': 'results.csv',
+            'values': [
+                [0, 0],
+                ['a,b', 'c d']
+            ]
         }]}}}
         # We use the deprecated parameter, to confirm it's still there
         output = self.lib.get_outputs(details, csv_as_dataframe=False)
@@ -256,12 +253,12 @@ class TestSolveInline(TestCase):
 
     def test_get_csv_file_the_new_way(self):
         details = {'entity': {'decision_optimization': {'output_data': [{
-              'fields': ['i', 'f'],
-              'id': 'results.csv',
-              'values': [
-                 [0, 0],
-                 ['a,b', 'c d']
-              ]
+            'fields': ['i', 'f'],
+            'id': 'results.csv',
+            'values': [
+                [0, 0],
+                ['a,b', 'c d']
+            ]
         }]}}}
         output = self.lib.get_outputs(details, tabular_as_csv=True)
         self.assertEqual(type(b''), type(output['results.csv']))
