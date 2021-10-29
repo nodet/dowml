@@ -1,3 +1,4 @@
+import docplex.util.environment as environment
 from docplex.mp.model_reader import ModelReader
 
 
@@ -9,6 +10,12 @@ def run_model(path):
     m.parameters.timelimit(10)
     # Limit tree memory to 1 MB
     m.parameters.workmem(1)
+
+    # Dump the model as a file named local_model.lp
+    m.export_as_lp("local_model.lp")
+    # And add this as a job attachment with id model.lp
+    environment.set_output_attachment('model.lp', 'local_model.lp')
+
     m.solve(log_output=True)
 
 if __name__ == '__main__':

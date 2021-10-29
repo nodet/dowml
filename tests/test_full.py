@@ -121,9 +121,11 @@ class TestDetailsAndOutputs(TestCase):
     def setUpClass(cls) -> None:
         lib = DOWMLLib()
         lib.outputs = 'assets'
-        id_not_inline = lib.solve('../examples/afiro.mps')
+        lib.model_type = 'docplex'
+        id_not_inline = lib.solve('../examples/markshare.py ../examples/markshare1.mps.gz')
         lib.inputs = 'inline'
         lib.outputs = 'inline'
+        lib.model_type = 'cplex'
         id_inline = lib.solve('../examples/afiro.mps')
         lib.wait_for_job_end(id_not_inline)
         lib.wait_for_job_end(id_inline)
@@ -289,7 +291,8 @@ class TestDetailsAndOutputs(TestCase):
     def test_output_for_non_inline_has_expected_files(self):
         cli = DOWMLInteractive()
         self.check_stored_files(cli, self.id_not_inline,
-                                ['afiro.mps', 'solution.json', 'stats.csv', 'log.txt', 'details.json'])
+                                ['markshare.py', 'markshare1.mps.gz', 'model.lp', 'kpis.csv',
+                                 'solution.json', 'stats.csv', 'log.txt', 'details.json'])
 
 
 if __name__ == '__main__':
