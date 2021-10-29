@@ -1017,7 +1017,7 @@ class DOWMLLib:
             },
             cdd_inputdata: [],
             cdd_outputdata: [
-                {'id': '.*\\.*'}
+                {'id': '.*'}
             ]
         }
         if self.outputs == 'assets':

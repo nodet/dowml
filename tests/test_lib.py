@@ -458,7 +458,7 @@ class TestOutputs(TestCase):
         self.assertEqual(kall.args[0], 'deployment-id')
         self.assertEqual(len(kall.args[1]['output-data']), 1)
         i = kall.args[1]['output-data'][0]
-        self.assertEqual(i['id'], '.*\\.*')
+        self.assertEqual(i['id'], '.*')
 
     def test_solve_with_outputs_assets(self):
         # If outputs are assets, we create a single output-data-reference,
@@ -474,7 +474,7 @@ class TestOutputs(TestCase):
         self.assertEqual(len(kall.args[1][odr]), 1)
         i = kall.args[1][odr][0]
         self.assertEqual('data_asset', i['type'])
-        self.assertEqual('.*\\.*', i['id'])
+        self.assertEqual('.*', i['id'])
         self.assertEqual({}, i['connection'])
         self.assertEqual({'name': '${job_id}/${attachment_name}'}, i['location'])
 
