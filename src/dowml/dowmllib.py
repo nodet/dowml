@@ -1195,9 +1195,10 @@ class DOWMLLib:
                 }
             }
             # Create the space
-            space = client.spaces.store(meta_props=metadata)
-            self._logger.debug('Space created')
-            space_id = client.spaces.get_uid(space)
+            space_details = client.spaces.store(meta_props=metadata)
+            state = space_details['entity']['status'].get('state')
+            self._logger.debug(f'Space created, with state={state}.')
+            space_id = client.spaces.get_uid(space_details)
         self._logger.info(f'Space id: {space_id}')
         return space_id
 
