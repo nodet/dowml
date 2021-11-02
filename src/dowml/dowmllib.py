@@ -1195,7 +1195,10 @@ class DOWMLLib:
                 }
             }
             # Create the space
-            space_details = client.spaces.store(meta_props=metadata)
+            # We want the space to be ready as soon as the code returns from
+            # spaces.store(), so we use background_mode=False. In addition, this
+            # gives us error checking which doesn't happen in default mode.
+            space_details = client.spaces.store(meta_props=metadata, background_mode=False)
             state = space_details['entity']['status'].get('state')
             self._logger.debug(f'Space created, with state={state}.')
             space_id = client.spaces.get_uid(space_details)
