@@ -1,6 +1,15 @@
 User-visible changes
 --------------------
 
+
+master:
+
+- [#41] Prevent crash when using '--region' and credentials didn't include
+        a URL.
+- [#39] When creating the space, wait for it to be fully ready instead of
+        (trying to) use it immediately.
+
+
 V1.4.0:
 
 - [#37] Allow to override the URL in the credentials with a command-line
