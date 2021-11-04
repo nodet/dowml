@@ -231,6 +231,11 @@ class TestSolveInline(TestCase):
         create_job_mock.assert_called_once()
         self.assertNotIn('oaas.timeLimit', self.get_params(create_job_mock))
 
+    def test_deprecated_get_output(self):
+        details = {'entity': {'decision_optimization': {}}}
+        _ = self.lib.get_output(details)
+        self.assertTrue(True)
+
     def test_get_no_output(self):
         details = {'entity': {'decision_optimization': {}}}
         output = self.lib.get_outputs(details)
