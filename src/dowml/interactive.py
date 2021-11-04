@@ -422,6 +422,17 @@ Runs the specified command in a shell."""
         # the Interactive.
         return 0
 
+    def do_status(self, _):
+        """status
+Prints current configuration for the Interactive."""
+        print(f'URL: {self.lib._wml_credentials[_CredentialsProvider.URL]}')
+        id = self.lib._space_id if self.lib._space_id else 'unknown'
+        print(f'Space: {self.lib.space_name} ({id})')
+        print(f'Type: {self.lib.model_type}, size: {self.lib.tshirt_size}, version: {self.lib.do_version}')
+        print(f'Inputs: {self.lib.inputs}, outputs: {self.lib.outputs}')
+        t = f'{self.lib.timelimit} seconds' if self.lib.timelimit else 'unlimited'
+        print(f'Time: {t}')
+
 
 def main_loop(instance, commands, prompt_at_the_end):
     # By default, we want to run the command loop

@@ -427,5 +427,14 @@ class TestUrlAndRegionArguments(TestCase):
         self.assertEqual(cli.lib._wml_credentials['url'], url)
 
 
+class TestStatus(TestCase):
+
+    def setUp(self) -> None:
+        self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
+
+    def test_successful_shell_returns_zero(self):
+        self.cli.do_status()
+
+
 if __name__ == '__main__':
     main()
