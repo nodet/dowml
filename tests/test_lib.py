@@ -138,6 +138,13 @@ class TestCredentials(TestCase):
         with self.assertRaises(InvalidCredentials):
             _ = DOWMLLib(url='https://jp-tok.ml.cloud.ibm.com', region='eu-de')
 
+    def test_can_specify_region_on_top_of_no_url(self):
+        """The point of this test is to check GH-41: when credentials don't include
+        a URL, specifying a region in the constructor would crash"""
+        with mock.patch.dict(os.environ,
+                             {'DOWML_CREDENTIALS': "{'apikey': '<apikey>', 'region': 'eu-de'}"}):
+            _ = DOWMLLib(region='eu-gb')
+
 
 class TestSolveInline(TestCase):
 

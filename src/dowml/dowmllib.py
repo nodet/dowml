@@ -154,7 +154,7 @@ class _CredentialsProvider:
             wml_credentials[self.REGION] = region
             # Setting a region must clear the URL, otherwise there will be an
             # ambiguity (and therefore an error) just below
-            wml_credentials.pop(self.URL)
+            wml_credentials.pop(self.URL, None)
         if self.REGION in wml_credentials:
             region = wml_credentials[self.REGION]
             if self.URL in wml_credentials:
