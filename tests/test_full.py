@@ -3,7 +3,7 @@ import shutil
 
 from pandas import DataFrame
 
-from dowml.dowmllib import DOWMLLib
+from dowml.lib import DOWMLLib
 from unittest import TestCase, main
 
 from dowml.interactive import DOWMLInteractive

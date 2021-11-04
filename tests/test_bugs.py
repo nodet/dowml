@@ -9,7 +9,7 @@ from ibm_watson_machine_learning.Set import Set
 from ibm_watson_machine_learning.deployments import Deployments
 from ibm_watson_machine_learning.spaces import Spaces
 
-from dowml.dowmllib import DOWMLLib
+from dowml.lib import DOWMLLib
 from dowml.interactive import DOWMLInteractive, main_loop
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'

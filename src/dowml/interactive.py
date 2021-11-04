@@ -23,7 +23,7 @@ from cmd import Cmd
 from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
 
 import dowml
-from dowml.dowmllib import DOWMLLib, InvalidCredentials, NoCredentialsToCreateSpace, _CredentialsProvider
+from dowml.lib import DOWMLLib, InvalidCredentials, NoCredentialsToCreateSpace, _CredentialsProvider
 
 
 class CommandNeedsJobID(Exception):

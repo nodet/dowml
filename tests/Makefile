@@ -1,6 +1,6 @@
 export PYTHONPATH=$PYTHONPATH:../src:..
 
-quick_tests = test_lib.py test_cli.py test_bugs.py
+quick_tests = test_lib.py test_cli.py test_bugs.py test_dowmllib.py
 slow_tests = test_full.py
 all_tests = $(quick_tests) $(slow_tests)
 
@@ -24,7 +24,7 @@ cover:
 	coverage run -a -m unittest $(all_tests)
 	rm -rf a_details.json
 	coverage html
-	open htmlcov/_Users_nodet_Documents_work_git_master_dowml_src_dowml_dowmllib_py.html
+	open htmlcov/_Users_nodet_Documents_work_git_master_dowml_src_dowml_lib_py.html
 
 # This really exercises as much as possible
 # but doesn't check the results

@@ -10,4 +10,4 @@
 #  limitations under the License.
 #  --------------------------------------------------------------------------
 
-VERSION = '1.5.0'
+from dowml.lib import *

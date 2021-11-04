@@ -9,7 +9,7 @@ from unittest.mock import Mock, ANY, call
 from dowml import VERSION
 from dowml.interactive import DOWMLInteractive, \
     CommandNeedsJobID, CommandNeedsNonNullInteger, InvalidArgumentForCommand
-from dowml.dowmllib import DOWMLLib, version_is_greater
+from dowml.lib import DOWMLLib, version_is_greater
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
 EXPECTED = 'expected'

@@ -14,7 +14,7 @@ from unittest import TestCase, main, mock
 
 from ibm_watson_machine_learning.wml_client_error import WMLClientError
 
-from dowml.dowmllib import InvalidCredentials, _CredentialsProvider, DOWMLLib, SimilarNamesInJob, version_is_greater
+from dowml.lib import InvalidCredentials, _CredentialsProvider, DOWMLLib, SimilarNamesInJob, version_is_greater
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
 

@@ -1,6 +1,6 @@
 import pprint
 
-from dowml.dowmllib import DOWMLLib
+from dowml.lib import DOWMLLib
 
 
 def main():

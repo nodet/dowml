@@ -2,7 +2,12 @@ User-visible changes
 --------------------
 
 
-master:
+V1.5.0:
+
+- [#42] Rename submodule 'dowmllib' to simply 'lib'
+
+
+V1.4.1:
 
 - [#41] Prevent crash when using '--region' and credentials didn't include
         a URL.
