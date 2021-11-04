@@ -432,8 +432,8 @@ class TestStatus(TestCase):
     def setUp(self) -> None:
         self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
 
-    def test_successful_shell_returns_zero(self):
-        self.cli.do_status()
+    def test_status_command_exists(self):
+        self.cli.do_status('')
 
 
 if __name__ == '__main__':
