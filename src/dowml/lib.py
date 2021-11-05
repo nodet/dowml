@@ -313,6 +313,7 @@ class DOWMLLib:
         # http://ibm-wml-api-pyclient.mybluemix.net/#api-for-ibm-cloud
         client = APIClient(self._wml_credentials)
         self._logger.info(f'Creating the client succeeded.  Client version is {client.version}.')
+        self._logger.info(f'Client uses URL {self._wml_credentials[_CredentialsProvider.URL]}.')
         return client
 
     def _set_default_space(self):
