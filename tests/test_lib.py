@@ -163,6 +163,7 @@ class TestCredentials(TestCase):
 
 class TestLibAttributes(TestCase):
     URL = 'the-url'
+    SPACE_ID = 'the-space-id'
 
     def test_lib_has_url(self):
         lib = DOWMLLib(url=self.URL)
@@ -172,6 +173,27 @@ class TestLibAttributes(TestCase):
         lib = DOWMLLib(url=self.URL)
         with self.assertRaises(AttributeError):
             lib.url = 'the-new-url'
+
+    def test_lib_has_space_id(self):
+        lib = DOWMLLib()
+        self.assertEqual(None, lib.space_id)
+
+    def test_space_id_is_readonly(self):
+        lib = DOWMLLib(space_id=self.SPACE_ID)
+        with self.assertRaises(AttributeError):
+            lib.space_id = 'the-new-space-id'
+
+    def test_space_id_not_none_after_client_is_created(self):
+        lib = DOWMLLib(space_id=self.SPACE_ID)
+        lib._create_client = Mock()
+        lib._find_or_create_space = Mock()
+        self.assertEqual(None, lib.space_id)
+
+        lib._get_or_make_client()
+
+        lib._create_client.assert_called_once()
+        lib._find_or_create_space.assert_not_called()
+        self.assertEqual(self.SPACE_ID, lib.space_id)
 
 
 class TestSolveInline(TestCase):

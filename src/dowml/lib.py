@@ -302,6 +302,11 @@ class DOWMLLib:
         return self._wml_credentials[_CredentialsProvider.URL]
 
     @property
+    def space_id(self):
+        """The id for the deployment space that the library is connected to."""
+        return self._space_id
+
+    @property
     def inline(self):
         self._logger.warning('Attribute \'inline\' is deprecated: use \'inputs\' instead.')
         return self.inputs == 'inline'
@@ -712,7 +717,7 @@ class DOWMLLib:
             try:
                 platform_job_id = job_details['entity']['platform_job']['job_id']
                 platform_run_id = job_details['entity']['platform_job']['run_id']
-                url = f'{ws_url}/v2/jobs/{platform_job_id}/runs/{platform_run_id}?space_id={self._space_id}'
+                url = f'{ws_url}/v2/jobs/{platform_job_id}/runs/{platform_run_id}?space_id={self.space_id}'
             except KeyError:
                 everything_ok_so_far = False
         if everything_ok_so_far:
@@ -1015,7 +1020,7 @@ class DOWMLLib:
                     'id': basename,
                     "type": "data_asset",
                     "location": {
-                        "href": "/v2/assets/" + data_asset_id + "?space_id=" + self._space_id
+                        "href": "/v2/assets/" + data_asset_id + "?space_id=" + self.space_id
                     }
                 }
             solve_payload[cdd_inputdata].append(input_data)
