@@ -1,5 +1,6 @@
 import datetime
 import os
+import sys
 from logging import Logger
 from unittest.mock import Mock, patch, call
 
@@ -12,11 +13,25 @@ from ibm_watson_machine_learning.spaces import Spaces
 
 from unittest import TestCase, main, mock
 
-from ibm_watson_machine_learning.wml_client_error import WMLClientError
+from ibm_watson_machine_learning.wml_client_error import WMLClientError, ApiRequestFailure
 
 from dowml.lib import InvalidCredentials, _CredentialsProvider, DOWMLLib, SimilarNamesInJob, version_is_greater
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
+
+
+class HiddenPrints:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        self._original_stderr = sys.stderr
+        sys.stdout = open(os.devnull, 'w')
+        sys.stderr = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stderr.close()
+        sys.stdout = self._original_stdout
+        sys.stderr = self._original_stderr
 
 
 class TestCredentials(TestCase):
@@ -321,6 +336,54 @@ class TestSolveInline(TestCase):
         output = self.lib.get_outputs(details)
         # We get back the raw content
         self.assertEqual(content, output[name])
+
+
+class TestSolveCachesDeploymentInformation(TestCase):
+
+    def setUp(self) -> None:
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
+        lib._logger = Mock(spec=Logger)
+        lib._client = Mock(spec=APIClient)
+        lib._client.deployments = Mock(spec=Deployments)
+        lib.inline = True
+        domn = Mock()
+        domn.SOLVE_PARAMETERS = 'solve-parameters'
+        domn.INPUT_DATA = 'input-data'
+        domn.OUTPUT_DATA = 'output-data'
+        lib._client.deployments.DecisionOptimizationMetaNames = domn
+        lib.get_file_as_data = lambda path: 'base-64-content'
+        lib._space_id = 'space-id'
+        lib._get_deployment_id_with_params_cached = Mock(spec=DOWMLLib._get_deployment_id_with_params_cached)
+        lib._get_deployment_id_with_params_cached.return_value = 'deployment-id'
+        self.lib = lib
+
+    def test_solve_checks_deployment_info(self):
+        self.lib.solve('afiro.mps')
+        self.lib._get_deployment_id_with_params_cached.assert_called_once()
+
+    def test_solve_checks_deployment_info_only_once(self):
+        self.lib.solve('afiro.mps')
+        self.lib.solve('afiro.mps')
+        self.lib._get_deployment_id_with_params_cached.assert_called_once()
+
+    def test_solve_checks_deployment_info_again_if_failure(self):
+        mock_get_id = self.lib._get_deployment_id_with_params_cached
+        mock_get_id.side_effect = ['stale-deployment-id', 'new-deployment-id']
+        create_job_mock = self.lib._client.deployments.create_job
+        mock_response = Mock()
+        mock_response.status_code = ''
+        mock_response.content = b'deployment_does_not_exist'
+        with HiddenPrints():
+            create_job_mock.side_effect = [ApiRequestFailure('error message', mock_response), 'job-id']
+        self.lib.solve('afiro.mps')
+        self.assertEqual(2, mock_get_id.call_count)
+
+    def test_solve_checks_deployment_again_when_job_type_changes(self):
+        self.lib.model_type = 'cplex'
+        self.lib.solve('afiro.mps')
+        self.lib.model_type = 'docplex'
+        self.lib.solve('foo.py')
+        self.assertEqual(2, self.lib._get_deployment_id_with_params_cached.call_count)
 
 
 class TestSolveUsingDataAssets(TestCase):

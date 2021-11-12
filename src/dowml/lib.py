@@ -17,6 +17,7 @@ import glob
 import io
 import logging
 import os
+import pprint
 import re
 import sys
 import tempfile
@@ -29,7 +30,7 @@ from functools import lru_cache
 from operator import attrgetter
 
 import requests
-from ibm_watson_machine_learning.wml_client_error import WMLClientError
+from ibm_watson_machine_learning.wml_client_error import WMLClientError, ApiRequestFailure
 from packaging import version
 
 from ibm_watson_machine_learning import APIClient
@@ -351,12 +352,31 @@ class DOWMLLib:
         :return: The id of the submitted job
         """
         self._get_or_make_client()
-
-        deployment_id = self._get_deployment_id()
-        self._logger.info(f'Deployment id: {deployment_id}')
-        job_id = self.create_job(paths, deployment_id)
-        self._logger.info(f'Job id: {job_id}')
-        return job_id
+        # As _get_deployment_id caches its results, it may happen that what it returns is
+        # invalid. For example if the user deleted the deployment after the last solve.
+        # So if we get an error about the deployment not existing, we clear the cache
+        # and retry once.
+        first_try = True
+        while True:
+            deployment_id = self._get_deployment_id()
+            self._logger.info(f'Deployment id: {deployment_id}')
+            try:
+                job_id = self.create_job(paths, deployment_id)
+                self._logger.info(f'Job id: {job_id}')
+                return job_id
+            except ApiRequestFailure as e:
+                if first_try and b'deployment_does_not_exist' in e.args[1].content:
+                    self._logger.warning(f'Deployment was not found. Clearing the cache and retrying...')
+                    self._get_deployment_id_with_params.cache_clear()
+                    first_try = False
+                else:
+                    if not first_try:
+                        self._logger.warning(f'Clearing the cache didn\'t help...')
+                    else:
+                        # This is not the error we expected
+                        pass
+                    # either way, there's nothing we can do on this one
+                    raise
 
     def client_data_asset_download(self, asset_id, filename):
         self._logger.debug(f'Downloading asset {asset_id} in {filename}...')
@@ -1049,13 +1069,31 @@ class DOWMLLib:
         return job_id
 
     def _get_deployment_id(self):
+        # Which deployment we want depends on a number of configuration values
+        # in the library.  In order for the cache to work correctly, and not always
+        # return the same deployment id, the cached function must be given these
+        # values as parameters.
+        return self._get_deployment_id_with_params(self.DEPLOYMENT_NAME,
+                                                   self.model_type,
+                                                   self.do_version,
+                                                   self.tshirt_size)
+
+    @lru_cache
+    def _get_deployment_id_with_params(self, deployment_name_prefix, model_type, do_version, tshirt_size):
+        # The point of this forwarding function is to allow testing.
+        # Specifically, counting the number of calls to the _cached
+        # function, and deciding what it returns.
+        # Mocking this function would remove the lru_cache...
+        return self._get_deployment_id_with_params_cached(deployment_name_prefix, model_type, do_version, tshirt_size)
+
+    def _get_deployment_id_with_params_cached(self, deployment_name_prefix, model_type, do_version, tshirt_size):
         """Create the deployment if doesn't exist already, return its id."""
         self._logger.debug('Getting deployments...')
         client = self._get_or_make_client()
         deployment_details = client.deployments.get_details()
         self._logger.debug('Done.')
         resources = deployment_details['resources']
-        deployment_name = f'{self.DEPLOYMENT_NAME}-{self.model_type}-{self.do_version}-{self.tshirt_size}'
+        deployment_name = f'{deployment_name_prefix}-{model_type}-{do_version}-{tshirt_size}'
         self._logger.debug(f'Got the list. Looking for deployment named \'{deployment_name}\'')
         deployment_id = None
         for r in resources:
@@ -1067,7 +1105,6 @@ class DOWMLLib:
             return deployment_id
 
         self._logger.debug('This deployment doesn\'t exist yet. Creating it...')
-
         deployment_id = self._create_deployment(deployment_name)
         return deployment_id
 
