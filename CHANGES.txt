@@ -6,6 +6,7 @@ V1.5.0:
 
 - [#45] Add readonly 'url' and 'space_id' attributes to the lib
 - [#44] Speed-up job creation by caching deployment information
+- [#43] Add 'status' command in the Interactive
 - [#42] Rename submodule 'dowmllib' to simply 'lib'
 
 
