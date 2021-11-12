@@ -17,7 +17,6 @@ import glob
 import io
 import logging
 import os
-import pprint
 import re
 import sys
 import tempfile
@@ -366,12 +365,12 @@ class DOWMLLib:
                 return job_id
             except ApiRequestFailure as e:
                 if first_try and b'deployment_does_not_exist' in e.args[1].content:
-                    self._logger.warning(f'Deployment was not found. Clearing the cache and retrying...')
+                    self._logger.warning('Deployment was not found. Clearing the cache and retrying...')
                     self._get_deployment_id_with_params.cache_clear()
                     first_try = False
                 else:
                     if not first_try:
-                        self._logger.warning(f'Clearing the cache didn\'t help...')
+                        self._logger.warning('Clearing the cache didn\'t help...')
                     else:
                         # This is not the error we expected
                         pass
