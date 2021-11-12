@@ -1,7 +1,5 @@
 import os
 import tempfile
-
-import dowml
 import statistics
 from datetime import datetime
 
