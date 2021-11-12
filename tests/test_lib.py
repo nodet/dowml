@@ -166,25 +166,25 @@ class TestLibAttributes(TestCase):
     SPACE_ID = 'the-space-id'
 
     def test_lib_has_url(self):
-        lib = DOWMLLib(url=self.URL)
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME, url=self.URL)
         self.assertEqual(self.URL, lib.url)
 
     def test_url_is_readonly(self):
-        lib = DOWMLLib(url=self.URL)
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME, url=self.URL)
         with self.assertRaises(AttributeError):
             lib.url = 'the-new-url'
 
     def test_lib_has_space_id(self):
-        lib = DOWMLLib()
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
         self.assertEqual(None, lib.space_id)
 
     def test_space_id_is_readonly(self):
-        lib = DOWMLLib(space_id=self.SPACE_ID)
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME, space_id=self.SPACE_ID)
         with self.assertRaises(AttributeError):
             lib.space_id = 'the-new-space-id'
 
     def test_space_id_not_none_after_client_is_created(self):
-        lib = DOWMLLib(space_id=self.SPACE_ID)
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME, space_id=self.SPACE_ID)
         lib._create_client = Mock()
         lib._find_or_create_space = Mock()
         self.assertEqual(None, lib.space_id)
