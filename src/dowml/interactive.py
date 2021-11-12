@@ -425,7 +425,7 @@ Runs the specified command in a shell."""
     def do_status(self, _):
         """status
 Prints current configuration for the Interactive."""
-        print(f'URL: {self.lib._wml_credentials[_CredentialsProvider.URL]}')
+        print(f'URL: {self.lib.url}')
         id = f'({self.lib._space_id})' if self.lib._space_id else ''
         print(f'Space: {self.lib.space_name} {id}')
         print(f'Type: {self.lib.model_type}, size: {self.lib.tshirt_size}, version: {self.lib.do_version}')

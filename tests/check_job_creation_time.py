@@ -33,8 +33,7 @@ def run_one_model(lib, path):
 
 def main():
     lib = DOWMLLib()
-    url = lib._wml_credentials['url']
-    print(f'Using URL: {url}')
+    print(f'Using URL: {lib.url}')
     lib.model_type = 'docplex'
     lib.inputs = 'inline'
     lib.outputs = 'inline'

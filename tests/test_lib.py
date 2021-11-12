@@ -161,6 +161,19 @@ class TestCredentials(TestCase):
             _ = DOWMLLib(region='eu-gb')
 
 
+class TestLibAttributes(TestCase):
+    URL = 'the-url'
+
+    def test_lib_has_url(self):
+        lib = DOWMLLib(url=self.URL)
+        self.assertEqual(self.URL, lib.url)
+
+    def test_url_is_readonly(self):
+        lib = DOWMLLib(url=self.URL)
+        with self.assertRaises(AttributeError):
+            lib.url = 'the-new-url'
+
+
 class TestSolveInline(TestCase):
 
     def setUp(self) -> None:

@@ -297,6 +297,11 @@ class DOWMLLib:
         self.tz = tz
 
     @property
+    def url(self):
+        """The URL for the WML service instance that the library is connected to."""
+        return self._wml_credentials[_CredentialsProvider.URL]
+
+    @property
     def inline(self):
         self._logger.warning('Attribute \'inline\' is deprecated: use \'inputs\' instead.')
         return self.inputs == 'inline'
