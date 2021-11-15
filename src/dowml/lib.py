@@ -381,10 +381,6 @@ class DOWMLLib:
                 else:
                     if not first_try:
                         self._logger.warning('Clearing the cache didn\'t help...')
-                    else:
-                        # This is not the error we expected
-                        pass
-                    # either way, there's nothing we can do on this one
                     raise
 
     def client_data_asset_download(self, asset_id, filename):
