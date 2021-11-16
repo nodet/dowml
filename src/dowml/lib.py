@@ -84,6 +84,7 @@ def _new_params():
     global _the_old_params
     global _the_filter
     # Use the original code and get its output
+    # noinspection PyCallingNonCallable
     result = _the_old_params()
     # Add the filter, if one is required
     if _the_filter:
@@ -710,7 +711,6 @@ class DOWMLLib:
         if everything_ok_so_far and not ws_url:
             self._logger.error(f'Unknown Watson Studio URL for WML URL {wml_url}.')
             everything_ok_so_far = False
-        url = None  # Only required to silence the editor's warning
         if everything_ok_so_far:
             try:
                 platform_job_id = job_details['entity']['platform_job']['job_id']
@@ -720,8 +720,10 @@ class DOWMLLib:
                 self._logger.error('Watson Studio job id or run id not found in WML job details.')
                 everything_ok_so_far = False
         if everything_ok_so_far:
+            # noinspection PyUnboundLocalVariable
             self._logger.debug(f'Trying to delete run {platform_run_id} of Watson Studio job {platform_job_id}...')
             # noinspection PyProtectedMember
+            # noinspection PyUnboundLocalVariable
             r = requests.delete(url, headers={'Authorization': f'Bearer {client.service_instance._get_token()}',
                                               'Content-Type': 'application/json',
                                               'cache-control': 'no-cache'})
@@ -887,7 +889,6 @@ class DOWMLLib:
                             print('')
                             # We are joining the lines in the activity with a CR,
                             # only to remove them if they were already included...
-                            # FIXME: what a waste!
                             act = '\n'.join(activity)
                             act = self.remove_empty_lines(act)
                             print(act)
