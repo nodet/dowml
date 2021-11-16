@@ -434,8 +434,8 @@ class TestSolveCachesDeploymentInformation(TestCase):
         mock_response.content = b'deployment_does_not_exist'
         with HiddenPrints():
             create_job_mock.side_effect = [ApiRequestFailure('error message', mock_response),
-                                           Exception('another error message')]
-        with self.assertRaises(Exception):
+                                           ApiRequestFailure('error message', mock_response)]
+        with self.assertRaises(ApiRequestFailure):
             self.lib.solve('afiro.mps')
         self.assertEqual(2, self.lib._get_deployment_id_with_params_cached.call_count)
         self.assertEqual(2, create_job_mock.call_count)
