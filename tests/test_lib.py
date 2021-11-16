@@ -762,6 +762,25 @@ class TestWait(TestCase):
         self.assertEqual(nb_not_complete_calls + 2, self.lib._client.deployments.get_job_details.call_count)
 
 
+class TestDetails(TestCase):
+
+    def setUp(self) -> None:
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
+        lib._logger = Mock(spec=Logger)
+        lib._client = Mock(spec=APIClient)
+        lib._client.version = "0.0.0"
+        lib._client.set = Mock(spec=Set)
+        lib._client.deployments = Mock(spec=Deployments)
+        lib._client.spaces = Mock(spec=Spaces)
+        lib._client.spaces.get_details.return_value = {'resources': []}
+        self.lib = lib
+
+    def test_get_details_can_filter_large_chunks_with_no_key_error(self):
+        self.lib._client.deployments.get_job_details.return_value = {}
+        self.lib.get_job_details('1')
+        self.assertTrue(True)
+
+
 class TestLog(TestCase):
 
     def setUp(self) -> None:
