@@ -1021,6 +1021,17 @@ class TestDeleteJob(TestCase):
         self.assertEqual('https://the.ws.url.ibm.com/v2/jobs/platform-job-id/runs/platform-run-id?space_id=None',
                          args[0])
 
+    def test_delete_deals_with_unknown_watson_studio_url(self):
+        self.lib._client.PLATFORM_URLS_MAP = {}
+        job_id = 'job_id'
+        self.lib.get_job_details.return_value = {
+            'metadata': {
+                'id': job_id
+            },
+        }
+        self.lib.delete_job(job_id)
+        self.lib._client.deployments.delete_job.assert_called_once_with(job_id, True)
+
     def test_delete_deals_with_absent_platform_job_information(self):
         job_id = 'job_id'
         self.lib.get_job_details.return_value = {

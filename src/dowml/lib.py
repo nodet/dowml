@@ -704,9 +704,11 @@ class DOWMLLib:
         client = self._get_or_make_client()
         wml_url = self._wml_credentials['url']
         # We don't want to (try to) delete the WS run if we only cancel the job
+        # Instead, we skip everything until calling deployments.delete_job(True)
         everything_ok_so_far = hard
         ws_url = client.PLATFORM_URLS_MAP.get(wml_url)
-        if not ws_url:
+        if everything_ok_so_far and not ws_url:
+            self._logger.error(f'Unknown Watson Studio URL for WML URL {wml_url}.')
             everything_ok_so_far = False
         url = None  # Only required to silence the editor's warning
         if everything_ok_so_far:
@@ -715,8 +717,10 @@ class DOWMLLib:
                 platform_run_id = job_details['entity']['platform_job']['run_id']
                 url = f'{ws_url}/v2/jobs/{platform_job_id}/runs/{platform_run_id}?space_id={self.space_id}'
             except KeyError:
+                self._logger.error('Watson Studio job id or run id not found in WML job details.')
                 everything_ok_so_far = False
         if everything_ok_so_far:
+            self._logger.debug(f'Trying to delete run {platform_run_id} of Watson Studio job {platform_job_id}...')
             # noinspection PyProtectedMember
             r = requests.delete(url, headers={'Authorization': f'Bearer {client.service_instance._get_token()}',
                                               'Content-Type': 'application/json',
