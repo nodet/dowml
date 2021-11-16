@@ -15,11 +15,11 @@ import logging
 import os
 import pprint
 import re
+import requests
 import sys
 
-import requests
-
 from cmd import Cmd
+from datetime import datetime
 from ibm_watson_machine_learning.wml_client_error import ApiRequestFailure
 
 import dowml
@@ -481,7 +481,7 @@ def main_loop(instance, commands, prompt_at_the_end):
             instance.intro = ''
 
 
-# We will mock the 'requests' function that's used by APIClient
+# We will patch the 'requests' function that's used by APIClient
 # So first we save the original function
 orig_requests_session_send = requests.Session.send
 
@@ -491,10 +491,11 @@ def mocked_requests_session_send(*arguments, **kwargs):
     session, prepared_request = arguments
     method = prepared_request.method
     url = prepared_request.url
-    #       2021-02-17 16:59:39,710
-    print(f'           {method} {url}')
+    dt_iso = datetime.now().isoformat(sep=' ', timespec='milliseconds')
+    print(f'{dt_iso} {method} {url}')
     resp = orig_requests_session_send(*arguments, **kwargs)
-    # print(f'                        {resp.status_code}')
+    dt_iso = datetime.now().isoformat(sep=' ', timespec='milliseconds')
+    print(f'{dt_iso} {resp.status_code}')
     return resp
 
 
