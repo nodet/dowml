@@ -855,8 +855,15 @@ class TestDeleteJob(TestCase):
         self.lib = lib
 
     def test_delete_soft_doesnt_look_for_job_details(self):
+        # Kept to check that compatibility is kept
         job_id = 'job_id'
         self.lib.delete_job(job_id, hard=False)
+        self.lib._client.deployments.delete_job.assert_called_once_with(job_id, False)
+        self.lib.get_job_details.assert_not_called()
+
+    def test_cancel_doesnt_look_for_job_details(self):
+        job_id = 'job_id'
+        self.lib.cancel_job(job_id)
         self.lib._client.deployments.delete_job.assert_called_once_with(job_id, False)
         self.lib.get_job_details.assert_not_called()
 
@@ -870,7 +877,7 @@ class TestDeleteJob(TestCase):
                 'id': job_id
             },
         }
-        self.lib.delete_job(job_id, hard=True)
+        self.lib.delete_job(job_id)
         self.lib._client.deployments.delete_job.assert_called_once_with(job_id, True)
         self.lib.get_job_details.assert_called_once_with(job_id, with_contents='names')
         self.lib._client.data_assets.delete.assert_not_called()
@@ -911,7 +918,7 @@ class TestDeleteJob(TestCase):
         m.attach_mock(get_job_details, 'get_job_details')
         m.attach_mock(delete_asset, 'delete_asset')
 
-        self.lib.delete_job(job_id, hard=True)
+        self.lib.delete_job(job_id)
         delete_job.assert_called_once_with(job_id, True)
         # By default, get_job_details will filter the outputs, we need them
         # when we want to check what data asset to delete
@@ -947,7 +954,7 @@ class TestDeleteJob(TestCase):
         }
         delete_asset = self.lib._client.data_assets.delete
         delete_asset.side_effect = WMLClientError("delete assets failed")
-        self.lib.delete_job(job_id, hard=True)
+        self.lib.delete_job(job_id)
         self.assertEqual(2, delete_asset.call_count)
 
     def test_delete_deletes_the_platform_job(self):
@@ -969,7 +976,7 @@ class TestDeleteJob(TestCase):
         mock_delete = Mock()
         mock_delete.return_value = mock_response
         with mock.patch('requests.delete', mock_delete):
-            self.lib.delete_job(job_id, hard=True)
+            self.lib.delete_job(job_id)
         mock_delete.assert_called_once()
         args, _ = mock_delete.call_args_list[0]
         self.assertEqual('https://the.ws.url.ibm.com/v2/jobs/platform-job-id/runs/platform-run-id?space_id=None',
@@ -983,7 +990,7 @@ class TestDeleteJob(TestCase):
                 'id': job_id
             },
         }
-        self.lib.delete_job(job_id, hard=True)
+        self.lib.delete_job(job_id)
         self.lib._client.deployments.delete_job.assert_called_once_with(job_id, True)
 
     def test_delete_deals_with_error_when_deleting_platform_job(self):
@@ -1005,7 +1012,7 @@ class TestDeleteJob(TestCase):
         mock_delete = Mock()
         mock_delete.return_value = mock_response
         with mock.patch('requests.delete', mock_delete):
-            self.lib.delete_job(job_id, hard=True)
+            self.lib.delete_job(job_id)
         self.lib._client.deployments.delete_job.assert_called_once_with(job_id, True)
 
 

@@ -411,7 +411,7 @@ Uses current job if not specified."""
 Stops the job specified.
 job is either a job number or a job id. Uses current job if not specified."""
         job_id = self._get_and_remember_job_id(job_id)
-        self.lib.delete_job(job_id, False)
+        self.lib.cancel_job(job_id)
 
     @staticmethod
     def do_shell(command):

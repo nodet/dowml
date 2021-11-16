@@ -2,6 +2,12 @@ User-visible changes
 --------------------
 
 
+master:
+
+- [#40] Introduce cancel_job function. Deprecate hard parameter in call
+        to delete_job, which now really deletes the job by default.
+
+
 V1.5.0:
 
 - [#45] Add readonly 'url' and 'space_id' attributes to the lib

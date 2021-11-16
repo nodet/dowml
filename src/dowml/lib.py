@@ -731,18 +731,29 @@ class DOWMLLib:
             #   we just wanted to cancel the job, so there's nothing to warn against
             client.deployments.delete_job(job_id, hard)
 
-    def delete_job(self, job_id, hard=False):
+    def delete_job(self, job_id, hard=True):
         """Delete the given job.
 
         :param job_id: the job to be deleted
-        :param hard: if False, cancel the job. If true, delete it completely
+        :param hard: deprecated. Use cancel_job instead of passing False
         """
-        job_details = None
-        if hard:
-            job_details = self.get_job_details(job_id, with_contents='names')
-            self._delete_data_assets(job_details)
-        self._logger.debug(f'Deleting job {job_id}...')
-        self._client_deployments_delete_job(job_id, hard, job_details)
+        if not hard:
+            self.cancel_job(job_id)
+            return
+        self._logger.debug(f'Deleting data assets (if any) for job {job_id}...')
+        job_details = self.get_job_details(job_id, with_contents='names')
+        self._delete_data_assets(job_details)
+        self._logger.debug(f'Done. Deleting job {job_id}...')
+        self._client_deployments_delete_job(job_id, True, job_details)
+        self._logger.debug('Done.')
+
+    def cancel_job(self, job_id):
+        """Cancel the given job.
+
+        :param job_id: the job to be canceled
+        """
+        self._logger.debug(f'Canceling job {job_id}...')
+        self._client_deployments_delete_job(job_id, False, None)
         self._logger.debug('Done.')
 
     def decode_log(self, output):
