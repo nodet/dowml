@@ -18,5 +18,6 @@ def run_model(path):
 
     m.solve(log_output=True)
 
+
 if __name__ == '__main__':
     run_model('markshare1.mps.gz')
