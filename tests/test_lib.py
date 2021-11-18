@@ -164,6 +164,11 @@ class TestCredentials(TestCase):
         with mock.patch.dict(os.environ, clear=True):
             _ = DOWMLLib(api_key='<apikey>', region='eu-de')
 
+    def test_must_specify_region_or_url(self):
+        with mock.patch.dict(os.environ, clear=True):
+            with self.assertRaises(InvalidCredentials):
+                _ = DOWMLLib(api_key='<apikey>')
+
 
 class TestLibAttributes(TestCase):
     URL = 'the-url'

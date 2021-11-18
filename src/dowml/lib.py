@@ -158,6 +158,8 @@ class _CredentialsProvider:
                 wml_credentials[self.URL] = url
             if region:
                 wml_credentials[self.REGION] = region
+            if not url and not region:
+                raise InvalidCredentials('URL or region must be specified (but not both).')
         assert type(wml_credentials) is dict
         assert (self.APIKEY in wml_credentials or self.TOKEN in wml_credentials)
         if self.APIKEY in wml_credentials:
