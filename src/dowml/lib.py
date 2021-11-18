@@ -123,7 +123,7 @@ class _CredentialsProvider:
         'jp-tok': 'https://jp-tok.ml.cloud.ibm.com',
     }
 
-    def __init__(self, wml_credentials_file=None, wml_credentials_str=None, url=None, region=None):
+    def __init__(self, wml_credentials_file=None, api_key=None, wml_credentials_str=None, url=None, region=None):
         self._logger = logging.getLogger(self.__class__.__name__)
 
         if wml_credentials_str is None:
@@ -131,19 +131,33 @@ class _CredentialsProvider:
                 wml_credentials_str = self._read_wml_credentials_from_file(wml_credentials_file)
             else:
                 wml_credentials_str = self._read_wml_credentials_from_env()
-            self._logger.debug('Found credential string.')
-        self.credentials = self.check_credentials(wml_credentials_str, url=url, region=region)
+            if wml_credentials_str:
+                self._logger.debug('Found credential string.')
+        self.credentials = self.check_credentials(wml_credentials_str, api_key=api_key, url=url, region=region)
 
     def usage(self):
         print(f'${self.ENVIRONMENT_VARIABLE_NAME} should contain credentials as a Python dict of the form:')
         print(f'  {{\'{self.APIKEY}\': \'<apikey>\', \'{self.URL}\': \'https://us-south.ml.cloud.ibm.com\'}}')
         print(f'Or set ${self.ENVIRONMENT_VARIABLE_NAME_FILE} to the path to a file containing the same information.')
 
-    def check_credentials(self, wml_cred_str, url, region):
-        assert type(wml_cred_str) is str
-        if not wml_cred_str:
-            raise InvalidCredentials('WML credentials must not be an empty string.')
-        wml_credentials = ast.literal_eval(wml_cred_str)
+    def check_credentials(self, wml_cred_str, api_key, url, region):
+        if wml_cred_str is not None:
+            assert type(wml_cred_str) is str
+            if not wml_cred_str:
+                raise InvalidCredentials('WML credentials must not be an empty string.')
+            wml_credentials = ast.literal_eval(wml_cred_str)
+        else:
+            # If we don't find a credentials string through the environment, we will
+            # assume that the parameters are enough to build one.
+            wml_credentials = {}
+            if api_key:
+                wml_credentials[self.APIKEY] = api_key
+            else:
+                raise InvalidCredentials('API key must be specified.')
+            if url:
+                wml_credentials[self.URL] = url
+            if region:
+                wml_credentials[self.REGION] = region
         assert type(wml_credentials) is dict
         assert (self.APIKEY in wml_credentials or self.TOKEN in wml_credentials)
         if self.APIKEY in wml_credentials:
@@ -187,14 +201,12 @@ class _CredentialsProvider:
         var_name = self.ENVIRONMENT_VARIABLE_NAME
         var_file_name = self.ENVIRONMENT_VARIABLE_NAME_FILE
         self._logger.debug(f'Looking for credentials in environment variable {var_name}...')
+        wml_cred_str = None
         if var_name in os.environ:
             wml_cred_str = os.environ[var_name]
         elif var_file_name in os.environ:
             self._logger.debug(f'Looking for credentials file name in environment variable {var_file_name}...')
             wml_cred_str = self._read_wml_credentials_from_file(os.environ[var_file_name])
-        else:
-            raise InvalidCredentials(f'Environment variables ${var_name} or ${var_file_name} not found.')
-
         return wml_cred_str
 
     def _read_wml_credentials_from_file(self, file):
@@ -238,6 +250,7 @@ class DOWMLLib:
     DEPLOYMENT_NAME = f'{DOWML_PREFIX}-deployment'
 
     def __init__(self, wml_credentials_file=None,
+                 api_key=None,
                  space_id=None,
                  url=None,
                  region=None,
@@ -272,7 +285,7 @@ class DOWMLLib:
 
         self._logger = logging.getLogger(self.__class__.__name__)
 
-        cred_provider = _CredentialsProvider(wml_credentials_file, url=url, region=region)
+        cred_provider = _CredentialsProvider(wml_credentials_file, api_key=api_key, url=url, region=region)
         wml_credentials = cred_provider.credentials
 
         # A space name in the credentials changes the default

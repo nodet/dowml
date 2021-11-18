@@ -160,6 +160,10 @@ class TestCredentials(TestCase):
                              {'DOWML_CREDENTIALS': "{'apikey': '<apikey>', 'region': 'eu-de'}"}):
             _ = DOWMLLib(region='eu-gb')
 
+    def test_can_specify_apikey_in_lib_constructor(self):
+        with mock.patch.dict(os.environ, clear=True):
+            _ = DOWMLLib(api_key='<apikey>', region='eu-de')
+
 
 class TestLibAttributes(TestCase):
     URL = 'the-url'
