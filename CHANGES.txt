@@ -4,6 +4,7 @@ User-visible changes
 
 master:
 
+- [#47] Add a 'api-key' parameter to the Interactive
 - [#40] Introduce cancel_job function. Deprecate hard parameter in call
         to delete_job, which now really deletes the job by default.
 
