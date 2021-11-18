@@ -63,9 +63,9 @@ job id, but none is specified, the last one is used.
 
 ''')
 
-    def __init__(self, wml_cred_file=None, space_id=None, url=None, region=None):
+    def __init__(self, wml_cred_file=None, api_key=None, space_id=None, url=None, region=None):
         super().__init__()
-        self.lib = DOWMLLib(wml_cred_file, space_id, url=url, region=region)
+        self.lib = DOWMLLib(wml_cred_file, api_key=api_key, space_id=space_id, url=url, region=region)
         self.jobs = []
         self.last_job_id = None
 
@@ -531,6 +531,10 @@ def interactive():
                              f'the one specified in the credentials under the '
                              f'\'{_CredentialsProvider.URL}\' key, if any. '
                              f'Incompatible with --region argument.')
+    parser.add_argument('--api-key', '-k', default=None,
+                        help=f'API key to use to connect to WML. Takes precedence over '
+                             f'the one specified in the credentials under the '
+                             f'\'{_CredentialsProvider.APIKEY}\' key, if any.')
     regions = list(_CredentialsProvider.REGION_TO_URL.keys())
     parser.add_argument('--region', '-r', default=None,
                         help=f'Region to use for the Machine Learning service. Takes precedence over '
@@ -562,7 +566,8 @@ def interactive():
         # logging.getLogger('ibm_boto3').setLevel(logging.DEBUG)
 
     try:
-        instance = DOWMLInteractive(args.wml_cred_file, args.space, url=args.url, region=args.region)
+        instance = DOWMLInteractive(args.wml_cred_file, api_key=args.api_key,
+                                    space_id=args.space, url=args.url, region=args.region)
         main_loop(instance, args.commands, args.input)
     except InvalidCredentials as e:
         logging.getLogger().error(f"ERROR: {e.__doc__}", exc_info=True)

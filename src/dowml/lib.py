@@ -141,27 +141,27 @@ class _CredentialsProvider:
         print(f'Or set ${self.ENVIRONMENT_VARIABLE_NAME_FILE} to the path to a file containing the same information.')
 
     def check_credentials(self, wml_cred_str, api_key, url, region):
+        wml_credentials = None
         if wml_cred_str is not None:
             assert type(wml_cred_str) is str
             if not wml_cred_str:
                 raise InvalidCredentials('WML credentials must not be an empty string.')
             wml_credentials = ast.literal_eval(wml_cred_str)
-        else:
+            assert type(wml_credentials) is dict
+        if not wml_credentials:
             # If we don't find a credentials string through the environment, we will
             # assume that the parameters are enough to build one.
             wml_credentials = {}
             if api_key:
                 wml_credentials[self.APIKEY] = api_key
-            else:
-                raise InvalidCredentials('API key must be specified.')
             if url:
                 wml_credentials[self.URL] = url
             if region:
                 wml_credentials[self.REGION] = region
-            if not url and not region:
-                raise InvalidCredentials('URL or region must be specified (but not both).')
-        assert type(wml_credentials) is dict
-        assert (self.APIKEY in wml_credentials or self.TOKEN in wml_credentials)
+        if self.APIKEY not in wml_credentials and self.TOKEN not in wml_credentials:
+            raise InvalidCredentials('API key (or token) must be specified.')
+        if self.URL not in wml_credentials and self.REGION not in wml_credentials:
+            raise InvalidCredentials('URL or region must be specified (but not both).')
         if self.APIKEY in wml_credentials:
             assert type(wml_credentials[self.APIKEY]) is str
         else:

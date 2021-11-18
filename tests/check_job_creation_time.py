@@ -111,7 +111,7 @@ def test_one_region(number, wml_cred_file=None, space_id=None, url=None, region=
 
 
 DESCRIPTION = \
-    f'''Checking WML job submission, queuing and saving speed.'''
+    '''Checking WML job submission, queuing and saving speed.'''
 
 
 def main():
@@ -143,7 +143,8 @@ def main():
     parser.add_argument('--number', '-n', default=NB_MODELS,
                         help='Number of jobs to submit.')
     args = parser.parse_args()
-    test_one_region(int(args.number), wml_cred_file=args.wml_cred_file, space_id=args.space, url=args.url, region=args.region)
+    test_one_region(int(args.number), wml_cred_file=args.wml_cred_file,
+                    space_id=args.space, url=args.url, region=args.region)
 
 
 if __name__ == '__main__':
