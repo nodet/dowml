@@ -12,6 +12,7 @@ lint: $(SRC)
 DISTRIB=dist/dowml-*-py3-none-any.whl
 
 $(DISTRIB): $(SRC)
+	rm -rf dist/*
 	python3 -m build
 
 build: lint $(DISTRIB)
