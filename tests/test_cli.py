@@ -429,7 +429,8 @@ class TestCredentialsArguments(TestCase):
     def test_interactive_understands_an_api_key_argument(self):
         api_key = '<my_api_key>'
         url = 'https://my.own.url.ibm.com'
-        cli = DOWMLInteractive(api_key=api_key, url=url)
+        with mock.patch.dict(os.environ, clear=True):
+            cli = DOWMLInteractive(api_key=api_key, url=url)
         self.assertEqual(cli.lib._wml_credentials['url'], url)
 
 

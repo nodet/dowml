@@ -169,6 +169,13 @@ class TestCredentials(TestCase):
             with self.assertRaises(InvalidCredentials):
                 _ = DOWMLLib(api_key='<apikey>')
 
+    def test_apikey_in_constructor_overrides_environment(self):
+        KEY = '<apikey-from-constructor>'
+        with mock.patch.dict(os.environ,
+                             {'DOWML_CREDENTIALS': "{'apikey': '<apikey-from-env>'}"}):
+            lib = DOWMLLib(api_key=KEY, region='eu-de')
+            self.assertEqual(KEY, lib._wml_credentials['apikey'])
+
 
 class TestLibAttributes(TestCase):
     URL = 'the-url'

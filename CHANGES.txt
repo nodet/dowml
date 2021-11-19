@@ -2,7 +2,13 @@ User-visible changes
 --------------------
 
 
-master:
+V1.6.1:
+
+- [#48] Parameter '--api-key' must override whatever was found through
+        the environment
+
+
+V1.6.0:
 
 - [#47] Add a 'api-key' parameter to the Interactive
 - [#40] Introduce cancel_job function. Deprecate hard parameter in call

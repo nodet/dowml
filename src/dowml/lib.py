@@ -152,12 +152,12 @@ class _CredentialsProvider:
             # If we don't find a credentials string through the environment, we will
             # assume that the parameters are enough to build one.
             wml_credentials = {}
-            if api_key:
-                wml_credentials[self.APIKEY] = api_key
-            if url:
-                wml_credentials[self.URL] = url
-            if region:
-                wml_credentials[self.REGION] = region
+        if api_key:
+            wml_credentials[self.APIKEY] = api_key
+        if url:
+            wml_credentials[self.URL] = url
+        if region:
+            wml_credentials[self.REGION] = region
         if self.APIKEY not in wml_credentials and self.TOKEN not in wml_credentials:
             raise InvalidCredentials('API key (or token) must be specified.')
         if self.URL not in wml_credentials and self.REGION not in wml_credentials:
