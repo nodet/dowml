@@ -1070,7 +1070,6 @@ class DOWMLLib:
             cdd.SOLVE_PARAMETERS: {
                 'oaas.logAttachmentName': 'log.txt',
                 'oaas.logTailEnabled': 'true',
-                'oaas.includeInputData': 'false',
                 'oaas.resultsFormat': 'JSON'
             },
             cdd_inputdata: [],
