@@ -280,7 +280,7 @@ class TestDetailsAndOutputs(TestCase):
         with HiddenPrints():
             cli.do_output(job_id)
         for f in files:
-            self.assertTrue(os.path.isfile(f'{job_id}/{f}'))
+            self.assertTrue(os.path.isfile(f'{job_id}/{f}'), f'File {job_id}/{f} was not found!')
         self.assertEqual(len(files), len(os.listdir(job_id)))
 
     def test_output_for_inline_has_expected_files(self):
