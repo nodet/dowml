@@ -102,6 +102,9 @@ def test_one_region(number, wml_cred_file=None, space_id=None, url=None, region=
             print('Mean: ', statistics.mean(times))
             print('Median: ', statistics.median(times))
             print(f'{QUANTILE - 1}-th quantile: ', statistics.quantiles(times, n=QUANTILE)[QUANTILE - 2])
+            total_jobs = len(times)
+            warn_jobs = len(list(filter(lambda t: t > 10, times)))
+            print(f'warning/total # of jobs: {warn_jobs}/{total_jobs}')
 
             print(f'warning/total # of requests: {warn_requests}/{total_requests}')
         finally:
