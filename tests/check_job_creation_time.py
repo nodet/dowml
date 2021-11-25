@@ -1,5 +1,6 @@
 import argparse
 import os
+import pprint
 import tempfile
 import statistics
 import time
@@ -30,7 +31,7 @@ def patched_requests_session_send(*arguments, **kwargs):
     url = prepared_request.url
     dt = datetime.now()
     iso = dt.isoformat(sep=' ', timespec='milliseconds')
-    print(f'{iso} {method} {url}')
+    # print(f'{iso} {method} {url}')
     resp = orig_requests_session_send(*arguments, **kwargs)
     total_requests += 1
     dt2 = datetime.now()
@@ -40,7 +41,7 @@ def patched_requests_session_send(*arguments, **kwargs):
         warn = f' <== WARNING! This one took {diff} seconds'
         warn_requests += 1
     iso = dt2.isoformat(sep=' ', timespec='milliseconds')
-    print(f'{iso} {resp.status_code} {warn}')
+    # print(f'{iso} {resp.status_code} {warn}')
     return resp
 
 
@@ -56,20 +57,33 @@ def run_one_model(lib, path):
     job_id = lib.solve(path)
     submit_time = (datetime.now() - dt).total_seconds()
     _, details = lib.wait_for_job_end(job_id)
-    # It happens very often that the WS job is still 'in progress' when the WML job
-    # has just completed, and deleting it fails.  Waiting a little bit, to give the
-    # platform enough time to update the WS job should help.
-    time.sleep(2)
-    lib.delete_job(job_id, True)
 
     queued_time = diff_time(details['metadata']['created_at'],
                             details['entity']['decision_optimization']['status']['running_at'])
+    last_log_line = details['entity']['decision_optimization']['solve_state']['latest_engine_activity'][-1]
+    dt_startup = last_log_line[-23:] + 'Z'
+    startup_time = diff_time(details['entity']['decision_optimization']['status']['running_at'],
+                             dt_startup)
+    stop_time = diff_time(dt_startup,
+                          details['entity']['decision_optimization']['status']['completed_at'])
     stored_time = diff_time(details['entity']['decision_optimization']['status']['completed_at'],
                             details['metadata']['modified_at'])
     print(f'Job {job_id} was submitted in {submit_time} seconds, '
           f'queued for {queued_time} seconds, '
+          f'started up in {startup_time} seconds, '
+          f'stopped in {stop_time} seconds, '
           f'and stored after {stored_time} seconds.')
-    return submit_time + queued_time + stored_time
+
+    if startup_time + stop_time < 0.5:
+        # It happens very often that the WS job is still 'in progress' when the WML job
+        # has just completed, and deleting it fails.  Waiting a little bit, to give the
+        # platform enough time to update the WS job should help.
+        time.sleep(2)
+        lib.delete_job(job_id, True)
+    else:
+        print(f'**** This job took too long to run! We keep it for investigations...')
+
+    return submit_time + queued_time + startup_time + stop_time + stored_time
 
 
 def test_one_region(number, wml_cred_file=None, space_id=None, url=None, region=None):
@@ -89,7 +103,8 @@ def test_one_region(number, wml_cred_file=None, space_id=None, url=None, region=
 
         handle, path = tempfile.mkstemp(suffix='.py', text=True)
         try:
-            os.write(handle, b"print('Running the code...')")
+            os.write(handle, b"from datetime import datetime\n")
+            os.write(handle, b"print(datetime.now().isoformat(timespec='milliseconds'))")
         finally:
             os.close(handle)
         try:
