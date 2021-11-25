@@ -417,7 +417,7 @@ class DOWMLLib:
 
         def _get_asset_content(asset_id):
             if version_is_greater(self._client.version, WML_HAS_FIXED_DOWNLOAD):
-                return self._client.data_assets.download(asset_id).decode('ascii')
+                return self._client.data_assets.get_content(asset_id).decode('ascii')
             else:
                 with tempfile.TemporaryDirectory() as temp_dir_name:
                     filename = os.path.join(temp_dir_name, f'{asset_id}-log.txt')
