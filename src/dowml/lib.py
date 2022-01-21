@@ -35,7 +35,7 @@ from packaging import version
 from ibm_watson_machine_learning import APIClient
 
 # WML Python API version with a fixed Assets.download function
-WML_HAS_FIXED_DOWNLOAD = "1000.0.0"
+WML_HAS_FIXED_DOWNLOAD = "1.0.177"
 # WML Python API version with _asset_id to create a job
 WML_HAS_ASSET_ID_IN_CREATE_JOB = "1.0.180"
 
