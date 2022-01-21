@@ -1,6 +1,5 @@
 import argparse
 import os
-import pprint
 import tempfile
 import statistics
 import time
@@ -26,22 +25,27 @@ warn_requests = 0
 def patched_requests_session_send(*arguments, **kwargs):
     global total_requests, warn_requests
 
+    do_print = False
     session, prepared_request = arguments
-    method = prepared_request.method
-    url = prepared_request.url
     dt = datetime.now()
-    iso = dt.isoformat(sep=' ', timespec='milliseconds')
-    # print(f'{iso} {method} {url}')
+    if do_print:
+        method = prepared_request.method
+        url = prepared_request.url
+        iso = dt.isoformat(sep=' ', timespec='milliseconds')
+        print(f'{iso} {method} {url}')
     resp = orig_requests_session_send(*arguments, **kwargs)
     total_requests += 1
     dt2 = datetime.now()
     diff = (dt2 - dt).total_seconds()
-    warn = ''
+    if do_print:
+        warn = ''
     if diff > 10.0:
-        warn = f' <== WARNING! This one took {diff} seconds'
+        if do_print:
+            warn = f' <== WARNING! This one took {diff} seconds'
         warn_requests += 1
     iso = dt2.isoformat(sep=' ', timespec='milliseconds')
-    # print(f'{iso} {resp.status_code} {warn}')
+    if do_print:
+        print(f'{iso} {resp.status_code} {warn}')
     return resp
 
 
@@ -81,7 +85,7 @@ def run_one_model(lib, path):
         time.sleep(2)
         lib.delete_job(job_id, True)
     else:
-        print(f'**** This job took too long to run! We keep it for investigations...')
+        print('**** This job took too long to run! We keep it for investigations...')
 
     return submit_time + queued_time + startup_time + stop_time + stored_time
 
