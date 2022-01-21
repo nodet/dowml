@@ -15,7 +15,8 @@ from unittest import TestCase, main, mock
 
 from ibm_watson_machine_learning.wml_client_error import WMLClientError, ApiRequestFailure
 
-from dowml.lib import InvalidCredentials, _CredentialsProvider, DOWMLLib, SimilarNamesInJob, version_is_greater
+from dowml.lib import InvalidCredentials, _CredentialsProvider, DOWMLLib, SimilarNamesInJob, version_is_greater, \
+    WML_HAS_ASSET_ID_IN_CREATE_JOB
 
 TEST_CREDENTIALS_FILE_NAME = 'test_credentials.txt'
 
@@ -218,6 +219,7 @@ class TestSolveInline(TestCase):
         lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
         lib._logger = Mock(spec=Logger)
         lib._client = Mock(spec=APIClient)
+        lib._client.version = WML_HAS_ASSET_ID_IN_CREATE_JOB
         lib._client.deployments = Mock(spec=Deployments)
         lib.inline = True
         domn = Mock()
@@ -229,6 +231,8 @@ class TestSolveInline(TestCase):
         lib._space_id = 'space-id'
         lib._get_deployment_id = Mock(spec=DOWMLLib._get_deployment_id)
         lib._get_deployment_id.return_value = 'deployment-id'
+        lib._get_model_id_from_deployment = Mock(spec=DOWMLLib._get_model_id_from_deployment)
+        lib._get_model_id_from_deployment.return_value = 'model-id'
         self.lib = lib
 
     def test_solve_single_file(self):
@@ -236,7 +240,10 @@ class TestSolveInline(TestCase):
         create_job_mock = self.lib._client.deployments.create_job
         create_job_mock.assert_called_once()
         kall = create_job_mock.call_args
-        self.assertEqual(kall.kwargs, {})
+        set_of_parameters = {}
+        if version_is_greater(self.lib._client.version, WML_HAS_ASSET_ID_IN_CREATE_JOB):
+            set_of_parameters = {'_asset_id': 'model-id'}
+        self.assertEqual(kall.kwargs, set_of_parameters)
         self.assertEqual(kall.args[0], 'deployment-id')
         self.assertEqual(len(kall.args[1]['input-data']), 1)
         i = kall.args[1]['input-data'][0]
@@ -395,6 +402,7 @@ class TestSolveCachesDeploymentInformation(TestCase):
         lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
         lib._logger = Mock(spec=Logger)
         lib._client = Mock(spec=APIClient)
+        lib._client.version = WML_HAS_ASSET_ID_IN_CREATE_JOB
         lib._client.deployments = Mock(spec=Deployments)
         lib.inline = True
         domn = Mock()
@@ -406,6 +414,8 @@ class TestSolveCachesDeploymentInformation(TestCase):
         lib._space_id = 'space-id'
         lib._get_deployment_id_with_params_cached = Mock(spec=DOWMLLib._get_deployment_id_with_params_cached)
         lib._get_deployment_id_with_params_cached.return_value = 'deployment-id'
+        lib._get_model_id_from_deployment = Mock(spec=DOWMLLib._get_model_id_from_deployment)
+        lib._get_model_id_from_deployment.return_value = 'model-id'
         self.lib = lib
 
     def test_solve_checks_deployment_info(self):
@@ -578,6 +588,7 @@ class TestOutputs(TestCase):
         lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
         lib._logger = Mock(spec=Logger)
         lib._client = Mock(spec=APIClient)
+        lib._client.version = WML_HAS_ASSET_ID_IN_CREATE_JOB
         lib._client.deployments = Mock(spec=Deployments)
         lib.inline = True
         domn = Mock()
@@ -590,7 +601,15 @@ class TestOutputs(TestCase):
         lib._space_id = 'space-id'
         lib._get_deployment_id = Mock(spec=DOWMLLib._get_deployment_id)
         lib._get_deployment_id.return_value = 'deployment-id'
+        lib._get_model_id_from_deployment = Mock(spec=DOWMLLib._get_model_id_from_deployment)
+        lib._get_model_id_from_deployment.return_value = 'model-id'
         self.lib = lib
+
+    def get_create_job_kwargs(self):
+        if version_is_greater(self.lib._client.version, WML_HAS_ASSET_ID_IN_CREATE_JOB):
+            return {'_asset_id': 'model-id'}
+        else:
+            return {}
 
     def test_solve_with_outputs_inline(self):
         # If outputs are inline, we create a single output-data,
@@ -600,7 +619,8 @@ class TestOutputs(TestCase):
         create_job_mock = self.lib._client.deployments.create_job
         create_job_mock.assert_called_once()
         kall = create_job_mock.call_args
-        self.assertEqual(kall.kwargs, {})
+        set_of_parameters = self.get_create_job_kwargs()
+        self.assertEqual(kall.kwargs, set_of_parameters)
         self.assertEqual(kall.args[0], 'deployment-id')
         self.assertEqual(len(kall.args[1]['output-data']), 1)
         i = kall.args[1]['output-data'][0]
@@ -614,7 +634,8 @@ class TestOutputs(TestCase):
         create_job_mock = self.lib._client.deployments.create_job
         create_job_mock.assert_called_once()
         kall = create_job_mock.call_args
-        self.assertEqual(kall.kwargs, {})
+        set_of_parameters = self.get_create_job_kwargs()
+        self.assertEqual(kall.kwargs, set_of_parameters)
         self.assertEqual(kall.args[0], 'deployment-id')
         odr = 'output_data_references'
         self.assertEqual(len(kall.args[1][odr]), 1)

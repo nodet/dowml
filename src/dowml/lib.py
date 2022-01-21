@@ -36,6 +36,9 @@ from ibm_watson_machine_learning import APIClient
 
 # WML Python API version with a fixed Assets.download function
 WML_HAS_FIXED_DOWNLOAD = "1000.0.0"
+# WML Python API version with _asset_id to create a job
+WML_HAS_ASSET_ID_IN_CREATE_JOB = "1.0.180"
+
 
 LOGNAME = 'log.txt'
 
@@ -970,6 +973,10 @@ class DOWMLLib:
         deployment = client.deployments.get_details(deployment_id)
         return deployment
 
+    def _get_model_id_from_deployment(self, deployment_id):
+        details = self._get_deployment_from_id(deployment_id)
+        return details["entity"]["asset"]['id']
+
     def _get_size_from_details(self, job):
         try:
             deployment_id = job['entity']['deployment']['id']
@@ -1097,7 +1104,11 @@ class DOWMLLib:
         else:
             self._logger.debug(repr(solve_payload))
         dt = datetime.now()
-        job_details = client.deployments.create_job(deployment_id, solve_payload)
+        if version_is_greater(client.version, WML_HAS_ASSET_ID_IN_CREATE_JOB):
+            model_id = self._get_model_id_from_deployment(deployment_id)
+            job_details = client.deployments.create_job(deployment_id, solve_payload, _asset_id=model_id)
+        else:
+            job_details = client.deployments.create_job(deployment_id, solve_payload)
         submit_time = (datetime.now() - dt).total_seconds()
         self._logger.debug(f'Done in {submit_time}. Getting its id...')
         job_id = client.deployments.get_job_uid(job_details)

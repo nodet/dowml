@@ -1,6 +1,10 @@
 User-visible changes
 --------------------
 
+master:
+
+- [#49] Enable saving one REST call when Python API is recent enough
+
 
 V1.6.1:
 
