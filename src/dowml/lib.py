@@ -251,7 +251,7 @@ class DOWMLLib:
     MODEL_NAME = f'{DOWML_PREFIX}-model'
     MODEL_TYPES = ['cplex', 'cpo', 'opl', 'docplex']
     DO_VERSION = '20.1'
-    TSHIRT_SIZES = ['S', 'M', 'XL']
+    TSHIRT_SIZES = ['S', 'M', 'L', 'XL']
     DEPLOYMENT_NAME = f'{DOWML_PREFIX}-deployment'
 
     def __init__(self, wml_credentials_file=None,
