@@ -52,9 +52,9 @@ usage: dowml [-h] [--wml-cred-file WML_CRED_FILE] [--verbose]
              [--commands [COMMANDS [COMMANDS ...]]] [--input] [--space SPACE] [--url URL]
              [--api-key API_KEY] [--region REGION]
 
-Decision Optimization in WML Interactive, version 1.6.0.
+Decision Optimization in WML Interactive, version 1.7.0.
 Submit and manage Decision Optimization models interactively.
-(c) Copyright Xavier Nodet, 2021
+(c) Copyright Xavier Nodet, 2022
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -91,7 +91,7 @@ $ dowml -c help type size 'inputs inline' 'solve examples/afiro.mps' jobs wait j
 
 Decision Optimization in WML Interactive, version 1.6.0.
 Submit and manage Decision Optimization models interactively.
-(c) Copyright Xavier Nodet, 2021
+(c) Copyright Xavier Nodet, 2022
 
 Type ? for a list of commands.
 

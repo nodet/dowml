@@ -1,7 +1,7 @@
 #  --------------------------------------------------------------------------
 #  Source file provided under Apache License, Version 2.0, January 2004,
 #  http://www.apache.org/licenses/
-#  (c) Copyright Xavier Nodet, 2021
+#  (c) Copyright Xavier Nodet, 2022
 #
 #  Unless required by applicable law or agreed to in writing, software
 #  distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,7 +47,7 @@ class InvalidArgumentForCommand(Exception):
 INTERACTIVE_BANNER = \
     f'''Decision Optimization in WML Interactive, version {dowml.VERSION}.
 Submit and manage Decision Optimization models interactively.
-(c) Copyright Xavier Nodet, 2021'''
+(c) Copyright Xavier Nodet, 2022'''
 
 
 class DOWMLInteractive(Cmd):
