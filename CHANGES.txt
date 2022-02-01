@@ -1,7 +1,7 @@
 User-visible changes
 --------------------
 
-master:
+V1.7.0:
 
 - [#51] Add 'L' to the list of known sizes
 - [#50] Don't store the log on disk when downloading it for display
