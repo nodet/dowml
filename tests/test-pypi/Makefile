@@ -13,7 +13,8 @@ test_locally_built:
 
 test_pypi_test_build:
 	. test-pypi-venv/bin/activate                                                                          ;\
-	python -m pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dowml ;\
+	python -m pip install ibm-watson-machine-learning                                                      ;\
+	python -m pip install -i https://pypi.org/simple --extra-index-url https://test.pypi.org/simple/ dowml ;\
     pip show dowml                                                                                         ;\
 	python list_jobs.py                                                                                    ;\
 	dowml -c 'jobs'
