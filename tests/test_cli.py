@@ -218,7 +218,7 @@ class TestOutput(TestCase):
             call('a', 'out1', b'content-a'),
             call('a', 'out2', b'content-b'),
             call('a', 'details.json', '{}', text=True)
-        ], any_order=True)
+        ], any_order=False)
 
     def test_save_content(self):
         write_data = b'content'
