@@ -312,10 +312,10 @@ job is either a job number or a job id. Uses current job if not specified."""
 Downloads and stores all the inputs and outputs of a job, as well as the details/status of the job.
 job is either a job number or a job id. Uses current job if not specified."""
 
-        def store_details(details):
+        def store_details(job_details):
             # We don't want to store all the outputs in the details themselves, so
             # we make a copy and filter that.
-            filtered_details = details.copy()
+            filtered_details = job_details.copy()
             self.lib.filter_large_chunks_from_details(filtered_details)
             filtered_details = pprint.pformat(filtered_details)
             self.save_content(job_id, 'details.json', filtered_details, text=True)
