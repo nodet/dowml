@@ -215,9 +215,9 @@ class TestOutput(TestCase):
             with mock.patch('builtins.open', mock_open):
                 self.cli.do_dump('1')
         self.cli.save_content.assert_has_calls([
+            call('a', 'details.json', '{}', text=True),
             call('a', 'out1', b'content-a'),
-            call('a', 'out2', b'content-b'),
-            call('a', 'details.json', '{}', text=True)
+            call('a', 'out2', b'content-b')
         ], any_order=False)
 
     def test_save_content(self):

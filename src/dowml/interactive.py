@@ -312,6 +312,14 @@ job is either a job number or a job id. Uses current job if not specified."""
 Downloads and stores all the inputs and outputs of a job, as well as the details/status of the job.
 job is either a job number or a job id. Uses current job if not specified."""
 
+        def store_details(details):
+            # We don't want to store all the outputs in the details themselves, so
+            # we make a copy and filter that.
+            filtered_details = details.copy()
+            self.lib.filter_large_chunks_from_details(filtered_details)
+            filtered_details = pprint.pformat(filtered_details)
+            self.save_content(job_id, 'details.json', filtered_details, text=True)
+
         def store_inline_inputs(job_details):
             inputs = self.lib.get_inputs(job_details, tabular_as_csv=True)
             for name in inputs:
@@ -335,6 +343,10 @@ job is either a job number or a job id. Uses current job if not specified."""
 
         job_id = self._get_and_remember_job_id(job_id)
         details = self.lib.get_job_details(job_id, with_contents='full')
+
+        # We want to store the details first, in case an error happens later
+        # with the assets.
+        store_details(details)
         store_inline_inputs(details)
         store_inline_outputs(details)
         download_data_assets(self.lib.get_output_asset_ids(details))
@@ -342,10 +354,6 @@ job is either a job number or a job id. Uses current job if not specified."""
         # the user to cancel the transfer of these items, which probably would
         # be the largest for a job, after the others have been stored.
         download_data_assets(self.lib.get_input_asset_ids(details))
-        # We don't want to store all the outputs in the details themselves
-        self.lib.filter_large_chunks_from_details(details)
-        details = pprint.pformat(details)
-        self.save_content(job_id, 'details.json', details, text=True)
 
     def do_details(self, arguments, printer=pprint.pprint):
         """details [job] [names|full]
