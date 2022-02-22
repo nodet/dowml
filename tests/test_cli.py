@@ -213,7 +213,7 @@ class TestOutput(TestCase):
         mock_mkdir = Mock()
         with mock.patch('os.mkdir', mock_mkdir):
             with mock.patch('builtins.open', mock_open):
-                self.cli.do_output('1')
+                self.cli.do_dump('1')
         self.cli.save_content.assert_has_calls([
             call('a', 'out1', b'content-a'),
             call('a', 'out2', b'content-b'),
