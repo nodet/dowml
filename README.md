@@ -258,7 +258,7 @@ include the data files submitted, the results of the jobs, and the _deployments_
 The DOWML client will connect to the space specified by the user using
 either the `--space` command-line argument or the `space_id` item in the credentials.
 If neither of these are specified, the client will look for a space named 
-_DOWMLClient-space_, and will try to create such a space if one doesn't exist.
+_dowml-space_, and will try to create such a space if one doesn't exist.
 To create a new space, the DOWML client will need both `cos_resource_crn` and
 `ml_instance_crn` to have been specified in the credentials.
 
@@ -288,6 +288,39 @@ To create a new space, the DOWML client will need both `cos_resource_crn` and
   in the pane that open on the right.  This item is required only for 
   the DOWML client to be able to create a space.  If you specified a `space_id`,
   it is not required.
+
+
+## CP4D credentials
+
+The credentials to connect to the WML service _in a (private) CP4D instance_ are 
+different from those above that pertain to CP4D _as a service_.  The credentials
+look like this:
+
+```
+{
+   "instance_id": "openshift",
+   "version": "4.0",
+   "url": "...",
+   "token": "...",
+   "space_id": "..."
+}
+```
+
+- The `url` is the URL of your CP4D instance, with no `/` at the end. 
+- The `token` can be obtained by running the following command:
+  ```
+  $ curl -k -X GET [url]/v1/preauth/validateAuth -u '[userId]:[password]' | jq
+  ```
+  where `[url]` is your cluster URL, `[userId]` and `[password]` are the credentials
+  of the user that you want to connect as.
+
+- `space_id`: identifier of an existing space to connect to.
+The DOWML client will connect to the space specified by the user using
+either the `--space` command-line argument or the `space_id` item in the credentials.
+If neither of these are specified, the client will look for a space named 
+_dowml-space_, and will try to create such a space if one doesn't exist.  On CPD,
+unlike for Cloud, no `cos_resource_crn` or `ml_instance_crn` are required.
+
 
 ## Using data assets in Watson Studio
 

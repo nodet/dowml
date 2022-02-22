@@ -1257,28 +1257,35 @@ class DOWMLLib:
             # Prepare necessary information
 
             wml_credentials = self._wml_credentials
-            cos_crn = _CredentialsProvider.COS_CRN
-            ml_crn = _CredentialsProvider.ML_CRN
-            if cos_crn not in wml_credentials or ml_crn not in wml_credentials:
-                raise NoCredentialsToCreateSpace(f'WML credentials do not contain the information necessary '
-                                                 f'to create a deployment space. \nMissing \'{cos_crn}\' '
-                                                 f'and/or \'{ml_crn}\'.')
-            assert type(wml_credentials[cos_crn]) is str
-            assert type(wml_credentials[ml_crn]) is str
-
-            csc = client.spaces.ConfigurationMetaNames
-            metadata = {
-                csc.NAME: self.space_name,
-                csc.DESCRIPTION: self.space_name + ' description',
-                csc.STORAGE: {
-                    "type": "bmcos_object_storage",
-                    "resource_crn": self._wml_credentials[cos_crn]
-                },
-                csc.COMPUTE: {
-                    "name": "existing_instance_id",
-                    "crn": self._wml_credentials[ml_crn]
+            if "token" in wml_credentials:
+                csc = client.spaces.ConfigurationMetaNames
+                metadata = {
+                    csc.NAME: self.space_name,
+                    csc.DESCRIPTION: self.space_name + ' description',
                 }
-            }
+            else:
+                cos_crn = _CredentialsProvider.COS_CRN
+                ml_crn = _CredentialsProvider.ML_CRN
+                if cos_crn not in wml_credentials or ml_crn not in wml_credentials:
+                    raise NoCredentialsToCreateSpace(f'WML credentials do not contain the information necessary '
+                                                     f'to create a deployment space. \nMissing \'{cos_crn}\' '
+                                                     f'and/or \'{ml_crn}\'.')
+                assert type(wml_credentials[cos_crn]) is str
+                assert type(wml_credentials[ml_crn]) is str
+
+                csc = client.spaces.ConfigurationMetaNames
+                metadata = {
+                    csc.NAME: self.space_name,
+                    csc.DESCRIPTION: self.space_name + ' description',
+                    csc.STORAGE: {
+                        "type": "bmcos_object_storage",
+                        "resource_crn": self._wml_credentials[cos_crn]
+                    },
+                    csc.COMPUTE: {
+                        "name": "existing_instance_id",
+                        "crn": self._wml_credentials[ml_crn]
+                    }
+                }
             # Create the space
             # We want the space to be ready as soon as the code returns from
             # spaces.store(), so we use background_mode=False. In addition, this
