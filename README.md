@@ -311,10 +311,10 @@ look like this:
   ```
   $ curl -k -X GET [url]/v1/preauth/validateAuth -u '[userId]:[password]' | jq
   ```
-  where `[url]` is your cluster URL, `[userId]` and `[password]` are the credentials
+  where `[url]` is your CPD instance URL, `[userId]` and `[password]` are the credentials
   of the user that you want to connect as.
 
-- `space_id`: identifier of an existing space to connect to.
+- `space_id`: the identifier of an existing space to connect to.
 The DOWML client will connect to the space specified by the user using
 either the `--space` command-line argument or the `space_id` item in the credentials.
 If neither of these are specified, the client will look for a space named 
