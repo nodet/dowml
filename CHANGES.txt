@@ -1,6 +1,15 @@
 User-visible changes
 --------------------
 
+master:
+
+- [#55] We can't delete the Watson Studio job when connected to a CPD
+        instance. But at least we can stop warning about that...
+- [#53] Store the details first when dumping a job, in case there's
+        an error later in the process
+- [#56] Get dowml to work with on-prem CPD instances through tokens
+
+
 V1.7.0:
 
 - [#51] Add 'L' to the list of known sizes
