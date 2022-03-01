@@ -1,7 +1,7 @@
 User-visible changes
 --------------------
 
-master:
+V1.8.0:
 
 - [#57] 'cancel' accepts job specifications such as * and n-m
 - [#55] We can't delete the Watson Studio job when connected to a CPD
