@@ -163,6 +163,8 @@ class _CredentialsProvider:
             wml_credentials[self.REGION] = region
         if self.APIKEY not in wml_credentials and self.TOKEN not in wml_credentials:
             raise InvalidCredentials('API key (or token) must be specified.')
+        if self.APIKEY in wml_credentials and self.TOKEN in wml_credentials:
+            raise InvalidCredentials('API key and token must not be both specified.')
         if self.URL not in wml_credentials and self.REGION not in wml_credentials:
             raise InvalidCredentials('URL or region must be specified (but not both).')
         if self.APIKEY in wml_credentials:

@@ -177,6 +177,12 @@ class TestCredentials(TestCase):
             lib = DOWMLLib(api_key=KEY, region='eu-de')
             self.assertEqual(KEY, lib._wml_credentials['apikey'])
 
+    def test_cant_set_both_token_and_apikey(self):
+        with self.assertRaises(InvalidCredentials):
+            _ = _CredentialsProvider(wml_credentials_str="\
+                 {'token': '<token>', 'apikey': '<apikey>', \
+                  'url': 'https://us-south.ml.cloud.ibm.com'}")
+
 
 class TestLibAttributes(TestCase):
     URL = 'the-url'
