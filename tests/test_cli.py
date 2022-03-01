@@ -93,7 +93,7 @@ class TestDetails(TestCase):
         self.with_content_helper('a full')
 
 
-class TestDelete(TestCase):
+class TestCancelDelete(TestCase):
 
     def setUp(self) -> None:
         self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
@@ -107,9 +107,19 @@ class TestDelete(TestCase):
         self.cli.lib.delete_job.assert_called_once_with('a', True)
         self.assertEqual(self.cli.jobs, ['b', 'c'])
 
+    def test_cancel_first(self):
+        self.cli.do_cancel('1')
+        self.cli.lib.cancel_job.assert_called_once_with('a')
+        self.assertEqual(self.cli.jobs, ['a', 'b', 'c'])
+
     def test_delete_not_in_list(self):
         self.cli.do_delete('d')
         self.cli.lib.delete_job.assert_called_once_with('d', True)
+        self.assertEqual(self.cli.jobs, ['a', 'b', 'c'])
+
+    def test_cancel_not_in_list(self):
+        self.cli.do_cancel('d')
+        self.cli.lib.cancel_job.assert_called_once_with('d')
         self.assertEqual(self.cli.jobs, ['a', 'b', 'c'])
 
     def test_delete_all(self):
@@ -122,6 +132,16 @@ class TestDelete(TestCase):
         ], any_order=True)
         self.assertEqual(self.cli.jobs, [])
 
+    def test_cancel_all(self):
+        self.cli.do_cancel('*')
+        self.cli.lib.get_jobs.assert_called_once()
+        self.cli.lib.cancel_job.assert_has_calls([
+            call('a'),
+            call('b'),
+            call('c')
+        ], any_order=True)
+        self.assertEqual(self.cli.jobs, ['a', 'b', 'c'])
+
     def test_delete_current(self):
         self.cli.last_job_id = 'b'
         self.cli.do_delete('')
@@ -130,10 +150,23 @@ class TestDelete(TestCase):
         self.assertEqual(self.cli.jobs, ['a', 'c'])
         self.assertIsNone(self.cli.last_job_id)
 
+    def test_cancel_current(self):
+        self.cli.last_job_id = 'b'
+        self.cli.do_cancel('')
+        self.cli.lib.cancel_job.assert_called_once_with('b')
+        self.assertEqual(1, self.cli.lib.cancel_job.call_count)
+        self.assertEqual(self.cli.jobs, ['a', 'b', 'c'])
+        self.assertEqual(self.cli.last_job_id, 'b')
+
     def test_delete_not_current(self):
         self.cli.last_job_id = 'b'
         self.cli.do_delete('c')
         self.assertEqual(self.cli.last_job_id, 'b')
+
+    def test_cancel_not_current(self):
+        self.cli.last_job_id = 'b'
+        self.cli.do_cancel('c')
+        self.assertEqual(self.cli.last_job_id, 'c')
 
     def test_delete_range(self):
         self.cli.do_delete('1-2')
@@ -142,6 +175,14 @@ class TestDelete(TestCase):
             call('b', True)
         ], any_order=True)
         self.assertEqual(2, self.cli.lib.delete_job.call_count)
+
+    def test_cancel_range(self):
+        self.cli.do_cancel('1-2')
+        self.cli.lib.cancel_job.assert_has_calls([
+            call('a'),
+            call('b')
+        ], any_order=True)
+        self.assertEqual(2, self.cli.lib.cancel_job.call_count)
 
     def test_delete_range_complete(self):
         self.cli.do_delete('1-3')
@@ -152,9 +193,22 @@ class TestDelete(TestCase):
         ], any_order=True)
         self.assertEqual(3, self.cli.lib.delete_job.call_count)
 
+    def test_cancel_range_complete(self):
+        self.cli.do_cancel('1-3')
+        self.cli.lib.cancel_job.assert_has_calls([
+            call('a'),
+            call('b'),
+            call('c')
+        ], any_order=True)
+        self.assertEqual(3, self.cli.lib.cancel_job.call_count)
+
     def test_delete_range_empty(self):
         self.cli.do_delete('2-1')
         self.cli.lib.delete_job.assert_not_called()
+
+    def test_cancel_range_empty(self):
+        self.cli.do_cancel('2-1')
+        self.cli.lib.cancel_job.assert_not_called()
 
     def test_delete_range_larger(self):
         self.cli.do_delete('3-5')
@@ -162,6 +216,13 @@ class TestDelete(TestCase):
             call('c', True)
         ], any_order=True)
         self.assertEqual(1, self.cli.lib.delete_job.call_count)
+
+    def test_cancel_range_larger(self):
+        self.cli.do_cancel('3-5')
+        self.cli.lib.cancel_job.assert_has_calls([
+            call('c')
+        ], any_order=True)
+        self.assertEqual(1, self.cli.lib.cancel_job.call_count)
 
 
 class TestOutput(TestCase):

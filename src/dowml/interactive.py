@@ -417,11 +417,15 @@ Uses current job if not specified."""
             self.last_job_id = self.jobs[0]
 
     def do_cancel(self, job_id):
-        """cancel [job]
-Stops the job specified.
-job is either a job number or a job id. Uses current job if not specified."""
-        job_id = self._get_and_remember_job_id(job_id)
-        self.lib.cancel_job(job_id)
+        """cancel [job|*|n-m]
+Stops the job specified. 'job' is either a job number or a job id.
+Use '*' to cancel all the jobs. A range of jobs, specified by their numbers,
+can be canceled using 'n-m'.
+Uses current job if not specified."""
+        jobs = self.parse_job_spec(job_id)
+        for j in jobs:
+            j = self._get_and_remember_job_id(j)
+            self.lib.cancel_job(j)
 
     @staticmethod
     def do_shell(command):
