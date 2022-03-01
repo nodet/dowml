@@ -337,7 +337,7 @@ class DOWMLLib:
         self._logger.warning('Attribute \'inline\' is deprecated: use \'inputs\' instead.')
         self.inputs = 'inline' if value else 'assets'
 
-    def is_connected_to_CPD(self):
+    def is_connected_to_onprem(self):
         return _CredentialsProvider.TOKEN in self._wml_credentials
 
     def _create_client(self):
@@ -732,7 +732,7 @@ class DOWMLLib:
         # So 'hard' means that we try to delete the WS.
         # Except if we are connected to CPD, as in this case we don't know how
         # to find the WS URL.
-        everything_ok_so_far = hard and not self.is_connected_to_CPD()
+        everything_ok_so_far = hard and not self.is_connected_to_onprem()
         ws_url = client.PLATFORM_URLS_MAP.get(wml_url)
         if everything_ok_so_far and not ws_url:
             self._logger.error(f'Unknown Watson Studio URL for WML URL {wml_url}.')
@@ -1297,7 +1297,7 @@ class DOWMLLib:
             # Prepare necessary information
 
             wml_credentials = self._wml_credentials
-            if self.is_connected_to_CPD():
+            if self.is_connected_to_onprem():
                 metadata = self._create_space_metadata_for_cpd(client)
             else:
                 metadata = self._create_space_metadata_for_cloud(client, wml_credentials)
