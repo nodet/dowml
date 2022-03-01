@@ -371,29 +371,31 @@ job is either a job number or a job id. Uses current job if not specified."""
         details = self.lib.get_job_details(job_id, with_contents=with_contents)
         printer(details, indent=4, width=120)
 
+    def parse_job_spec(self, job_spec):
+        """Returns a list of all the job ids that fit the given specification."""
+        if job_spec == '*':
+            # Update the list of jobs before trying to delete them
+            self._cache_jobs()
+            return self.jobs.copy()
+        elif m := re.fullmatch('(\\d+)-(\\d+)', job_spec):
+            n1 = int(m.group(1))
+            n2 = int(m.group(2))
+            # We must gather the list of all the ids of jobs we want to delete
+            # right from the start, because deleting each job will update the
+            # list while iterating
+            return self.jobs[n1-1:n2].copy()
+        else:
+            return [job_spec]
+
     def do_delete(self, job_id):
         """delete [job|*|n-m]
 Deletes the job specified. 'job' is either a job number or a job id.
 Use '*' to delete all the jobs. A range of jobs, specified by their numbers,
 can be deleted using 'n-m'.
 Uses current job if not specified."""
-        if job_id == '*':
-            # Update the list of jobs before trying to delete them
-            self._cache_jobs()
-            while self.jobs:
-                job = self.jobs[0]
-                self.delete_one_job(job)
-        elif m := re.fullmatch('(\\d+)-(\\d+)', job_id):
-            n1 = int(m.group(1))
-            n2 = int(m.group(2))
-            # We must gather the list of all the ids of jobs we want to delete
-            # right from the start, because deleting each job will update the
-            # list while iterating
-            ids = self.jobs[n1-1:n2]
-            for i in ids:
-                self.delete_one_job(i)
-        else:
-            self.delete_one_job(job_id)
+        jobs = self.parse_job_spec(job_id)
+        for j in jobs:
+            self.delete_one_job(j)
 
     def delete_one_job(self, job_id):
         previous_job = self.last_job_id
