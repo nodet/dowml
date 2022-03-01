@@ -179,9 +179,9 @@ class TestCredentials(TestCase):
 
     def test_cant_set_both_token_and_apikey(self):
         with self.assertRaises(InvalidCredentials):
-            _ = _CredentialsProvider(wml_credentials_str="\
-                 {'token': '<token>', 'apikey': '<apikey>', \
-                  'url': 'https://us-south.ml.cloud.ibm.com'}")
+            _ = _CredentialsProvider(wml_credentials_str="{"
+                                     "'token': '<token>', 'apikey': '<apikey>',"
+                                     "'url': 'https://us-south.ml.cloud.ibm.com'}")
 
 
 class TestLibAttributes(TestCase):

@@ -729,7 +729,10 @@ class DOWMLLib:
         wml_url = self._wml_credentials['url']
         # We don't want to (try to) delete the WS run if we only cancel the job
         # Instead, we skip everything until calling deployments.delete_job(True)
-        everything_ok_so_far = hard
+        # So 'hard' means that we try to delete the WS.
+        # Except if we are connected to CPD, as in this case we don't know how
+        # to find the WS URL.
+        everything_ok_so_far = hard and not self.is_connected_to_CPD()
         ws_url = client.PLATFORM_URLS_MAP.get(wml_url)
         if everything_ok_so_far and not ws_url:
             self._logger.error(f'Unknown Watson Studio URL for WML URL {wml_url}.')
