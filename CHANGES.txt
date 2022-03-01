@@ -3,6 +3,7 @@ User-visible changes
 
 master:
 
+- [#57] 'cancel' accepts job specifications such as * and n-m
 - [#55] We can't delete the Watson Studio job when connected to a CPD
         instance. But at least we can stop warning about that...
 - [#53] Store the details first when dumping a job, in case there's
