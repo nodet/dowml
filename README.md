@@ -301,19 +301,16 @@ look like this:
    "instance_id": "openshift",
    "version": "4.0",
    "url": "...",
-   "token": "...",
+   "username": "...",
+   "apikey": "...",
    "space_id": "..."
 }
 ```
 
 - The `url` is the URL of your CP4D instance, with no `/` at the end. 
-- The `token` can be obtained by running the following command:
-  ```
-  $ curl -k -X GET [url]/v1/preauth/validateAuth -u '[userId]:[password]' | jq
-  ```
-  where `[url]` is your CPD instance URL, `[userId]` and `[password]` are the credentials
-  of the user that you want to connect as.
-
+- The `username` and `apikey` for your user on this cluster.  You can
+get the API key in the 'Profile and settings' dialog that's accessible from your
+avatar menu in the top-right of the screen.
 - `space_id`: the identifier of an existing space to connect to.
 The DOWML client will connect to the space specified by the user using
 either the `--space` command-line argument or the `space_id` item in the credentials.
