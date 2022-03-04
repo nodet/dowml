@@ -338,7 +338,7 @@ class DOWMLLib:
         self.inputs = 'inline' if value else 'assets'
 
     def is_connected_to_onprem(self):
-        return _CredentialsProvider.TOKEN in self._wml_credentials
+        return self._wml_credentials.get("instance_id") == "openshift"
 
     def _create_client(self):
         """Create the Python APIClient instance"""
