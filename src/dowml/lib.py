@@ -757,7 +757,7 @@ class DOWMLLib:
                 self._logger.error(f'Error when trying to delete the Watson Studio run. {r.text}')
                 everything_ok_so_far = False
         if not everything_ok_so_far:
-            if hard:
+            if hard and not self.is_connected_to_onprem():
                 self._logger.error('Could not delete the Watson Studio run. Deleting the WML job deployment instead...')
             # else:
             #   we just wanted to cancel the job, so there's nothing to warn against
