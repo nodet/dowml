@@ -34,6 +34,9 @@ from packaging import version
 
 from ibm_watson_machine_learning import APIClient
 
+# Number of nodes for a deployment
+MAX_NB_NODES = 5
+
 # WML Python API version with a fixed Assets.download function
 WML_HAS_FIXED_DOWNLOAD = "1.0.177"
 # WML Python API version with _asset_id to create a job
@@ -1173,7 +1176,7 @@ class DOWMLLib:
             cdc.NAME: deployment_name,
             cdc.DESCRIPTION: "Deployment for the Solve on WML Python script",
             cdc.BATCH: {},
-            cdc.HARDWARE_SPEC: {'name': self.tshirt_size, 'num_nodes': 2}
+            cdc.HARDWARE_SPEC: {'name': self.tshirt_size, 'num_nodes': MAX_NB_NODES}
         }
         deployment = client.deployments.create(artifact_uid=model_id, meta_props=meta_props)
         self._logger.debug('Deployment created.')
