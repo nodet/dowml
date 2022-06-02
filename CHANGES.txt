@@ -1,6 +1,10 @@
 User-visible changes
 --------------------
 
+master:
+
+- [#59] Upgrade default version to 22.1
+
 V1.8.0:
 
 - [#57] 'cancel' accepts job specifications such as * and n-m

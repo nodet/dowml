@@ -255,7 +255,7 @@ class DOWMLLib:
     space_name = f'{DOWML_PREFIX}-space'
     MODEL_NAME = f'{DOWML_PREFIX}-model'
     MODEL_TYPES = ['cplex', 'cpo', 'opl', 'docplex']
-    DO_VERSION = '20.1'
+    DO_VERSION = '22.1'
     TSHIRT_SIZES = ['S', 'M', 'L', 'XL']
     DEPLOYMENT_NAME = f'{DOWML_PREFIX}-deployment'
 
