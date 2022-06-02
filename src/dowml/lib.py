@@ -25,6 +25,7 @@ import urllib.parse
 from collections import namedtuple
 from contextlib import contextmanager
 from datetime import datetime
+from distutils.version import StrictVersion
 from functools import lru_cache
 from operator import attrgetter
 
@@ -1216,6 +1217,7 @@ class DOWMLLib:
             match = re.fullmatch(r"do_([0-9.]*)", name)
             if match:
                 available_versions.append(match.group(1))
+        available_versions.sort(key=StrictVersion)
         return available_versions
 
     def _create_model(self, model_name):

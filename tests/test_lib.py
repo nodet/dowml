@@ -824,6 +824,26 @@ class TestDetails(TestCase):
         self.assertTrue(True)
 
 
+class TestVersion(TestCase):
+
+    def setUp(self) -> None:
+        lib = DOWMLLib(TEST_CREDENTIALS_FILE_NAME)
+        lib._client = Mock(spec=APIClient)
+        lib._client.version = "1.0.92"
+        self.lib = lib
+
+    def test_version_output_is_sorted(self):
+        self.lib._client.software_specifications = Mock(ModelDefinition)
+        self.lib._client.software_specifications.get_details.return_value = {'resources': [
+            {'metadata': {'name': 'do_12.10'}},
+            {'metadata': {'name': 'do_22.1'}},
+            {'metadata': {'name': 'do_3.0'}},
+            {'metadata': {'name': 'do_20.1'}},
+        ]}
+        result = self.lib.get_available_versions()
+        self.assertEqual(['3.0', '12.10', '20.1', '22.1'], result)
+
+
 class TestLog(TestCase):
 
     def setUp(self) -> None:

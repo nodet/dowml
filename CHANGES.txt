@@ -3,6 +3,7 @@ User-visible changes
 
 master:
 
+- [#58] Sort list of available versions
 - [#59] Upgrade default version to 22.1
 
 V1.8.0:
