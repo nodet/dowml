@@ -1,8 +1,9 @@
 User-visible changes
 --------------------
 
-master:
+V1.9.0:
 
+- [#60] 'dump' was creating invalid files for inline content
 - [#58] Sort list of available versions
 - [#59] Upgrade default version to 22.1
 

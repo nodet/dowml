@@ -232,7 +232,8 @@ class TestOutput(TestCase):
         real_filter = DOWMLLib.filter_large_chunks_from_details
         self.cli.lib = Mock(spec=DOWMLLib)
         self.cli.lib.filter_large_chunks_from_details = real_filter
-        self.cli.lib.get_job_details.return_value = {'entity': {'decision_optimization': {'output_data': [{'content': ""}]}}}
+        self.cli.lib.get_job_details.return_value = \
+            {'entity': {'decision_optimization': {'output_data': [{'content': ""}]}}}
         self.cli.lib.get_inputs.return_value = {}
         self.cli.lib.get_outputs.return_value = {}
         self.cli.lib.get_output_asset_ids.return_value = {}
