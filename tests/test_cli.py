@@ -229,8 +229,10 @@ class TestOutput(TestCase):
 
     def setUp(self) -> None:
         self.cli = DOWMLInteractive(TEST_CREDENTIALS_FILE_NAME)
+        real_filter = DOWMLLib.filter_large_chunks_from_details
         self.cli.lib = Mock(spec=DOWMLLib)
-        self.cli.lib.get_job_details.return_value = {}
+        self.cli.lib.filter_large_chunks_from_details = real_filter
+        self.cli.lib.get_job_details.return_value = {'entity': {'decision_optimization': {'output_data': [{'content': ""}]}}}
         self.cli.lib.get_inputs.return_value = {}
         self.cli.lib.get_outputs.return_value = {}
         self.cli.lib.get_output_asset_ids.return_value = {}
@@ -262,7 +264,9 @@ class TestOutput(TestCase):
         with mock.patch('os.mkdir', mock_mkdir):
             with mock.patch('builtins.open', mock_open):
                 self.cli.do_output('1')
-        mock_get_output.assert_called_once_with({}, tabular_as_csv=True)
+        mock_get_output.assert_called_once_with(
+            {'entity': {'decision_optimization': {'output_data': [{'content': ""}]}}},
+            tabular_as_csv=True)
 
     def test_store_files(self):
         self.cli.lib.get_outputs.return_value = {
@@ -276,7 +280,10 @@ class TestOutput(TestCase):
             with mock.patch('builtins.open', mock_open):
                 self.cli.do_dump('1')
         self.cli.save_content.assert_has_calls([
-            call('a', 'details.json', '{}', text=True),
+            call('a', 'details.json',
+                 "{'entity': {'decision_optimization': {'output_data': [{'content': "
+                 "'[not '\n                                                                  'shown]'}]}}}",
+                 text=True),
             call('a', 'out1', b'content-a'),
             call('a', 'out2', b'content-b')
         ], any_order=False)
